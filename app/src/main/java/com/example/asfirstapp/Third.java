@@ -38,11 +38,18 @@ public class Third extends AppCompatActivity implements View.OnClickListener {
         BtClick2.setOnClickListener(this);
         BtClick4.setOnClickListener(this);
         BtClick5.setOnClickListener(this);
+        BtClick3.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-        Intent intent =  new Intent(this, Failure.class);
-        startActivity(intent);
+        if(view == BtClick3){
+            Intent intent = new Intent(this, CorrectScreen1.class);
+            startActivity(intent);
+        }
+        else {
+            Intent intent = new Intent(this, Failure.class);
+            startActivity(intent);
+        }
     }
 }

@@ -3,6 +3,9 @@ package com.example.asfirstapp;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,6 +32,24 @@ public class Second extends AppCompatActivity implements View.OnClickListener {
             return insets;
         })
     ;}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.level_select, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case R.id.level_1:
+                return true;
+            case R.id.level_2:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
     private void initViews() {
         TV = findViewById(R.id.TV);
         ET =  findViewById(R.id.ET);

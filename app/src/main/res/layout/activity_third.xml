@@ -37,7 +37,7 @@
     android:id="@+id/BtClick4"
     android:text="C. pt"
     android:textSize="30sp"
-        android:backgroundTint="#FF0000"/>
+    android:backgroundTint="#FF0000"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
