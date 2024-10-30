@@ -41,10 +41,16 @@ public class Second extends AppCompatActivity implements View.OnClickListener {
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
+
         switch (item.getItemId()){
+
             case R.id.level_1:
+                Intent levelOne = new Intent(this, Third.class);
+                startActivity(levelOne);
                 return true;
             case R.id.level_2:
+                Intent levelTwo = new Intent(this, SecondQuestion.class);
+                startActivity(levelTwo);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
