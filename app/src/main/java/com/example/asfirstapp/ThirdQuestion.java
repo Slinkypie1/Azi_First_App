@@ -12,39 +12,39 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class SecondQuestion extends AppCompatActivity implements View.OnClickListener {
-    TextView TV2;
-    Button BtClick6;
-    Button BtClick7;
-    Button BtClick8;
-    Button BtClick9;
+public class ThirdQuestion extends AppCompatActivity implements View.OnClickListener {
+TextView TV3;
+Button BtClick11;
+Button BtClick12;
+Button BtClick13;
+Button BtClick14;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_second_question);
+        setContentView(R.layout.activity_third_question);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews();
+        initViews();
             return insets;
         });
     }
 
     private void initViews() {
-        TV2 = findViewById(R.id.TV2);
-        BtClick6 = findViewById(R.id.BtClick6);
-        BtClick7 = findViewById(R.id.BtClick7);
-        BtClick8 = findViewById(R.id.BtClick8);
-        BtClick9 = findViewById(R.id.BtClick9);
-        BtClick6.setOnClickListener(this);
-        BtClick7.setOnClickListener(this);
-        BtClick8.setOnClickListener(this);
-        BtClick9.setOnClickListener(this);
+        TV3 = findViewById(R.id.TV3);
+        BtClick11 = findViewById(R.id.BtClick11);
+        BtClick12 = findViewById(R.id.BtClick12);
+        BtClick13 = findViewById(R.id.BtClick13);
+        BtClick14 = findViewById(R.id.BtClick14);
+        BtClick11.setOnClickListener(this);
+        BtClick12.setOnClickListener(this);
+        BtClick13.setOnClickListener(this);
+        BtClick14.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-        if(view == BtClick7){
-            Intent intent = new Intent(this, CorrectScreen2.class);
+        if(view == BtClick13){
+            Intent intent = new Intent(this, CorrectScreen3.class);
             startActivity(intent);
         }
         else{

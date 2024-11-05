@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/correct_screen1"
+    tools:context=".CorrectScreen3"
     android:orientation="vertical"
-    tools:context=".CorrectScreen1">
-
+    android:background="@drawable/correct_screen3">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_weight="1"/>
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/BtClick10"
-        android:text="  Correct!\non to the next one!!"
-        android:textSize="40sp"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:text="Great Work I believe in you!\n keep going!"
+        android:textSize="30sp"
+        android:id="@+id/BtClick16"/>
+
+
 </LinearLayout>

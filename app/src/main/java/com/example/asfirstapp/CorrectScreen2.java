@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,28 +11,27 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class CorrectScreen1 extends AppCompatActivity implements View.OnClickListener {
-Button BtClick10;
+public class CorrectScreen2 extends AppCompatActivity implements View.OnClickListener {
+ Button BtClick15;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_correct_screen1);
+        setContentView(R.layout.activity_correct_screen2);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews();
+        initViews();
             return insets;
-
         });
     }
 
     private void initViews() {
-        BtClick10 = findViewById(R.id.BtClick10);
-        BtClick10.setOnClickListener(this);
+        BtClick15 = findViewById(R.id.BtClick15);
+        BtClick15.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-        Intent intent = new Intent(this, SecondQuestion.class);
+        Intent intent = new Intent(this, ThirdQuestion.class);
         startActivity(intent);
     }
 }

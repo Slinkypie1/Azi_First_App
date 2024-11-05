@@ -6,56 +6,51 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context=".ThirdQuestion"
     android:orientation="vertical"
-    tools:context=".SecondQuestion"
     android:padding="?attr/actionBarSize">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        />
-
+        android:orientation="vertical"/>
     <TextView
-        android:id="@+id/TV2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Which planet is know as the ''Red Planet''?"
+        android:text="Which of the following elements is a noble gas?"
         android:textSize="30sp"
-        android:layout_gravity="bottom"/>
-
-    <Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/BtClick6"
-    android:text="A. Venus"
-    android:textSize="30sp"
-    android:textAllCaps="false"/>
+        android:id="@+id/TV3"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/BtClick7"
-        android:text="B. Mars"
+        android:text="A. Nitrogen"
         android:textSize="30sp"
-        android:backgroundTint="#0014FF"
+        android:textAllCaps="false"
+        android:id="@+id/BtClick11"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="B. Oxygen"
+        android:textSize="30sp"
+        android:textAllCaps="false"
+        android:backgroundTint="#0009FF"
         android:textColor="@color/white"
-        android:textAllCaps="false"/>
-
+        android:id="@+id/BtClick12"/>
     <Button
-        android:id="@+id/BtClick8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="C. Neon"
+        android:textSize="30sp"
+        android:textAllCaps="false"
         android:backgroundTint="#FF0000"
-        android:text="C. Jupiter"
-        android:textAllCaps="false"
-        android:textSize="30sp" />
-
+        android:id="@+id/BtClick13"/>
     <Button
-        android:id="@+id/BtClick9"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/black"
-        android:text="D. Saturn"
+        android:text="D. Chlorine"
+        android:textSize="30sp"
         android:textAllCaps="false"
+        android:backgroundTint="@color/black"
         android:textColor="@color/white"
-        android:textSize="30sp" />
+        android:id="@+id/BtClick14"/>
+
 </LinearLayout>

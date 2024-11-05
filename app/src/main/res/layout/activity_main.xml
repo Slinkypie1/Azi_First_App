@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity"
-    android:layout_margin="10dp"
+    android:padding="?attr/actionBarSize"
     android:gravity="center"
     android:background="@drawable/azi_first_project_arrow">
     <LinearLayout
