@@ -1,6 +1,9 @@
 package com.example.asfirstapp;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,6 +28,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
+        createNotificationChannel();
+    }
+
+    private void createNotificationChannel() {
+        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
+            CharSequence channelName = "SlinkyPie\'s Quiz";
+            String channelDescription = "A quiz on anything I can think of";
+            int channelImportance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("SlinkyPie_Quiz", "SlinkyPie\'s Quiz", NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("A Quiz about random things can you answer them all correct?");
+        }
     }
 
 
