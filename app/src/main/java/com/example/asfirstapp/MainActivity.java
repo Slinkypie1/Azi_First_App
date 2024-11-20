@@ -1,8 +1,17 @@
 package com.example.asfirstapp;
 
+import android.content.Context;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import static androidx.core.content.ContextCompat.startActivity;
+import  android.Manifest;
+import android.content.pm.PackageManager;
+import  androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
@@ -14,6 +23,10 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -28,19 +41,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        createNotificationChannel();
-    }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Default Channel";
+            String description = "This is the default notification channel";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("default_channel_id", name, importance);
+            channel.setDescription(description);
 
-    private void createNotificationChannel() {
-        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
-            CharSequence channelName = "SlinkyPie\'s Quiz";
-            String channelDescription = "A quiz on anything I can think of";
-            int channelImportance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("SlinkyPie_Quiz", "SlinkyPie\'s Quiz", NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("A Quiz about random things can you answer them all correct?");
-        }
+            // Register the channel with the system
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
     }
-
+    }
 
     private void initViews() {
         BtCLick = findViewById(R.id.BtClick);
@@ -50,8 +62,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        Intent intent = new Intent(this, Second.class);
-        intent.putExtra("name", ET.getText() + "");
-        startActivity(intent);
+        BtCLick = findViewById(R.id.BtClick);
+        BtCLick.setOnClickListener(this);
+        ET = findViewById(R.id.ET);
+
     }
-}
+
+
+    ;
+    }
+
+
+
+
+
