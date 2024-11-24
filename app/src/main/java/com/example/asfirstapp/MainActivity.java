@@ -1,6 +1,9 @@
 package com.example.asfirstapp;
 
+
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import static androidx.core.content.ContextCompat.startActivity;
@@ -35,23 +38,47 @@ import androidx.core.view.WindowInsetsCompat;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     Button BtCLick;
     EditText ET;
+    public static void createNotificationChannel(Context context){
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            String channelId = "slinkypie_channel";
+            CharSequence channelName = "SlinkyPie";
+            String channelDescription = "A Quiz about random things";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
+            channel.setDescription(channelDescription);
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+
+        }
+    }
+    public void sendNotification(Context context){
+        String channelId = "slinkypie_channel";
+        NotificationCompat.Builder builder = new  NotificationCompat.Builder(context,channelId).setSmallIcon(R.drawable.quiz_icon).setContentTitle("SlinkyPie1").setContentText("Come play with me again please").setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        NotificationManagerCompat notificationManager =NotificationManagerCompat.from(context);
+        notificationManager.notify(1,builder.build());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Default Channel";
-            String description = "This is the default notification channel";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("default_channel_id", name, importance);
-            channel.setDescription(description);
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU){
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},1);
+            }
+        }
 
-            // Register the channel with the system
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if (requestCode == 1){
+            if (grantResults.length >0 &&grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                sendNotification(this);
+            }
+        }
     }
 
     private void initViews() {
