@@ -38,7 +38,10 @@ public class NotificationReceiver extends BroadcastReceiver {
             .setContentIntent(pendingIntent)
             .setSmallIcon(R.drawable.quiz_icon)
             .setContentTitle("SlinkyPie\'s Quiz")
-            .
+            .setContentText("Come and play me!")
+            .setAutoCancel(true);
+
+    notificationManager.notify(100,builder.build());
 
 
 }

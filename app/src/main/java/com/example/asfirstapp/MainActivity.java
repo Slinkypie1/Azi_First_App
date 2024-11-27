@@ -79,13 +79,55 @@ private static final int PERMISSION_REQUEST_CODE = 100;
             if (ContextCompat.checkSelfPermission(this,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS},PERMISSION_REQUEST_CODE);
             }else{
-
+                setupNotification();
             }
+        }else{
+            setupNotification();
+        }
+    }
+
+    private void setupNotification() {
+        createNotificationChannel();
+        scheduleNotification();
+    }
+
+
+    private void createNotificationChannel() {
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            String channelId = "NotificationChannel";
+            CharSequence channelName = "Notifications";
+            String channelDescription = "Channel for notifications";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(channelId,channelName,importance);
+            channel.setDescription(channelDescription);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
         }
     }
 
 
+    private void scheduleNotification() {
+    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+    Intent intent = new Intent(this, NotificationManager.class);
+    PendingIntent pendingIntent =PendingIntent.getBroadcast(this,0,intent,PendingIntent.FLAG_IMMUTABLE);
 
+    long triggerTime = System.currentTimeMillis()+10000;
+
+    if(alarmManager != null){
+        alarmManager.set(AlarmManager.RTC_WAKEUP,triggerTime, pendingIntent);
+    }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setupNotification();
+            } else {
+
+            }
+        }
+    }
 
     private void initViews() {
         BtCLick = findViewById(R.id.BtClick);
