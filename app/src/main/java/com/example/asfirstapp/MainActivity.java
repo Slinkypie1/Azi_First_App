@@ -76,8 +76,8 @@ private static final int PERMISSION_REQUEST_CODE = 100;
         setContentView(R.layout.activity_main);
         initViews();
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
-            if (ContextCompat.checkSelfPermission(this,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS},PERMISSION_REQUEST_CODE);
+            if (ContextCompat.checkSelfPermission(this,android.Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS},PERMISSION_REQUEST_CODE);
             }else{
                 setupNotification();
             }
@@ -94,7 +94,7 @@ private static final int PERMISSION_REQUEST_CODE = 100;
 
     private void createNotificationChannel() {
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
-            String channelId = "NotificationChannel";
+            String channelId = "slinkypie";
             CharSequence channelName = "Notifications";
             String channelDescription = "Channel for notifications";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -108,7 +108,7 @@ private static final int PERMISSION_REQUEST_CODE = 100;
 
     private void scheduleNotification() {
     AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-    Intent intent = new Intent(this, NotificationManager.class);
+    Intent intent = new Intent(this, NotificationReceiver.class);
     PendingIntent pendingIntent =PendingIntent.getBroadcast(this,0,intent,PendingIntent.FLAG_IMMUTABLE);
 
     long triggerTime = System.currentTimeMillis()+10000;
@@ -124,6 +124,7 @@ private static final int PERMISSION_REQUEST_CODE = 100;
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setupNotification();
             } else {
+                Toast.makeText(this, "Notification permission is required for this feature.",Toast.LENGTH_LONG).show();
 
             }
         }
@@ -143,12 +144,4 @@ private static final int PERMISSION_REQUEST_CODE = 100;
         startActivity(intent);
 
     }
-
-
-
-
-
-
-
-
 }

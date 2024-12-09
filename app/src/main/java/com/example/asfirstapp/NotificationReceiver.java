@@ -29,18 +29,16 @@ public class NotificationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-    Toast.makeText(context,"HELLO", Toast.LENGTH_LONG).show();
     NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    Intent goAppIntent = new Intent(context, MainActivity.class);
-    goAppIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    PendingIntent pendingIntent =PendingIntent.getActivity(context, 0,goAppIntent,PendingIntent.FLAG_IMMUTABLE);
+    Intent repeatingIntent = new Intent(context, MainActivity.class);
+    repeatingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    PendingIntent pendingIntent =PendingIntent.getActivity(context, 0,repeatingIntent,PendingIntent.FLAG_IMMUTABLE);
     NotificationCompat.Builder builder =new NotificationCompat.Builder(context,"slinkypie")
             .setContentIntent(pendingIntent)
             .setSmallIcon(R.drawable.quiz_icon)
-            .setContentTitle("SlinkyPie\'s Quiz")
+            .setContentTitle("SlinkyPie's Quiz")
             .setContentText("Come and play me!")
             .setAutoCancel(true);
-
     notificationManager.notify(100,builder.build());
 
 
