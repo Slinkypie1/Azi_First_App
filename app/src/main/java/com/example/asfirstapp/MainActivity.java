@@ -84,6 +84,7 @@ private static final int PERMISSION_REQUEST_CODE = 100;
         }else{
             setupNotification();
         }
+        checkBatteryOptimization();
     }
 
     private void setupNotification() {
@@ -106,6 +107,7 @@ private static final int PERMISSION_REQUEST_CODE = 100;
     }
 
 
+    @SuppressLint("ScheduleExactAlarm")
     private void scheduleNotification() {
     AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
     Intent intent = new Intent(this, NotificationReceiver.class);
@@ -113,10 +115,22 @@ private static final int PERMISSION_REQUEST_CODE = 100;
 
     long triggerTime = System.currentTimeMillis()+10000;
 
-    if(alarmManager != null){
-        alarmManager.set(AlarmManager.RTC_WAKEUP,triggerTime, pendingIntent);
+    if(alarmManager != null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            } else {
+                Intent permissionIntent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                startActivity(permissionIntent);
+                Toast.makeText(this, "Permission required to schedule exact alarms", Toast.LENGTH_LONG).show();
+            }
+        }
+        else{
+            alarmManager.set(AlarmManager.RTC_WAKEUP,triggerTime,pendingIntent);
+        }
     }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -126,6 +140,15 @@ private static final int PERMISSION_REQUEST_CODE = 100;
             } else {
                 Toast.makeText(this, "Notification permission is required for this feature.",Toast.LENGTH_LONG).show();
 
+            }
+        }
+    }
+    private void checkBatteryOptimization(){
+        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.M){
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            if (!powerManager.isIgnoringBatteryOptimizations(getPackageName())){
+                Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                startActivity(intent);
             }
         }
     }
