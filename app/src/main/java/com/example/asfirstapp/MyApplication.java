@@ -2,6 +2,9 @@ package com.example.asfirstapp;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.content.SharedPreferences;
+import android.util.Log;
+
 public class MyApplication  extends Application{
     private static boolean isAppInForeground = false;
     @Override

@@ -6,9 +6,9 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
-
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application
-        android:name=".MyApplication"
+        android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -54,5 +54,6 @@
         </activity>
         <receiver android:name = ".NotificationReceiver" android:enabled="true" android:exported="true"/>
     </application>
+
 
 </manifest>

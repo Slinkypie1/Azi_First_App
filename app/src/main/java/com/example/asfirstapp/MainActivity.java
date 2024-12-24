@@ -3,7 +3,6 @@ package com.example.asfirstapp;
 
 
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission;
-import android.Manifest;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.os.PowerManager;
 
@@ -39,7 +37,6 @@ import androidx.core.content.ContextCompat;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -55,7 +52,6 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -68,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button BtCLick;
     EditText ET;
 private static final int PERMISSION_REQUEST_CODE = 100;
+    private static final String TAG = "MainActivity";
+
 
 
     @Override
@@ -75,7 +73,7 @@ private static final int PERMISSION_REQUEST_CODE = 100;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU){
             if (ContextCompat.checkSelfPermission(this,android.Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){
                 ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS},PERMISSION_REQUEST_CODE);
             }else{
@@ -107,29 +105,21 @@ private static final int PERMISSION_REQUEST_CODE = 100;
     }
 
 
-    @SuppressLint("ScheduleExactAlarm")
     private void scheduleNotification() {
-    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-    Intent intent = new Intent(this, NotificationReceiver.class);
-    PendingIntent pendingIntent =PendingIntent.getBroadcast(this,0,intent,PendingIntent.FLAG_IMMUTABLE);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, NotificationReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-    long triggerTime = System.currentTimeMillis()+10000;
+        long triggerTime = System.currentTimeMillis() + 5000; // 5 seconds from now
 
-    if(alarmManager != null) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-            } else {
-                Intent permissionIntent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                startActivity(permissionIntent);
-                Toast.makeText(this, "Permission required to schedule exact alarms", Toast.LENGTH_LONG).show();
-            }
-        }
-        else{
-            alarmManager.set(AlarmManager.RTC_WAKEUP,triggerTime,pendingIntent);
+        if (alarmManager != null) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            Log.d(TAG, "Alarm scheduled for notification.");
         }
     }
-    }
+
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
