@@ -110,7 +110,7 @@ private static final int PERMISSION_REQUEST_CODE = 100;
         Intent intent = new Intent(this, NotificationReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        long triggerTime = System.currentTimeMillis() + 5000; // 5 seconds from now
+        long triggerTime = System.currentTimeMillis() + 10000; // 5 seconds from now
 
         if (alarmManager != null) {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
