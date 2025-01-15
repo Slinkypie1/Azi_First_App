@@ -42,7 +42,7 @@ public class Puzzle1 extends AppCompatActivity implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         float lightValue = event.values[0];
         lightTextView.setText("Light Intensity: " + lightValue + " lx");
-        if (lightValue <= 10) {
+        if (lightValue == 0) {
             Intent correctBrightness = new Intent(this, CorrectScreen4.class);
             startActivity(correctBrightness);
         }
