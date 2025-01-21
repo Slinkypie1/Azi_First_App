@@ -8,6 +8,11 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+
+
+
 
     <application
         android:name=".MyApp"
@@ -65,6 +70,11 @@
             android:name=".NotificationReceiver"
             android:enabled="true"
             android:exported="true" />
+        <service android:name=".MyForegroundService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            tools:ignore="ForegroundServicePermission" />
+        <service android:name=".MusicService" android:exported="false" />
     </application>
 
 </manifest>

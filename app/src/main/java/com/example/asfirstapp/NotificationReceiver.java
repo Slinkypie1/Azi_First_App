@@ -49,7 +49,7 @@ public class NotificationReceiver extends BroadcastReceiver {
             );
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "slinkypie")
-                    .setSmallIcon(android.R.drawable.ic_dialog_info) // Replace with your app icon
+                    .setSmallIcon(R.drawable.quiz_icon)
                     .setContentTitle("SlinkyPie's Quiz")
                     .setContentText("Come and play me!")
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
