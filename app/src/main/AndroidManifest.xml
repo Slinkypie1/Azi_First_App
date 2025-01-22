@@ -9,11 +9,10 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
-
-
-
-
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+        tools:ignore="CoarseFineLocation" />
+    
     <application
         android:name=".MyApp"
         android:allowBackup="true"
@@ -26,6 +25,9 @@
         android:theme="@style/Theme.AppCompat.Light"
         tools:ignore="MissingClass"
         tools:targetApi="31">
+        <activity
+            android:name=".Puzzle2"
+            android:exported="false" />
         <activity
             android:name=".CorrectScreen4"
             android:exported="false" />
@@ -70,11 +72,15 @@
             android:name=".NotificationReceiver"
             android:enabled="true"
             android:exported="true" />
-        <service android:name=".MyForegroundService"
+
+        <service
+            android:name=".MyForegroundService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             tools:ignore="ForegroundServicePermission" />
-        <service android:name=".MusicService" android:exported="false" />
+        <service
+            android:name=".MusicService"
+            android:exported="false" />
     </application>
 
 </manifest>
