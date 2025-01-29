@@ -1,6 +1,7 @@
 package com.example.asfirstapp;
 
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -82,7 +83,21 @@ public class Puzzle2 extends AppCompatActivity implements SensorEventListener {
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
         }
+        private String getDirection(float azimuth){
+            if (azimuth >= 45&&azimuth < 135){
+                return "East";
+            } else if (azimuth >=135&&azimuth<225) {
+                return "South";
+            } else if (azimuth>=225&&azimuth<315) {
+                return "West";
+            }
+            else {
+                return "North";
+            }
+        }
+    }
 
         private String getDirection(float azimuth) {
             if (azimuth >= 45 && azimuth < 135) {
@@ -96,4 +111,13 @@ public class Puzzle2 extends AppCompatActivity implements SensorEventListener {
             }
         }
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
     }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+}
