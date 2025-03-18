@@ -7,22 +7,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Puzzle2"
-    android:gravity="center"
-    android:padding="16dp">
-    <TextView
-        android:id="@+id/hint"
+    tools:context=".CorrectScreen5"
+    android:background="@drawable/complete_puzzle2">
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textColor="@color/black"/>
-    <TextView
-    android:id="@+id/directionText"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:text="Current Direction: "
-    android:textSize="24sp"
-    android:textColor="@color/black"
-    />
+        android:orientation="vertical"
+        android:layout_weight="1"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Excellent guiding"
+        android:textSize="50sp"
+        android:id="@+id/BtClick18"/>
 
 </LinearLayout>

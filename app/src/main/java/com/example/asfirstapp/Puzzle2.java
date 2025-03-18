@@ -1,27 +1,26 @@
 package com.example.asfirstapp;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class Puzzle2 extends AppCompatActivity implements SensorEventListener {
-
+    private TextView hint;
     private SensorManager sensorManager;
     private Sensor rotationSensor;
-    private float[] orientation = new float[3];
-    private float[] rotationMatrix = new float[9];
     private TextView directionText;
-    private String[] directions = {"East", "West", "North"};
+    private final String[] directions = {"East", "West", "North"};
     private int currentStep = 0;
+    private boolean puzzleCompleted = false;
+    private String lastDirection = "";
+    private long lastUpdateTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,14 +29,26 @@ public class Puzzle2 extends AppCompatActivity implements SensorEventListener {
         setContentView(R.layout.activity_puzzle2);
 
         directionText = findViewById(R.id.directionText);
+        hint = findViewById(R.id.hint);
+        initHint();
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         if (rotationSensor == null) {
-            Toast.makeText(this, "Compass not available on this device", Toast.LENGTH_LONG).show();
             finish();
         }
+
+        directionText.setText("Face " + directions[currentStep]);
+    }
+
+    private void initHint() {
+        String[] riddles = {
+                "I rise each day, yet I am not the sun.\nTravelers seek me when their journey’s begun.\nOn a compass, I take my place,\nOpposite where the sun sets with grace.\nWhat am I?",
+                "I follow the sun as it ends the day,\nGuiding travelers along their way.\nOn a compass, I take my stand,\nOpposite where the day began.\nWhat am I?",
+                "I point the way, steady and true,\nThrough icy lands and skies so blue.\nThe compass trusts me, never astray,\nLeading explorers on their way.\nWhat am I?"
+        };
+        hint.setText(riddles[currentStep]);
     }
 
     @Override
@@ -58,26 +69,39 @@ public class Puzzle2 extends AppCompatActivity implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
-            SensorManager.getOrientation(rotationMatrix, orientation);
+        if (puzzleCompleted || event.sensor.getType() != Sensor.TYPE_ROTATION_VECTOR) return;
 
-            float azimuth = (float) Math.toDegrees(orientation[0]); // Get azimuth
-            azimuth = (azimuth + 360) % 360;
+        float[] rotationMatrix = new float[9];
+        float[] orientation = new float[3];
 
-            String currentDirection = getDirection(azimuth);
-            directionText.setText("Current Direction: " + currentDirection);
+        SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
+        SensorManager.getOrientation(rotationMatrix, orientation);
 
-            if (currentDirection.equals(directions[currentStep])) {
-                currentStep++;
+        int azimuth = (int) Math.toDegrees(orientation[0]);
+        azimuth = (azimuth + 360) % 360;
 
-                if (currentStep == directions.length) {
-                    Toast.makeText(this, "Congratulations! You completed the puzzle.", Toast.LENGTH_LONG).show();
-                    currentStep = 0; // Reset puzzle
-                } else {
-                    Toast.makeText(this, "Good! Face " + directions[currentStep], Toast.LENGTH_SHORT).show();
-                }
+        String currentDirection = getDirection(azimuth);
+        long currentTime = System.currentTimeMillis();
+
+        if (!currentDirection.equals(lastDirection)) {
+            lastDirection = currentDirection;
+            lastUpdateTime = currentTime;
+        }
+
+        if (currentDirection.equals(directions[currentStep]) && (currentTime - lastUpdateTime > 1000)) {
+            currentStep++;
+
+            if (currentStep == directions.length) {
+                puzzleCompleted = true;
+                sensorManager.unregisterListener(this);
+                startActivity(new Intent(this, CorrectScreen5.class));
+                finish();
+            } else {
+                directionText.setText("Good! Now face " + directions[currentStep]);
+                hint.setText(getHintForStep(currentStep));
             }
+        } else {
+            directionText.setText("Current Direction: " + currentDirection);
         }
     }
 
@@ -85,15 +109,19 @@ public class Puzzle2 extends AppCompatActivity implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
-    private String getDirection(float azimuth) {
-        if (azimuth >= 45 && azimuth < 135) {
-            return "East";
-        } else if (azimuth >= 135 && azimuth < 225) {
-            return "South";
-        } else if (azimuth >= 225 && azimuth < 315) {
-            return "West";
-        } else {
-            return "North";
-        }
+    private String getDirection(int azimuth) {
+        if (azimuth >= 45 && azimuth < 135) return "East";
+        if (azimuth >= 135 && azimuth < 225) return "South";
+        if (azimuth >= 225 && azimuth < 315) return "West";
+        return "North";
+    }
+
+    private String getHintForStep(int step) {
+        String[] riddles = {
+                "I rise each day, yet I am not the sun.\nTravelers seek me when their journey’s begun.\nOn a compass, I take my place,\nOpposite where the sun sets with grace.\nWhat am I?",
+                "I follow the sun as it ends the day,\nGuiding travelers along their way.\nOn a compass, I take my stand,\nOpposite where the day began.\nWhat am I?",
+                "I point the way, steady and true,\nThrough icy lands and skies so blue.\nThe compass trusts me, never astray,\nLeading explorers on their way.\nWhat am I?"
+        };
+        return step < riddles.length ? riddles[step] : "";
     }
 }

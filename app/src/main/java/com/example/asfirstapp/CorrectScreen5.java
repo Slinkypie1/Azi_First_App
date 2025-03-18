@@ -11,27 +11,27 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class CorrectScreen4 extends AppCompatActivity implements View.OnClickListener {
-    Button BtCLick17;
+public class CorrectScreen5 extends AppCompatActivity implements View.OnClickListener {
+    Button BtClick18;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_correct_screen4);
+        setContentView(R.layout.activity_correct_screen5);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews();
+        initViews();
             return insets;
         });
     }
 
     private void initViews() {
-        BtCLick17 = findViewById(R.id.BtClick17);
-        BtCLick17.setOnClickListener(this);
+        BtClick18 = findViewById(R.id.BtClick18);
+        BtClick18.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-        Intent intent = new Intent(this, Puzzle2.class);
+        Intent intent = new Intent(this, Puzzle2.class);//Puzzle2 is temporary
         startActivity(intent);
     }
 }

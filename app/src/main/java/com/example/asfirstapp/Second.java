@@ -55,9 +55,15 @@ public class Second extends AppCompatActivity implements View.OnClickListener {
             case R.id.level_3:
                 Intent levelThree = new Intent(this, ThirdQuestion.class);
                 startActivity(levelThree);
+                return true;
             case R.id.level_4:
                 Intent levelFour = new Intent(this, Puzzle1.class);
                 startActivity(levelFour);
+                return true;
+            case R.id.level_5:
+                Intent levelFive = new Intent(this, Puzzle2.class);
+                startActivity(levelFive);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -75,5 +81,5 @@ public class Second extends AppCompatActivity implements View.OnClickListener {
         startActivity(intent);
     }
 
-    ;
+
 }
