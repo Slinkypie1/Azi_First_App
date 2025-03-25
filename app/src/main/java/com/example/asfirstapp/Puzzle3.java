@@ -11,14 +11,14 @@ import androidx.appcompat.app.AppCompatActivity;
 public class Puzzle3 extends AppCompatActivity implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private BalanceGameView gameView;
+    private MazeGridView mazeGridView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        gameView = findViewById(R.id.balanceGameView);
-        gameView = new BalanceGameView(this); // Use custom game view
-        setContentView(gameView);
+
+        mazeGridView = new MazeGridView(this); // Create Maze Grid View
+        setContentView(mazeGridView); // Set it as the content view
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (sensorManager != null) {
@@ -45,7 +45,7 @@ public class Puzzle3 extends AppCompatActivity implements SensorEventListener {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float tiltX = event.values[0]; // Left/Right tilt
             float tiltY = event.values[1]; // Forward/Backward tilt
-            gameView.updateBall(tiltX, tiltY);
+            mazeGridView.updateBall(tiltX, tiltY);
         }
     }
 
