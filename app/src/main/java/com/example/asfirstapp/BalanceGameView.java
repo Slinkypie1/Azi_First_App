@@ -10,7 +10,7 @@ import android.view.View;
 public class BalanceGameView extends View {
     private Paint paint;
     private float ballX, ballY;
-    private float radius = 15; // Ball radius
+    private float radius = 10; // Ball radius
     private float maxX, maxY; // Screen boundaries
 
     public BalanceGameView(Context context) {
