@@ -27,6 +27,9 @@
         tools:ignore="MissingClass"
         tools:targetApi="31">
         <activity
+            android:name=".fillTheBlanks"
+            android:exported="false" />
+        <activity
             android:name=".CorrectScreen6"
             android:exported="false" />
         <activity

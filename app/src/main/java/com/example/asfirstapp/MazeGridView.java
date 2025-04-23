@@ -19,7 +19,7 @@ public class MazeGridView extends View {
     private float ballX, ballY;
     private Paint paint;
     private boolean gameStarted = false;
-    private int countdown = 3;
+    private int countdown = 10;
     private Handler handler = new Handler();
     private Context context;
 
@@ -42,15 +42,15 @@ public class MazeGridView extends View {
         // Maze: 1 = wall, 0 = path, 2 = goal (green square)
         maze = new int[][] {
                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-                {1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-                {1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1},
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1},
                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
         };
 
@@ -138,7 +138,7 @@ public class MazeGridView extends View {
     public void updateBall(float tiltX, float tiltY) {
         if (!gameStarted) return;
 
-        float speed = cellSize / 20; // Slower movement
+        float speed = cellSize / 27; // Slower movement
         float newBallX = ballX - tiltX * speed;
         float newBallY = ballY + tiltY * speed;
 

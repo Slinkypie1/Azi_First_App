@@ -31,7 +31,7 @@ public class CorrectScreen6 extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
-        Intent intent = new Intent(this, Puzzle3.class);// temporary usage of Puzzle3.Class
+        Intent intent = new Intent(this, fillTheBlanks.class);// temporary usage of Puzzle3.Class
         startActivity(intent);
     }
 }
