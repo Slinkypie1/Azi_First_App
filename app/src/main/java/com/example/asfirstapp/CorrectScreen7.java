@@ -11,12 +11,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class CorrectScreen6 extends AppCompatActivity implements View.OnClickListener {
-    Button BtClick19;
+public class CorrectScreen7 extends AppCompatActivity implements View.OnClickListener {
+    Button BtClick20;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_correct_screen6);
+        setContentView(R.layout.activity_correct_screen7);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             initViews();
             return insets;
@@ -24,14 +24,13 @@ public class CorrectScreen6 extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initViews() {
-        BtClick19 = findViewById(R.id.BtClick19);
-        BtClick19.setOnClickListener(this);
-
+        BtClick20 = findViewById(R.id.BtClick20);
+        BtClick20.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-        Intent intent = new Intent(this, FillTheBlanks.class);// temporary usage of Puzzle3.Class
+        Intent intent = new Intent(this, FillTheBlanks.class);
         startActivity(intent);
     }
 }

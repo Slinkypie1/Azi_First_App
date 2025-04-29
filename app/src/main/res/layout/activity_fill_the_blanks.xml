@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="24dp"
+    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".FillTheBlanks">
 
     <TextView
         android:id="@+id/quoteText"
@@ -11,10 +15,27 @@
         android:layout_height="wrap_content"
         android:textSize="18sp"
         android:text="The greatest _____ in living lies not in never _____, but in _____ every time we fall." />
-
-    <Spinner android:id="@+id/spinner1" android:layout_width="match_parent" android:layout_height="wrap_content" />
-    <Spinner android:id="@+id/spinner2" android:layout_width="match_parent" android:layout_height="wrap_content" />
-    <Spinner android:id="@+id/spinner3" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="choices for first blank:"
+        android:textColor="@color/black"
+        android:textSize="16sp"/>
+    <Spinner android:id="@+id/spinner1" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="choices for second blank:"
+        android:textColor="@color/black"
+        android:textSize="16sp"/>
+    <Spinner android:id="@+id/spinner2" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="choices for third blank:"
+        android:textColor="@color/black"
+        android:textSize="16sp"/>
+    <Spinner android:id="@+id/spinner3" android:layout_width="wrap_content" android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/submitButton"
@@ -22,10 +43,4 @@
         android:layout_height="wrap_content"
         android:text="Check Answers" />
 
-    <TextView
-        android:id="@+id/resultText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:paddingTop="16dp" />
 </LinearLayout>

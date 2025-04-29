@@ -69,7 +69,7 @@ public class Second extends AppCompatActivity implements View.OnClickListener {
                 startActivity(levelSix);
                 return true;
             case R.id.level_7:
-                Intent levelSeven = new Intent(this, fillTheBlanks.class);
+                Intent levelSeven = new Intent(this, FillTheBlanks.class);
                 startActivity(levelSeven);
                 return true;
             default:
