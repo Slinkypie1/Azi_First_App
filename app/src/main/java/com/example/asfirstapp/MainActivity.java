@@ -137,4 +137,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(intent);
 
     }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopService(new Intent(this, MusicService.class)); // Stop the music when the app goes to the background
+    }
+
 }

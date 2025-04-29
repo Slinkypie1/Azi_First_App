@@ -12,8 +12,6 @@ public class MusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-
         mediaPlayer = MediaPlayer.create(this, R.raw.puzzle_game_music);
         mediaPlayer.setLooping(true);
     }
@@ -29,7 +27,6 @@ public class MusicService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
@@ -41,4 +38,6 @@ public class MusicService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 }
+
