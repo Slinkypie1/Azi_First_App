@@ -72,6 +72,10 @@ public class Second extends AppCompatActivity implements View.OnClickListener {
                 Intent levelSeven = new Intent(this, FillTheBlanks.class);
                 startActivity(levelSeven);
                 return true;
+            case R.id.level_8:
+                Intent levelEight = new Intent(this, FindTheCountry.class);
+                startActivity(levelEight);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

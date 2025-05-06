@@ -27,8 +27,19 @@
         tools:ignore="MissingClass"
         tools:targetApi="31">
         <activity
-            android:name=".CorrectScreen7"
+            android:name=".CorrectScreen8"
             android:exported="false" />
+        <activity
+            android:name=".MapAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".FindTheCountry"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".CorrectScreen7"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".FillTheBlanks"
             android:exported="false"
