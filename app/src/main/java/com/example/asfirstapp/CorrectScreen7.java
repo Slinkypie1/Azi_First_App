@@ -23,7 +23,7 @@ public class CorrectScreen7 extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onClick(View view) {
 
-        Intent intent = new Intent(this, FillTheBlanks.class);
+        Intent intent = new Intent(this, FindTheCountry.class);
         startActivity(intent);
     }
 }

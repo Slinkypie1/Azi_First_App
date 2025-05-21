@@ -20,6 +20,9 @@ public class FindTheCountry extends AppCompatActivity {
     TextView questionText;
     RecyclerView recyclerView;
 
+    // Track used countries globally
+    List<String> usedCountries = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,26 +36,42 @@ public class FindTheCountry extends AppCompatActivity {
     }
 
     void loadPuzzle() {
-        List<String> list = new ArrayList<>(Arrays.asList(allCountries));
-        Collections.shuffle(list);
-        String answer = list.get(0);
+        List<String> availableCountries = new ArrayList<>(Arrays.asList(allCountries));
+        availableCountries.removeAll(usedCountries);
+
+        // If all countries used, reset to start over
+        if (availableCountries.isEmpty()) {
+            usedCountries.clear();
+            availableCountries = new ArrayList<>(Arrays.asList(allCountries));
+        }
+
+        Collections.shuffle(availableCountries);
+        String answer = availableCountries.get(0);
+
         questionText.setText("Find: " + answer);
 
-        // Assuming you have drawable resources named like "outline_india", "outline_usa", etc.
-        List<Region> options = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            String country = list.get(i);
-            // Map country name to outline drawable ID
-            String outlineDrawableId = "outline_" + country.toLowerCase();  // assumes outlines are named like "outline_india"
-            boolean isCorrect = country.equals(answer);
+        // Add the newly chosen answer to usedCountries to avoid repeats in next rounds
+        usedCountries.add(answer);
 
+        // Prepare the options list: always show first 6 countries (for example) with images,
+        // regardless of usage, so all pictures are visible
+        List<Region> options = new ArrayList<>();
+        List<String> optionsForDisplay = new ArrayList<>(Arrays.asList(allCountries)); // all countries
+
+        Collections.shuffle(optionsForDisplay);
+
+        for (int i = 0; i < 6; i++) {
+            String country = optionsForDisplay.get(i);
+            String outlineDrawableId = "outline_" + country.toLowerCase();
+            boolean isCorrect = country.equals(answer);
             options.add(new Region(country, outlineDrawableId, isCorrect));
         }
 
         recyclerView.setAdapter(new MapAdapter(this, options, isCorrect -> {
             if (isCorrect) {
                 correctCount++;
-                Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
+                TextView textView = findViewById(R.id.winOrLose);
+                textView.setText("Correct");
                 if (correctCount == 5) {
                     Intent intent = new Intent(this, CorrectScreen8.class);
                     startActivity(intent);
@@ -62,11 +81,9 @@ public class FindTheCountry extends AppCompatActivity {
                 }
             } else {
                 failed = true;
-                Toast.makeText(this, "Wrong! You lose.", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, Failure.class));
                 finish();
             }
         }));
     }
-
 }
