@@ -16,4 +16,6 @@
         android:title="Level 7"/>
     <item android:id="@+id/level_8"
         android:title="Level 8"/>
+    <item android:id="@+id/level_9"
+        android:title="Level 9"/>
 </menu>

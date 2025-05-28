@@ -47,21 +47,25 @@ public class FindTheCountry extends AppCompatActivity {
 
         Collections.shuffle(availableCountries);
         String answer = availableCountries.get(0);
-
         questionText.setText("Find: " + answer);
-
-        // Add the newly chosen answer to usedCountries to avoid repeats in next rounds
         usedCountries.add(answer);
 
-        // Prepare the options list: always show first 6 countries (for example) with images,
-        // regardless of usage, so all pictures are visible
-        List<Region> options = new ArrayList<>();
-        List<String> optionsForDisplay = new ArrayList<>(Arrays.asList(allCountries)); // all countries
-
+        // Create options list and ensure the correct answer is included
+        List<String> optionsForDisplay = new ArrayList<>(Arrays.asList(allCountries));
+        optionsForDisplay.remove(answer);
         Collections.shuffle(optionsForDisplay);
 
-        for (int i = 0; i < 6; i++) {
-            String country = optionsForDisplay.get(i);
+        List<String> finalOptions = new ArrayList<>();
+        finalOptions.add(answer); // Ensure the answer is in the list
+
+        for (int i = 0; i < 5; i++) {
+            finalOptions.add(optionsForDisplay.get(i));
+        }
+
+        Collections.shuffle(finalOptions); // Shuffle to randomize position
+
+        List<Region> options = new ArrayList<>();
+        for (String country : finalOptions) {
             String outlineDrawableId = "outline_" + country.toLowerCase();
             boolean isCorrect = country.equals(answer);
             options.add(new Region(country, outlineDrawableId, isCorrect));
@@ -73,8 +77,7 @@ public class FindTheCountry extends AppCompatActivity {
                 TextView textView = findViewById(R.id.winOrLose);
                 textView.setText("Correct");
                 if (correctCount == 5) {
-                    Intent intent = new Intent(this, CorrectScreen8.class);
-                    startActivity(intent);
+                    startActivity(new Intent(this, CorrectScreen8.class));
                     finish();
                 } else {
                     loadPuzzle();
