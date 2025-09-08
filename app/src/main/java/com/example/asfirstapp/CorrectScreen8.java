@@ -9,21 +9,21 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class CorrectScreen8 extends AppCompatActivity implements View.OnClickListener {
 
-    Button BtClick20;
+    Button BtClick21;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_correct_screen8);
 
-//        BtClick20 = findViewById(R.id.BtClick2!);
-        BtClick20.setOnClickListener(this);
+        BtClick21 = findViewById(R.id.BtClick21);
+        BtClick21.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
 
-        Intent intent = new Intent(this, FindTheCountry.class);
+        Intent intent = new Intent(this, UnlockCityActivity.class);
         startActivity(intent);
     }
 }
