@@ -1,60 +1,60 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // Package declaration
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.Service;
-import android.content.Intent;
-import android.os.Build;
-import android.os.IBinder;
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
+import android.app.NotificationChannel; // Used to create a notification channel on Android 8.0+
+import android.app.NotificationManager; // To register notification channels
+import android.app.Service; // Base class for all services
+import android.content.Intent; // Used to start service or pass data
+import android.os.Build; // To check Android version
+import android.os.IBinder; // Required for bound services
+import androidx.annotation.Nullable; // For nullable annotations
+import androidx.core.app.NotificationCompat; // For building notifications
 
-public class MyForegroundService extends Service {
-    private static final String CHANNEL_ID = "ForegroundServiceChannel";
+public class MyForegroundService extends Service { // Define custom foreground service
+    private static final String CHANNEL_ID = "ForegroundServiceChannel"; // Unique ID for notification channel
 
     @Override
     public void onCreate() {
-        super.onCreate();
-        createNotificationChannel();
+        super.onCreate(); // Call parent onCreate
+        createNotificationChannel(); // Ensure notification channel exists (Android 8+)
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // Build the notification for the foreground service
         NotificationCompat.Builder notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("App is running")
-                .setContentText("This app is staying active in the foreground.")
-                .setSmallIcon(R.drawable.quiz_icon)
-                .setPriority(NotificationCompat.PRIORITY_LOW);
+                .setContentTitle("App is running") // Title of the notification
+                .setContentText("This app is staying active in the foreground.") // Description text
+                .setSmallIcon(R.drawable.quiz_icon) // Icon shown in the status bar
+                .setPriority(NotificationCompat.PRIORITY_LOW); // Low priority for minimal intrusion
 
+        startForeground(1, notification.build()); // Start service in foreground with notification ID 1
 
-        startForeground(1, notification.build());
-
-
-        return START_STICKY;
+        return START_STICKY; // Service restarts automatically if killed by the system
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        stopForeground(true);
+        super.onDestroy(); // Call parent onDestroy
+        stopForeground(true); // Remove the foreground status and notification
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return null; // Not a bound service, so return null
     }
 
     private void createNotificationChannel() {
+        // Only required for Android 8.0+ (Oreo and above)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Foreground Service Channel",
-                    NotificationManager.IMPORTANCE_LOW
+                    CHANNEL_ID, // Unique channel ID
+                    "Foreground Service Channel", // Human-readable channel name
+                    NotificationManager.IMPORTANCE_LOW // Importance level: low
             );
-            NotificationManager manager = getSystemService(NotificationManager.class);
+            NotificationManager manager = getSystemService(NotificationManager.class); // Get system notification manager
             if (manager != null) {
-                manager.createNotificationChannel(serviceChannel);
+                manager.createNotificationChannel(serviceChannel); // Register the channel
             }
         }
     }

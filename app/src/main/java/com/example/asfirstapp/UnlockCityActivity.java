@@ -20,63 +20,65 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// Activity where the user tries to "unlock" cities by navigating on the map
 public class UnlockCityActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
-    private TextView clueText;
-    private Button submitGuessBtn;
+    private GoogleMap mMap; // Google Map instance
+    private TextView clueText; // TextView to display the clue for the current city
+    private Button submitGuessBtn; // Button to submit the user's guess
 
-    private List<City> cityList = new ArrayList<>();
-    private List<City> shuffledCities;
-    private int currentIndex = 0;
-    private City currentCity;
+    private List<City> cityList = new ArrayList<>(); // All possible cities
+    private List<City> shuffledCities; // Shuffled order of cities to present
+    private int currentIndex = 0; // Current city index
+    private City currentCity; // Currently active city
 
-    private int correctGuessCount = 0;
-    private static final int TOTAL_CORRECT_TO_FINISH = 6;
-    private static final float ALLOWED_RADIUS_METERS = 500000;
+    private int correctGuessCount = 0; // Track how many correct guesses
+    private static final int TOTAL_CORRECT_TO_FINISH = 6; // Finish after 6 correct
+    private static final float ALLOWED_RADIUS_METERS = 500_000; // How close the guess must be (500 km)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_unlock_city);
+        setContentView(R.layout.activity_unlock_city); // Load layout
 
-        clueText = findViewById(R.id.clueText);
-        submitGuessBtn = findViewById(R.id.submitGuessBtn);
+        clueText = findViewById(R.id.clueText); // Connect clue TextView
+        submitGuessBtn = findViewById(R.id.submitGuessBtn); // Connect submit button
 
-        setupCities();
-        shuffleCities();
+        setupCities(); // Initialize list of cities with names, locations, and clues
+        shuffleCities(); // Shuffle cities for random order
 
+        // Initialize Google Maps fragment
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
+            mapFragment.getMapAsync(this); // Async load map
         }
 
+        // Handle guess submission
         submitGuessBtn.setOnClickListener(v -> {
             if (mMap == null || currentCity == null) return;
 
-            LatLng guess = mMap.getCameraPosition().target;
+            LatLng guess = mMap.getCameraPosition().target; // Get the center of the map as user's guess
 
             float[] result = new float[1];
             Location.distanceBetween(
-                    guess.latitude, guess.longitude,
-                    currentCity.location.latitude, currentCity.location.longitude,
+                    guess.latitude, guess.longitude, // user's guessed location
+                    currentCity.location.latitude, currentCity.location.longitude, // actual city location
                     result);
 
-            if (result[0] <= ALLOWED_RADIUS_METERS) {
-                correctGuessCount++;
-
+            if (result[0] <= ALLOWED_RADIUS_METERS) { // Check if guess is within allowed radius
+                correctGuessCount++; // Increase correct count
                 Toast.makeText(UnlockCityActivity.this,
                         "✅ Correct! You unlocked " + currentCity.name + "!",
                         Toast.LENGTH_LONG).show();
 
-                if (correctGuessCount >= TOTAL_CORRECT_TO_FINISH) {
+                if (correctGuessCount >= TOTAL_CORRECT_TO_FINISH) { // Completed all required cities
                     Intent intent = new Intent(UnlockCityActivity.this, CorrectScreen9.class);
                     startActivity(intent);
                     finish();
-                } else {
+                } else { // Move to next city
                     pickRandomCity();
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2)); // Reset map zoom
                 }
             } else {
                 Toast.makeText(UnlockCityActivity.this,
@@ -86,6 +88,7 @@ public class UnlockCityActivity extends AppCompatActivity implements OnMapReadyC
         });
     }
 
+    // Initialize all cities with name, coordinates, and a clue
     private void setupCities() {
         cityList.add(new City("Paris", new LatLng(48.8566, 2.3522), "This city is home to the Eiffel Tower."));
         cityList.add(new City("New York", new LatLng(40.7128, -74.0060), "Known as the Big Apple."));
@@ -101,12 +104,14 @@ public class UnlockCityActivity extends AppCompatActivity implements OnMapReadyC
         cityList.add(new City("San Francisco", new LatLng(37.7749, -122.4194), "Known for the Golden Gate Bridge."));
     }
 
+    // Shuffle city order randomly
     private void shuffleCities() {
         shuffledCities = new ArrayList<>(cityList);
         Collections.shuffle(shuffledCities);
         currentIndex = 0;
     }
 
+    // Pick the next city to show clue for
     private void pickRandomCity() {
         if (shuffledCities == null || shuffledCities.isEmpty()) {
             shuffleCities();
@@ -116,13 +121,14 @@ public class UnlockCityActivity extends AppCompatActivity implements OnMapReadyC
         }
         currentCity = shuffledCities.get(currentIndex);
         currentIndex++;
-        clueText.setText(currentCity.clue);
+        clueText.setText(currentCity.clue); // Display clue to user
     }
 
+    // Called when Google Map is ready
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
-        pickRandomCity();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2));
+        pickRandomCity(); // Show first city
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2)); // Set initial zoom to world view
     }
 }

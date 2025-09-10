@@ -1,32 +1,34 @@
 package com.example.asfirstapp;
+// Defines the package namespace.
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.os.Handler;
-import android.util.AttributeSet;
-import android.view.View;
+import android.content.Context;         // Needed to start activities and access resources.
+import android.content.Intent;          // Used to navigate to new activities.
+import android.graphics.Canvas;         // Drawing surface for custom view.
+import android.graphics.Color;          // Colors for drawing.
+import android.graphics.Paint;          // Paint object for drawing shapes/text.
+import android.os.Handler;              // Handler for countdown timer.
+import android.util.AttributeSet;       // For XML inflation.
+import android.view.View;               // Base class for custom views.
 
 public class MazeGridView extends View {
-    private static final int GRID_SIZE = 11;
-    private float cellSize;
-    private float offsetX, offsetY; // Offsets for centering
-    private static final int BALL_RADIUS = 25;
+    private static final int GRID_SIZE = 11;   // Maze is 11x11 cells.
+    private float cellSize;                    // Size of each cell in pixels.
+    private float offsetX, offsetY;            // Offsets to center the maze.
+    private static final int BALL_RADIUS = 25; // Radius of the red ball.
 
-    private int[][] maze;
-    private float ballX, ballY;
-    private Paint paint;
-    private boolean gameStarted = false;
-    private int countdown = 10;
-    private Handler handler = new Handler();
-    private Context context;
+    private int[][] maze;                      // 2D array: 1=wall, 0=path, 2=goal
+    private float ballX, ballY;                // Current ball coordinates.
+    private Paint paint;                        // Paint object for drawing shapes/text.
+    private boolean gameStarted = false;       // Tracks if countdown finished.
+    private int countdown = 10;                // Countdown before game starts.
+    private Handler handler = new Handler();   // Handler for countdown timing.
+    private Context context;                   // Context for starting activities.
 
+    // Constructors
     public MazeGridView(Context context) {
         super(context);
         this.context = context;
-        init();
+        init();  // Initialize maze and paint.
     }
 
     public MazeGridView(Context context, AttributeSet attrs) {
@@ -37,9 +39,9 @@ public class MazeGridView extends View {
 
     private void init() {
         paint = new Paint();
-        paint.setAntiAlias(true);
+        paint.setAntiAlias(true);  // Smooth edges for shapes/text.
 
-        // Maze: 1 = wall, 0 = path, 2 = goal (green square)
+        // Define the maze grid: 1=wall, 0=path, 2=goal (green square)
         maze = new int[][] {
                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -54,21 +56,21 @@ public class MazeGridView extends View {
                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
         };
 
-        startCountdown();
+        startCountdown();  // Start the 10-second countdown before the game.
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        // Determine the maximum square cell size
         cellSize = Math.min(w / (float) GRID_SIZE, h / (float) GRID_SIZE);
+        // Determine maximum cell size that fits the screen.
 
-        // Calculate offsets to center the maze if needed
         offsetX = (w - (cellSize * GRID_SIZE)) / 2;
         offsetY = (h - (cellSize * GRID_SIZE)) / 2;
+        // Center the maze if the view is not square.
 
-        // Place the ball in the first open space
+        // Place ball in the first open cell
         ballX = offsetX + cellSize + BALL_RADIUS;
         ballY = offsetY + cellSize + BALL_RADIUS;
     }
@@ -76,10 +78,10 @@ public class MazeGridView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawMaze(canvas);
-        drawBall(canvas);
+        drawMaze(canvas);  // Draw the maze walls and goal.
+        drawBall(canvas);  // Draw the red ball.
         if (!gameStarted) {
-            drawCountdown(canvas);
+            drawCountdown(canvas);  // Show countdown before start.
         }
     }
 
@@ -87,17 +89,15 @@ public class MazeGridView extends View {
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
                 if (maze[row][col] == 1) {
-                    paint.setColor(Color.BLACK);
-                    canvas.drawRect(
-                            offsetX + col * cellSize,
+                    paint.setColor(Color.BLACK); // Walls are black
+                    canvas.drawRect(offsetX + col * cellSize,
                             offsetY + row * cellSize,
                             offsetX + (col + 1) * cellSize,
                             offsetY + (row + 1) * cellSize,
                             paint);
                 } else if (maze[row][col] == 2) {
-                    paint.setColor(Color.GREEN);
-                    canvas.drawRect(
-                            offsetX + col * cellSize,
+                    paint.setColor(Color.GREEN); // Goal is green
+                    canvas.drawRect(offsetX + col * cellSize,
                             offsetY + row * cellSize,
                             offsetX + (col + 1) * cellSize,
                             offsetY + (row + 1) * cellSize,
@@ -108,7 +108,7 @@ public class MazeGridView extends View {
     }
 
     private void drawBall(Canvas canvas) {
-        paint.setColor(Color.RED);
+        paint.setColor(Color.RED); // Ball is red
         canvas.drawCircle(ballX, ballY, BALL_RADIUS, paint);
     }
 
@@ -120,15 +120,16 @@ public class MazeGridView extends View {
     }
 
     private void startCountdown() {
+        // Countdown logic: reduces number every second
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (countdown > 0) {
                     countdown--;
-                    invalidate();
+                    invalidate(); // Redraw view to update countdown
                     handler.postDelayed(this, 1000);
                 } else {
-                    gameStarted = true;
+                    gameStarted = true; // Start the game
                     invalidate();
                 }
             }
@@ -136,27 +137,30 @@ public class MazeGridView extends View {
     }
 
     public void updateBall(float tiltX, float tiltY) {
-        if (!gameStarted) return;
+        if (!gameStarted) return;  // Ignore tilts before countdown ends
 
-        float speed = cellSize / 50; // Slower movement
-        float newBallX = ballX - tiltX * speed;
-        float newBallY = ballY + tiltY * speed;
+        float speed = cellSize / 50; // Adjust movement speed
+        float newBallX = ballX - tiltX * speed; // Update X position
+        float newBallY = ballY + tiltY * speed; // Update Y position
 
         int col = (int) ((newBallX - offsetX) / cellSize);
         int row = (int) ((newBallY - offsetY) / cellSize);
 
         if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
             if (maze[row][col] == 0) {
+                // Free path, move ball
                 ballX = newBallX;
                 ballY = newBallY;
             } else if (maze[row][col] == 2) {
+                // Reached goal
                 navigateToCorrectScreen();
             } else {
+                // Hit wall
                 navigateToFailureScreen();
             }
         }
 
-        invalidate();
+        invalidate(); // Redraw ball at new position
     }
 
     private void navigateToFailureScreen() {

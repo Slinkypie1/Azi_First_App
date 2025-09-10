@@ -1,146 +1,170 @@
 package com.example.asfirstapp;
+// Defines the package name of your app (helps organize code and avoid conflicts).
 
+import android.app.AlarmManager;              // Used to schedule tasks/notifications at specific times.
+import android.app.NotificationChannel;       // Used to create notification channels (Android 8+).
+import android.app.NotificationManager;       // Manages notifications for the app.
+import android.app.PendingIntent;             // Grants permission to another app/component to run code later.
+import android.content.Context;               // Provides app context (global information about the app).
+import android.content.Intent;                // Used to start new activities/services or send broadcasts.
+import android.content.pm.PackageManager;     // Used to check app permissions.
+import android.os.Build;                      // Provides information about the device’s OS version.
+import android.os.Bundle;                     // Holds saved state data for activity recreation.
+import android.os.PowerManager;               // Manages power-related features like battery optimizations.
+import android.provider.Settings;             // Lets you open system settings screens.
+import android.util.Log;                      // For logging debug/error messages.
+import android.view.View;                     // Basic building block for UI components.
+import android.widget.Button;                 // Represents a button in the UI.
+import android.widget.EditText;               // Represents a text input field in the UI.
+import android.widget.Toast;                  // Small popup messages for user feedback.
 
-import android.app.AlarmManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.PowerManager;
-import android.provider.Settings;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.NonNull;           // Annotation to prevent null values in parameters.
+import androidx.appcompat.app.AppCompatActivity; // Base class for activities using modern UI features.
+import androidx.core.app.ActivityCompat;      // Helps request runtime permissions.
+import androidx.core.content.ContextCompat;   // Helps check if permissions are granted.
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    Button BtCLick;
-    EditText ET;
-    private static final int PERMISSION_REQUEST_CODE = 100;
-    private static final String TAG = "MainActivity";
+    // MainActivity class extends AppCompatActivity (so it can act as a screen).
+    // Implements View.OnClickListener to handle button clicks.
+
+    Button BtCLick; // A reference to the button in the layout.
+    EditText ET;    // A reference to the EditText field.
+    private static final int PERMISSION_REQUEST_CODE = 100; // Constant for permission request ID.
+    private static final String TAG = "MainActivity";       // Tag for logging messages.
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState);                 // Calls parent method to set up activity.
+        setContentView(R.layout.activity_main);             // Sets UI layout to activity_main.xml.
+
         Intent serviceIntent = new Intent(this, MusicService.class);
-        startService(serviceIntent);
-        initViews();
-        startForegroundService();
+        startService(serviceIntent);                        // Starts background music service.
+
+        initViews();                                        // Finds button & EditText in layout.
+
+        startForegroundService();                           // Starts foreground service (keeps alive).
+
+        // If Android version >= TIRAMISU (Android 13) → check notification permission.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, PERMISSION_REQUEST_CODE);
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Ask the user for notification permission if not granted.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+                        PERMISSION_REQUEST_CODE);
             } else {
-                setupNotification();
+                setupNotification();                        // If permission granted, setup notifications.
             }
         } else {
-            setupNotification();
+            setupNotification();                            // For older Android versions, no permission needed.
         }
-        checkBatteryOptimization();
+
+        checkBatteryOptimization();                         // Check if app is ignored from battery optimization.
     }
 
     private void setupNotification() {
-        createNotificationChannel();
-        scheduleNotification();
+        createNotificationChannel(); // Create notification channel if Android 8+.
+        scheduleNotification();      // Schedule daily notification.
     }
-
 
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelId = "slinkypie";
-            CharSequence channelName = "Notifications";
-            String channelDescription = "Channel for notifications";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Notification channels required on Android 8+.
+            String channelId = "slinkypie";                   // Channel ID.
+            CharSequence channelName = "Notifications";       // Channel name.
+            String channelDescription = "Channel for notifications"; // Channel description.
+            int importance = NotificationManager.IMPORTANCE_DEFAULT; // Importance level.
             NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
-            channel.setDescription(channelDescription);
+            channel.setDescription(channelDescription);        // Set description.
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+            notificationManager.createNotificationChannel(channel); // Register the channel.
         }
     }
+
     private void startForegroundService() {
         Intent serviceIntent = new Intent(this, MyForegroundService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
+            startForegroundService(serviceIntent); // For Android 8+, must call startForegroundService().
         } else {
-            startService(serviceIntent);
+            startService(serviceIntent);           // For older versions, normal startService().
         }
     }
-
-
 
     private void scheduleNotification() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        // Gets system alarm manager for scheduling.
+
         Intent intent = new Intent(this, NotificationReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        // Intent to trigger NotificationReceiver when alarm fires.
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
+                PendingIntent.FLAG_IMMUTABLE);
+        // PendingIntent that will send broadcast to NotificationReceiver.
 
         long triggerTime = System.currentTimeMillis() + AlarmManager.INTERVAL_DAY;
+        // Sets first trigger time to 1 day from now.
 
         if (alarmManager != null) {
             alarmManager.setRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    triggerTime,
-                    AlarmManager.INTERVAL_DAY,
-                    pendingIntent
+                    AlarmManager.RTC_WAKEUP,         // Wakes device if asleep.
+                    triggerTime,                     // Start time.
+                    AlarmManager.INTERVAL_DAY,       // Repeat interval = 1 day.
+                    pendingIntent                    // What to run.
             );
             Log.d(TAG, "Alarm scheduled for daily notifications.");
+            // Debug log message.
         }
     }
 
-
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                setupNotification();
-            } else {
-                Toast.makeText(this, "Notification permission is required for this feature.", Toast.LENGTH_LONG).show();
+        // Called after user responds to a permission request.
 
+        if (requestCode == PERMISSION_REQUEST_CODE) { // If it’s our notification permission request.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setupNotification(); // If granted, set up notifications.
+            } else {
+                Toast.makeText(this,
+                        "Notification permission is required for this feature.",
+                        Toast.LENGTH_LONG).show();
+                // Show warning if user denied permission.
             }
         }
     }
 
     private void checkBatteryOptimization() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Battery optimization introduced in Android 6.
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             if (!powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+                // If app is not exempt from battery optimizations...
                 Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-                startActivity(intent);
+                startActivity(intent); // Open settings screen so user can exempt it.
             }
         }
     }
 
     private void initViews() {
-        BtCLick = findViewById(R.id.BtClick);
-        BtCLick.setOnClickListener(this);
-        ET = findViewById(R.id.ET);
+        BtCLick = findViewById(R.id.BtClick);   // Finds button in XML layout.
+        BtCLick.setOnClickListener(this);       // Set MainActivity as the click handler.
+        ET = findViewById(R.id.ET);             // Finds EditText in XML layout.
     }
 
     @Override
     public void onClick(View view) {
-        Intent intent = new Intent(this, Second.class);
-        String inputText = ET.getText().toString();
-        intent.putExtra("name", inputText);
-        startActivity(intent);
-
+        // Called when button is clicked.
+        Intent intent = new Intent(this, Second.class); // Open Second activity.
+        String inputText = ET.getText().toString();     // Get text from EditText.
+        intent.putExtra("name", inputText);             // Pass text as extra data.
+        startActivity(intent);                          // Start Second activity.
     }
+
     @Override
     protected void onPause() {
         super.onPause();
         stopService(new Intent(this, MusicService.class));
+        // Stop music service when activity is paused (user leaves screen).
     }
-
 }
