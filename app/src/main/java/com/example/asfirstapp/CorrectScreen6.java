@@ -7,7 +7,7 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class CorrectScreen6 extends AppCompatActivity implements View.OnClickListener {
+public class CorrectScreen6 extends BaseMenuActivity implements View.OnClickListener {
 
     Button BtClick19;  // Button to proceed to next puzzle
 
@@ -19,6 +19,12 @@ public class CorrectScreen6 extends AppCompatActivity implements View.OnClickLis
         // Initialize button from layout and set click listener
         BtClick19 = findViewById(R.id.BtClick19);
         BtClick19.setOnClickListener(this);
+        int level = getIntent().getIntExtra("LEVEL", 1);
+
+        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        }
+
     }
 
     @Override

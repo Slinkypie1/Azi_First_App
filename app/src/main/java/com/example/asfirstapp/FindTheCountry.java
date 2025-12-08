@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView; // RecyclerView to display cou
 
 import java.util.*; // For List, ArrayList, Arrays, Collections
 
-public class FindTheCountry extends AppCompatActivity {
+public class FindTheCountry extends BaseMenuActivity {
 
     // List of all countries available for the puzzle
     String[] allCountries = {"India", "USA", "France", "Germany", "Japan", "Brazil", "Canada", "Italy", "China"};

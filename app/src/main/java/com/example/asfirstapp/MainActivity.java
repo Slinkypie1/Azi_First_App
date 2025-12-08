@@ -24,7 +24,7 @@ import androidx.core.app.ActivityCompat;      // Helps request runtime permissio
 import androidx.core.content.ContextCompat;   // Helps check if permissions are granted.
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends BaseMenuActivity implements View.OnClickListener {
     // MainActivity class extends AppCompatActivity (so it can act as a screen).
     // Implements View.OnClickListener to handle button clicks.
 
@@ -154,12 +154,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        // Called when button is clicked.
-        Intent intent = new Intent(this, Second.class); // Open Second activity.
-        String inputText = ET.getText().toString();     // Get text from EditText.
-        intent.putExtra("name", inputText);             // Pass text as extra data.
-        startActivity(intent);                          // Start Second activity.
+        String inputText = ET.getText().toString();  // Get text from EditText
+
+        // Save it in SharedPreferences
+        getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .edit()
+                .putString("last_name", inputText)
+                .apply();
+
+        // Go to Second activity
+        Intent intent = new Intent(this, Second.class);
+        intent.putExtra("name", inputText); // optional, can be removed
+        startActivity(intent);
     }
+
 
     @Override
     protected void onPause() {

@@ -12,7 +12,7 @@ import android.widget.TextView;        // UI element for displaying text.
 import androidx.activity.EdgeToEdge;   // Enables fullscreen edge-to-edge layouts.
 import androidx.appcompat.app.AppCompatActivity; // Base activity class with AppCompat support.
 
-public class Puzzle2 extends AppCompatActivity implements SensorEventListener {
+public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
     // Activity for the compass/riddle puzzle.
     // Implements SensorEventListener to track device rotation.
 

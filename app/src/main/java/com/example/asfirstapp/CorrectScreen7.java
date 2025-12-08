@@ -6,7 +6,7 @@ import android.view.View; // Needed for click handling
 import android.widget.Button; // Needed for Button UI element
 import androidx.appcompat.app.AppCompatActivity; // Base class for activities
 
-public class CorrectScreen7 extends AppCompatActivity implements View.OnClickListener {
+public class CorrectScreen7 extends BaseMenuActivity implements View.OnClickListener {
 
     Button BtClick20; // Button that the user will click to continue
 
@@ -17,6 +17,12 @@ public class CorrectScreen7 extends AppCompatActivity implements View.OnClickLis
 
         BtClick20 = findViewById(R.id.BtClick20); // Find the button in the layout
         BtClick20.setOnClickListener(this); // Set the click listener to this activity
+        int level = getIntent().getIntExtra("LEVEL", 1);
+
+        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        }
+
     }
 
     @Override

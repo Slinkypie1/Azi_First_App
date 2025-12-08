@@ -13,7 +13,7 @@ import androidx.core.graphics.Insets;      // Represents system UI insets (statu
 import androidx.core.view.ViewCompat;      // Utility for cross-version UI adjustments.
 import androidx.core.view.WindowInsetsCompat; // Provides details about window insets.
 
-public class CorrectScreen1 extends AppCompatActivity implements View.OnClickListener {
+public class CorrectScreen1 extends BaseMenuActivity implements View.OnClickListener {
     // This activity is shown when the player answers correctly (for Question 1).
     // Implements OnClickListener so it can handle button clicks.
 
@@ -35,12 +35,19 @@ public class CorrectScreen1 extends AppCompatActivity implements View.OnClickLis
             initViews();  // Initialize button after layout is ready.
             return insets; // Pass the insets back unchanged.
         });
+        int level = getIntent().getIntExtra("LEVEL", 1);
+
+        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        }
+
     }
 
     private void initViews() {
         BtClick10 = findViewById(R.id.BtClick10); // Finds the "Next" button by its ID.
         BtClick10.setOnClickListener(this);       // Sets this activity as the button's click listener.
     }
+
 
     @Override
     public void onClick(View view) {

@@ -10,7 +10,7 @@ import android.os.Bundle;                     // Holds activity state informatio
 
 import androidx.appcompat.app.AppCompatActivity; // Base class for activities with AppCompat support.
 
-public class Puzzle3 extends AppCompatActivity implements SensorEventListener {
+public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
     // Activity for maze puzzle controlled by tilting the device.
     // Implements SensorEventListener to track accelerometer data.
 

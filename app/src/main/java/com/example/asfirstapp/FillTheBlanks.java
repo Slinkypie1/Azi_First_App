@@ -6,7 +6,7 @@ import android.view.View; // Needed for click handling
 import android.widget.*; // Needed for Spinner, Button, etc.
 import androidx.appcompat.app.AppCompatActivity; // Base class for activities
 
-public class FillTheBlanks extends AppCompatActivity {
+public class FillTheBlanks extends BaseMenuActivity {
 
     // Array of all choices for the spinners
     String[] choices = {"choose here", "jumping", "rising", "falling", "happiness", "glory", "walking"};

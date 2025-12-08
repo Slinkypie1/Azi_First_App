@@ -8,7 +8,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 // Screen shown when the player completes the "Find the Country" puzzle successfully
-public class CorrectScreen8 extends AppCompatActivity implements View.OnClickListener {
+public class CorrectScreen8 extends BaseMenuActivity implements View.OnClickListener {
 
     Button BtClick21; // Button to proceed to the next puzzle/activity
 
@@ -19,6 +19,12 @@ public class CorrectScreen8 extends AppCompatActivity implements View.OnClickLis
 
         BtClick21 = findViewById(R.id.BtClick21); // Get reference to the button from layout
         BtClick21.setOnClickListener(this);       // Set this class as the click listener
+        int level = getIntent().getIntExtra("LEVEL", 1);
+
+        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        }
+
     }
 
     @Override

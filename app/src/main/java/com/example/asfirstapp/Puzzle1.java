@@ -15,7 +15,7 @@ import android.widget.TextView;        // UI element for displaying text.
 
 import androidx.appcompat.app.AppCompatActivity; // Base class for activities.
 
-public class Puzzle1 extends AppCompatActivity implements SensorEventListener {
+public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
     // Activity for the light sensor puzzle.
     // Implements SensorEventListener to react to light sensor changes.
 

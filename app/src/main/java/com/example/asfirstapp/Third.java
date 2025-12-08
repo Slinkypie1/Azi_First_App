@@ -13,7 +13,7 @@ import androidx.core.graphics.Insets;      // Represents system bar insets (stat
 import androidx.core.view.ViewCompat;      // Helps apply UI changes across Android versions.
 import androidx.core.view.WindowInsetsCompat; // Provides info about window insets.
 
-public class Third extends AppCompatActivity implements View.OnClickListener {
+public class Third extends BaseMenuActivity implements View.OnClickListener {
     // This activity shows a multiple-choice style screen with buttons.
     // Implements OnClickListener so this class can handle button clicks.
 

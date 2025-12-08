@@ -8,7 +8,7 @@ import android.widget.Button;        // Represents a clickable button.
 
 import androidx.appcompat.app.AppCompatActivity; // Base class for activities with AppCompat support.
 
-public class CorrectScreen5 extends AppCompatActivity implements View.OnClickListener {
+public class CorrectScreen5 extends BaseMenuActivity implements View.OnClickListener {
     // This activity shows the "correct answer" screen after Puzzle2 (compass puzzle)
     // Implements OnClickListener to handle button presses.
 
@@ -19,6 +19,12 @@ public class CorrectScreen5 extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_correct_screen5); // Set layout for this screen.
         initViews();  // Initialize button view directly (no insets handling needed).
+        int level = getIntent().getIntExtra("LEVEL", 1);
+
+        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        }
+
     }
 
     private void initViews() {

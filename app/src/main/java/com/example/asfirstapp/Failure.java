@@ -12,7 +12,7 @@ import androidx.core.graphics.Insets;      // Represents system bar insets (stat
 import androidx.core.view.ViewCompat;      // Helps apply UI changes across Android versions.
 import androidx.core.view.WindowInsetsCompat; // Provides info about window insets.
 
-public class Failure extends AppCompatActivity implements View.OnClickListener {
+public class Failure extends BaseMenuActivity implements View.OnClickListener {
     // This activity is shown when the player answers incorrectly.
     // Implements OnClickListener so it can handle button clicks.
 

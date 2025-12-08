@@ -16,7 +16,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 // Imports the AppCompatActivity class which provides support for modern Android features.
 
-public class CorrectScreen9 extends AppCompatActivity implements View.OnClickListener {
+public class CorrectScreen9 extends BaseMenuActivity implements View.OnClickListener {
     // Defines the activity class named CorrectScreen9.
     // Implements OnClickListener so we can handle button clicks.
 
@@ -36,6 +36,12 @@ public class CorrectScreen9 extends AppCompatActivity implements View.OnClickLis
 
         BtClick22.setOnClickListener(this);
         // Sets this activity as the listener for button clicks.
+        int level = getIntent().getIntExtra("LEVEL", 1);
+
+        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        }
+
     }
 
     @Override

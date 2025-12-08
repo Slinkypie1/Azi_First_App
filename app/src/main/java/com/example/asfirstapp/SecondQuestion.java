@@ -13,7 +13,7 @@ import androidx.core.graphics.Insets;      // Represents system bars insets (sta
 import androidx.core.view.ViewCompat;      // Utility for backward-compatible view handling.
 import androidx.core.view.WindowInsetsCompat; // Provides details about system UI insets.
 
-public class SecondQuestion extends AppCompatActivity implements View.OnClickListener {
+public class SecondQuestion extends BaseMenuActivity implements View.OnClickListener {
     // This activity shows the second quiz question.
     // Implements View.OnClickListener so this class can handle button clicks.
 

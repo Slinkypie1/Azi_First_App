@@ -13,7 +13,7 @@ import androidx.core.graphics.Insets;      // Represents system UI insets.
 import androidx.core.view.ViewCompat;      // Helper for applying cross-version UI behaviors.
 import androidx.core.view.WindowInsetsCompat; // Provides system window inset information.
 
-public class ThirdQuestion extends AppCompatActivity implements View.OnClickListener {
+public class ThirdQuestion extends BaseMenuActivity implements View.OnClickListener {
     // Activity for the third quiz question.
     // Implements OnClickListener to handle answer button clicks.
 

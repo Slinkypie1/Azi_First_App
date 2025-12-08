@@ -12,7 +12,7 @@ import androidx.core.graphics.Insets;      // Represents system bar insets (stat
 import androidx.core.view.ViewCompat;      // Helper for backward-compatible UI behavior.
 import androidx.core.view.WindowInsetsCompat; // Provides info about system window insets.
 
-public class CorrectScreen2 extends AppCompatActivity implements View.OnClickListener {
+public class CorrectScreen2 extends BaseMenuActivity implements View.OnClickListener {
     // This activity shows the "correct answer" screen for Question 2.
     // Implements View.OnClickListener to handle button clicks.
 
@@ -34,6 +34,12 @@ public class CorrectScreen2 extends AppCompatActivity implements View.OnClickLis
             initViews();  // Initialize button after layout is ready.
             return insets; // Return insets unchanged.
         });
+        int level = getIntent().getIntExtra("LEVEL", 1);
+
+        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        }
+
     }
 
     private void initViews() {

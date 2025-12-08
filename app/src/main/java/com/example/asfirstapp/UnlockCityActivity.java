@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 // Activity where the user tries to "unlock" cities by navigating on the map
-public class UnlockCityActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap; // Google Map instance
     private TextView clueText; // TextView to display the clue for the current city
