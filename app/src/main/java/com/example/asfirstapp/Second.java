@@ -12,9 +12,9 @@ import androidx.core.view.ViewCompat;
 
 public class Second extends BaseMenuActivity implements View.OnClickListener {
 
-    TextView TV;
-    EditText ET;
-    Button BtCLick1;
+    private TextView TV;
+    private EditText ET;
+    private Button BtClick1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,9 +22,11 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_second);
 
-        // Initialize views after layout insets are applied
+        // Initialize views immediately after layout is set
+        initViews();
+
+        // Keep edge-to-edge padding if needed but DO NOT initialize views here
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main1), (v, insets) -> {
-            initViews();
             return insets;
         });
     }
@@ -32,30 +34,32 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload the latest name whenever activity resumes
-
+        // Reload latest name when activity returns
+        updateNameDisplay();
     }
 
-    // Initialize views
+    // Initialize all views and listeners
     private void initViews() {
         TV = findViewById(R.id.TV);
         ET = findViewById(R.id.ET);
-        BtCLick1 = findViewById(R.id.BtClick1);
+        BtClick1 = findViewById(R.id.BtClick1);
 
-        updateNameDisplay(); // Show latest name
-        BtCLick1.setOnClickListener(this);
+        updateNameDisplay();
+
+        BtClick1.setOnClickListener(this);
     }
 
-    // Update TextView with last typed name
+    // Update welcome message using SharedPreferences
     private void updateNameDisplay() {
         String lastName = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .getString("last_name", "Player");
+
         TV.setText("Ready " + lastName + "?");
     }
 
     @Override
     public void onClick(View view) {
-        // Button click always starts level 1
-        startLevel(1);
+        // Always start Level 1
+         startLevel(1);
     }
 }
