@@ -1,51 +1,46 @@
 package com.example.asfirstapp;
-// Defines the package namespace for this class.
 
-import android.content.Intent;          // Used to navigate between activities.
-import android.os.Bundle;               // Holds activity state information.
-import android.view.View;               // Base class for UI elements.
-import android.widget.Button;           // Represents a clickable button.
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
-import androidx.activity.EdgeToEdge;    // Enables modern fullscreen edge-to-edge layouts.
-import androidx.appcompat.app.AppCompatActivity; // Base class for activities with AppCompat support.
-import androidx.core.graphics.Insets;    // Represents system bar insets (status/nav bars).
-import androidx.core.view.ViewCompat;    // Helps with cross-version UI behavior.
-import androidx.core.view.WindowInsetsCompat; // Provides info about window insets.
+import androidx.activity.EdgeToEdge;
+import androidx.core.view.ViewCompat;
 
 public class CorrectScreen4 extends BaseMenuActivity implements View.OnClickListener {
-    // This activity shows the "correct answer" screen after Puzzle1 (light sensor puzzle)
-    // Implements OnClickListener to handle button presses.
 
-    Button BtCLick17; // Button to proceed to the next puzzle (Puzzle2).
+    Button BtCLick17;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this); // Enable fullscreen edge-to-edge layout.
-        setContentView(R.layout.activity_correct_screen4); // Set layout for this screen.
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_correct_screen4);
 
-        // Handle system window insets (status/nav bar).
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews(); // Initialize button view.
-            return insets; // Return insets unchanged.
+            initViews();
+            return insets;
         });
-        int level = getIntent().getIntExtra("LEVEL", 1);
 
-        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
-            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        // Level 4 completed, unlock Level 5
+        unlockNextLevel(4);
+    }
+
+    private void unlockNextLevel(int currentLevel) {
+        if (currentLevel == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, currentLevel + 1);
         }
-
     }
 
     private void initViews() {
-        BtCLick17 = findViewById(R.id.BtClick17); // Find "Next" button by ID.
-        BtCLick17.setOnClickListener(this);       // Set this activity as click listener.
+        BtCLick17 = findViewById(R.id.BtClick17);
+        BtCLick17.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-        // Triggered when BtCLick17 is clicked.
-        Intent intent = new Intent(this, Puzzle2.class); // Create intent for Puzzle2 activity.
-        startActivity(intent);                            // Start Puzzle2.
+        Intent intent = new Intent(this, Puzzle2.class);
+        startActivity(intent);
     }
 }

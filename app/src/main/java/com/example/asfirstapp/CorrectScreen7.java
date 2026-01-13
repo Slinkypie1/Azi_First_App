@@ -1,34 +1,35 @@
 package com.example.asfirstapp;
 
-import android.content.Intent; // Needed to switch activities
-import android.os.Bundle; // Needed for activity lifecycle
-import android.view.View; // Needed for click handling
-import android.widget.Button; // Needed for Button UI element
-import androidx.appcompat.app.AppCompatActivity; // Base class for activities
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 public class CorrectScreen7 extends BaseMenuActivity implements View.OnClickListener {
 
-    Button BtClick20; // Button that the user will click to continue
+    Button BtClick20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState); // Call the parent onCreate method
-        setContentView(R.layout.activity_correct_screen7); // Load the correct screen layout
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_correct_screen7);
 
-        BtClick20 = findViewById(R.id.BtClick20); // Find the button in the layout
-        BtClick20.setOnClickListener(this); // Set the click listener to this activity
-        int level = getIntent().getIntExtra("LEVEL", 1);
+        BtClick20 = findViewById(R.id.BtClick20);
+        BtClick20.setOnClickListener(this);
 
-        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
-            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        // Level 7 completed, unlock Level 8
+        unlockNextLevel(7);
+    }
+
+    private void unlockNextLevel(int currentLevel) {
+        if (currentLevel == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, currentLevel + 1);
         }
-
     }
 
     @Override
     public void onClick(View view) {
-        // When the button is clicked, start the FindTheCountry activity
         Intent intent = new Intent(this, FindTheCountry.class);
-        startActivity(intent); // Launch the next activity
+        startActivity(intent);
     }
 }

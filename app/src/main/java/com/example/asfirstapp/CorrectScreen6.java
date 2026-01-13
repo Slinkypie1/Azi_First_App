@@ -5,31 +5,30 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 public class CorrectScreen6 extends BaseMenuActivity implements View.OnClickListener {
 
-    Button BtClick19;  // Button to proceed to next puzzle
+    Button BtClick19;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_correct_screen6); // Load the correct screen layout
+        setContentView(R.layout.activity_correct_screen6);
 
-        // Initialize button from layout and set click listener
         BtClick19 = findViewById(R.id.BtClick19);
         BtClick19.setOnClickListener(this);
-        int level = getIntent().getIntExtra("LEVEL", 1);
 
-        if (level == ProgressStorage.getHighestUnlockedLevel(this)) {
-            ProgressStorage.setHighestUnlockedLevel(this, level + 1);
+        // Level 6 completed, unlock Level 7
+        unlockNextLevel(6);
+    }
+
+    private void unlockNextLevel(int currentLevel) {
+        if (currentLevel == ProgressStorage.getHighestUnlockedLevel(this)) {
+            ProgressStorage.setHighestUnlockedLevel(this, currentLevel + 1);
         }
-
     }
 
     @Override
     public void onClick(View view) {
-        // When the button is clicked, navigate to the next puzzle/activity
         Intent intent = new Intent(this, FillTheBlanks.class);
         startActivity(intent);
     }
