@@ -23,6 +23,10 @@ import androidx.appcompat.app.AppCompatActivity; // Base class for activities us
 import androidx.core.app.ActivityCompat;      // Helps request runtime permissions.
 import androidx.core.content.ContextCompat;   // Helps check if permissions are granted.
 
+import com.google.firebase.firestore.FirebaseFirestore; // For Firebase Firestore.
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class MainActivity extends BaseMenuActivity implements View.OnClickListener {
     // MainActivity class extends AppCompatActivity (so it can act as a screen).
@@ -33,11 +37,15 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
     private static final int PERMISSION_REQUEST_CODE = 100; // Constant for permission request ID.
     private static final String TAG = "MainActivity";       // Tag for logging messages.
 
+    private FirebaseFirestore db; // Reference to Firestore database.
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);                 // Calls parent method to set up activity.
         setContentView(R.layout.activity_main);             // Sets UI layout to activity_main.xml.
+
+        db = FirebaseFirestore.getInstance();               // Initialize Firestore.
 
         Intent serviceIntent = new Intent(this, MusicService.class);
         startService(serviceIntent);                        // Starts background music service.
@@ -78,7 +86,9 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
             NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
             channel.setDescription(channelDescription);        // Set description.
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel); // Register the channel.
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel); // Register the channel.
+            }
         }
     }
 
@@ -154,7 +164,12 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
 
     @Override
     public void onClick(View view) {
-        String inputText = ET.getText().toString();  // Get text from EditText
+        String inputText = ET.getText().toString().trim();  // Get text from EditText
+
+        if (inputText.isEmpty()) {
+            Toast.makeText(this, "Please enter a name", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         // Save it in SharedPreferences
         getSharedPreferences("app_prefs", MODE_PRIVATE)
@@ -162,9 +177,52 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                 .putString("last_name", inputText)
                 .apply();
 
-        // Go to Second activity
+        // Save to Firebase Firestore and load progress
+        handleLogin(inputText);
+    }
+
+    private void handleLogin(String name) {
+        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        String documentId = deviceId + "_" + name; // Unique ID per name per device
+
+        db.collection("users").document(documentId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // User exists on this device, load their progress
+                        Long unlockedLevels = documentSnapshot.getLong("unlockedLevels");
+                        if (unlockedLevels != null) {
+                            ProgressStorage.setHighestUnlockedLevelOffline(this, unlockedLevels.intValue());
+                        }
+                        proceedToSecond(name);
+                    } else {
+                        // New user for this device - Create new record
+                        saveNewUser(name, deviceId, documentId);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Fallback to offline if firebase fails
+                    proceedToSecond(name);
+                });
+    }
+
+    private void saveNewUser(String name, String deviceId, String documentId) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("name", name);
+        user.put("deviceId", deviceId);
+        user.put("unlockedLevels", 1); // Start at level 1 for new users
+
+        db.collection("users").document(documentId)
+                .set(user)
+                .addOnSuccessListener(aVoid -> {
+                    ProgressStorage.setHighestUnlockedLevelOffline(this, 1);
+                    proceedToSecond(name);
+                })
+                .addOnFailureListener(e -> proceedToSecond(name));
+    }
+
+    private void proceedToSecond(String name) {
         Intent intent = new Intent(this, Second.class);
-        intent.putExtra("name", inputText); // optional, can be removed
+        intent.putExtra("name", name);
         startActivity(intent);
     }
 
