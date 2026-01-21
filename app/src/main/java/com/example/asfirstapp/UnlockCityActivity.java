@@ -51,15 +51,17 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         if (mapFragment != null) {
-            mapFragment.getMapAsync(this); // Async load map
+            mapFragment.getMapAsync(this); // Async load map; calls onMapReady when ready
         }
 
         // Handle guess submission
         submitGuessBtn.setOnClickListener(v -> {
-            if (mMap == null || currentCity == null) return;
+            if (mMap == null || currentCity == null) return; // Ensure map and city exist
 
-            LatLng guess = mMap.getCameraPosition().target; // Get the center of the map as user's guess
+            // Take the center of the map as the user's guess
+            LatLng guess = mMap.getCameraPosition().target;
 
+            // Calculate distance between guess and actual city location
             float[] result = new float[1];
             Location.distanceBetween(
                     guess.latitude, guess.longitude, // user's guessed location
@@ -72,15 +74,15 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
                         "✅ Correct! You unlocked " + currentCity.name + "!",
                         Toast.LENGTH_LONG).show();
 
-                if (correctGuessCount >= TOTAL_CORRECT_TO_FINISH) { // Completed all required cities
+                if (correctGuessCount >= TOTAL_CORRECT_TO_FINISH) { // Completed required cities
                     Intent intent = new Intent(UnlockCityActivity.this, CorrectScreen9.class);
-                    startActivity(intent);
-                    finish();
+                    startActivity(intent); // Navigate to success screen
+                    finish(); // Close current activity
                 } else { // Move to next city
                     pickRandomCity();
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2)); // Reset map zoom
                 }
-            } else {
+            } else { // Guess too far
                 Toast.makeText(UnlockCityActivity.this,
                         "❌ Try again, not close enough.",
                         Toast.LENGTH_SHORT).show();
@@ -106,28 +108,28 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
 
     // Shuffle city order randomly
     private void shuffleCities() {
-        shuffledCities = new ArrayList<>(cityList);
-        Collections.shuffle(shuffledCities);
-        currentIndex = 0;
+        shuffledCities = new ArrayList<>(cityList); // Copy list
+        Collections.shuffle(shuffledCities); // Randomize order
+        currentIndex = 0; // Reset index for new shuffle
     }
 
     // Pick the next city to show clue for
     private void pickRandomCity() {
         if (shuffledCities == null || shuffledCities.isEmpty()) {
-            shuffleCities();
+            shuffleCities(); // Ensure shuffled list exists
         }
         if (currentIndex >= shuffledCities.size()) {
-            shuffleCities();
+            shuffleCities(); // Reshuffle if reached end
         }
-        currentCity = shuffledCities.get(currentIndex);
-        currentIndex++;
+        currentCity = shuffledCities.get(currentIndex); // Get city for this turn
+        currentIndex++; // Increment index for next round
         clueText.setText(currentCity.clue); // Display clue to user
     }
 
     // Called when Google Map is ready
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        mMap = googleMap;
+        mMap = googleMap; // Store GoogleMap instance
         pickRandomCity(); // Show first city
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2)); // Set initial zoom to world view
     }

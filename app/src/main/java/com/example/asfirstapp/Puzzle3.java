@@ -1,35 +1,41 @@
 package com.example.asfirstapp;
-// Defines the package namespace for this class.
 
-import android.content.Context;              // Needed for system services and views.
-import android.hardware.Sensor;              // Represents hardware sensors.
-import android.hardware.SensorEvent;         // Contains sensor reading data.
-import android.hardware.SensorEventListener; // Interface to listen to sensor updates.
-import android.hardware.SensorManager;       // Manages sensors on the device.
-import android.os.Bundle;                     // Holds activity state information.
+// Imports for sensors, context, and activity management
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity; // Base class for activities with AppCompat support.
+import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * Puzzle3 Activity
+ * ----------------
+ * Maze puzzle controlled by tilting the device.
+ * The ball moves inside a custom MazeGridView according to accelerometer readings.
+ */
 public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
-    // Activity for maze puzzle controlled by tilting the device.
-    // Implements SensorEventListener to track accelerometer data.
 
-    private SensorManager sensorManager;  // Manages device sensors.
-    private Sensor accelerometer;         // The accelerometer sensor (tilt detection).
-    private MazeGridView mazeGridView;    // Custom View that draws the maze and the ball.
+    private SensorManager sensorManager;  // Manages all device sensors
+    private Sensor accelerometer;         // Detects device tilt
+    private MazeGridView mazeGridView;    // Custom view that draws maze and ball
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mazeGridView = new MazeGridView(this); // Instantiate custom maze view.
-        setContentView(mazeGridView);          // Set the maze view as the content view.
+        // Instantiate custom maze view
+        mazeGridView = new MazeGridView(this);
+        // Set the custom maze view as the activity’s content
+        setContentView(mazeGridView);
 
+        // Get sensor service
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        // Get access to the device's sensors.
         if (sensorManager != null) {
+            // Get accelerometer sensor
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            // Get the accelerometer sensor (used for tilt detection).
         }
     }
 
@@ -37,7 +43,8 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
     protected void onResume() {
         super.onResume();
         if (accelerometer != null) {
-            // Register listener for accelerometer updates when activity is visible.
+            // Register listener for accelerometer updates
+            // SENSOR_DELAY_GAME is suitable for games with moderate refresh
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
         }
     }
@@ -45,22 +52,22 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
     @Override
     protected void onPause() {
         super.onPause();
-        // Unregister sensor listener when activity is not visible to save battery.
+        // Unregister sensor listener to save battery when activity is not visible
         sensorManager.unregisterListener(this);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float tiltX = event.values[0]; // X-axis tilt (left/right)
-            float tiltY = event.values[1]; // Y-axis tilt (forward/backward)
+            float tiltX = event.values[0]; // Tilt left/right
+            float tiltY = event.values[1]; // Tilt forward/backward
+            // Update the ball position in the maze based on tilt
             mazeGridView.updateBall(tiltX, tiltY);
-            // Update ball position in maze based on device tilt.
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Not needed for this puzzle, but required by SensorEventListener.
+        // Not required for this puzzle but must be implemented
     }
 }

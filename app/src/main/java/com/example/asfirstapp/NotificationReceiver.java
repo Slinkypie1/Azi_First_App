@@ -1,69 +1,83 @@
 package com.example.asfirstapp; // Package declaration
 
-import android.app.NotificationChannel; // Used to create notification channels on Android 8.0+
-import android.app.NotificationManager; // To manage and show notifications
-import android.app.PendingIntent; // Allows notification to launch an activity when clicked
-import android.content.BroadcastReceiver; // Receives system or app broadcast events
-import android.content.Context; // Provides context for system services
-import android.content.Intent; // Used to specify the target activity
-import android.os.Build; // To check Android version
-import android.util.Log; // Logging for debugging
+// Imports needed for notifications and broadcast handling
+import android.app.NotificationChannel;       // For creating notification channels (Android 8+)
+import android.app.NotificationManager;       // To manage and display notifications
+import android.app.PendingIntent;             // Wraps intents to trigger later from notifications
+import android.content.BroadcastReceiver;     // Receives broadcast events from system/app
+import android.content.Context;               // Provides context for system services
+import android.content.Intent;                // Used to specify which activity to open
+import android.os.Build;                      // To check Android version
+import android.util.Log;                      // For logging debug messages
 
-import androidx.core.app.NotificationCompat; // Support library for notifications
+import androidx.core.app.NotificationCompat;  // Support library for building notifications
 
-public class NotificationReceiver extends BroadcastReceiver { // BroadcastReceiver triggered by alarms or system events
-    private static final String TAG = "NotificationReceiver"; // Tag used for logging
+/**
+ * NotificationReceiver handles scheduled notifications.
+ * Triggered by AlarmManager, it sends a notification if the app is not in the foreground.
+ */
+public class NotificationReceiver extends BroadcastReceiver {
+
+    private static final String TAG = "NotificationReceiver";
+    // Tag for logging
 
     @Override
-    public void onReceive(Context context, Intent intent) { // Called when the broadcast is received
-        Log.d(TAG, "NotificationReceiver triggered."); // Log for debugging
+    public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "NotificationReceiver triggered.");
+        // Called when the broadcast is received; log for debugging
 
-        // Check if the app is currently running
+        // Check if app is running (foreground) using MyApp class
         if (MyApp.isAppRunning(context)) {
-            Log.d(TAG, "App is running, skipping notification."); // Log that no notification is sent
-            return; // Do not send notification if app is in foreground
+            Log.d(TAG, "App is running, skipping notification.");
+            // If app is open, do not notify
+            return;
         }
 
-        Log.d(TAG, "App is closed, sending notification."); // Log that notification will be sent
+        Log.d(TAG, "App is closed, sending notification.");
+        // App is not open, so we send a notification
 
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         // Get the system notification manager
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (notificationManager != null) {
-            // Create notification channel for Android 8.0+ devices
+
+            // For Android 8.0+ (Oreo), notification channels are required
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationChannel channel = new NotificationChannel(
-                        "slinkypie", // Unique channel ID
-                        "Notifications", // Human-readable channel name
+                        "slinkypie",                 // Unique ID for this channel
+                        "Notifications",             // Human-readable name
                         NotificationManager.IMPORTANCE_DEFAULT // Importance level
                 );
-                notificationManager.createNotificationChannel(channel); // Register the channel
+                notificationManager.createNotificationChannel(channel);
+                // Register the channel with the system
             }
 
-            // Intent to open MainActivity when notification is clicked
+            // Create an intent that opens MainActivity when user taps the notification
             Intent repeatingIntent = new Intent(context, MainActivity.class);
-            repeatingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Ensure the activity is brought to front
+            repeatingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            // Bring activity to front instead of creating a new one
 
-            // Wrap the intent in a PendingIntent so notification can trigger it
+            // Wrap the intent in a PendingIntent
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     context,
-                    0, // Request code
+                    0, // Request code (unique if you have multiple notifications)
                     repeatingIntent,
-                    PendingIntent.FLAG_IMMUTABLE // Immutable flag for security
+                    PendingIntent.FLAG_IMMUTABLE // Makes PendingIntent secure
             );
 
             // Build the notification
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "slinkypie")
-                    .setSmallIcon(R.drawable.quiz_icon) // Notification icon
-                    .setContentTitle("SlinkyPie's Quiz") // Title text
-                    .setContentText("Come and play me!") // Body text
+                    .setSmallIcon(R.drawable.quiz_icon) // Icon shown in status bar
+                    .setContentTitle("SlinkyPie's Quiz") // Notification title
+                    .setContentText("Come and play me!") // Notification body
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT) // Normal priority
-                    .setAutoCancel(true) // Dismiss notification when clicked
-                    .setContentIntent(pendingIntent); // Intent triggered on click
+                    .setAutoCancel(true) // Notification disappears when clicked
+                    .setContentIntent(pendingIntent); // Launches MainActivity on click
 
-            // Show the notification with ID 100
+            // Show the notification with a fixed ID
             notificationManager.notify(100, builder.build());
-            Log.d(TAG, "Notification sent."); // Log that notification was sent
+            Log.d(TAG, "Notification sent."); // Log that the notification was displayed
         }
     }
 }

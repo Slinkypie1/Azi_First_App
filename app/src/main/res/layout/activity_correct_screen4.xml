@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".CorrectScreen4"
-    android:background="@drawable/thats_amazing">
+    android:background="@drawable/correct_screen4">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

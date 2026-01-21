@@ -5,211 +5,210 @@ import android.app.AlarmManager;              // Used to schedule tasks/notifica
 import android.app.NotificationChannel;       // Used to create notification channels (Android 8+).
 import android.app.NotificationManager;       // Manages notifications for the app.
 import android.app.PendingIntent;             // Grants permission to another app/component to run code later.
-import android.content.Context;               // Provides app context (global information about the app).
-import android.content.Intent;                // Used to start new activities/services or send broadcasts.
+import android.content.Context;               // Provides app context (global info about the app).
+import android.content.Intent;                // Used to start activities/services or send broadcasts.
 import android.content.pm.PackageManager;     // Used to check app permissions.
-import android.os.Build;                      // Provides information about the device’s OS version.
+import android.os.Build;                      // Provides device OS version info.
 import android.os.Bundle;                     // Holds saved state data for activity recreation.
-import android.os.PowerManager;               // Manages power-related features like battery optimizations.
+import android.os.PowerManager;               // Manages power/battery features.
 import android.provider.Settings;             // Lets you open system settings screens.
 import android.util.Log;                      // For logging debug/error messages.
-import android.view.View;                     // Basic building block for UI components.
-import android.widget.Button;                 // Represents a button in the UI.
-import android.widget.EditText;               // Represents a text input field in the UI.
-import android.widget.Toast;                  // Small popup messages for user feedback.
+import android.view.View;                     // Base class for UI components.
+import android.widget.Button;                 // Represents a clickable button.
+import android.widget.EditText;               // Represents a text input field.
+import android.widget.Toast;                  // Popup messages for user feedback.
 
 import androidx.annotation.NonNull;           // Annotation to prevent null values in parameters.
-import androidx.appcompat.app.AppCompatActivity; // Base class for activities using modern UI features.
+import androidx.appcompat.app.AppCompatActivity; // Base class for modern activities.
 import androidx.core.app.ActivityCompat;      // Helps request runtime permissions.
 import androidx.core.content.ContextCompat;   // Helps check if permissions are granted.
 
-import com.google.firebase.firestore.FirebaseFirestore; // For Firebase Firestore.
+import com.google.firebase.firestore.FirebaseFirestore; // Firebase Firestore database access.
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class MainActivity extends BaseMenuActivity implements View.OnClickListener {
-    // MainActivity class extends AppCompatActivity (so it can act as a screen).
-    // Implements View.OnClickListener to handle button clicks.
+    // MainActivity handles the first screen and login logic.
+    // Implements OnClickListener for handling button clicks.
 
-    Button BtCLick; // A reference to the button in the layout.
-    EditText ET;    // A reference to the EditText field.
-    private static final int PERMISSION_REQUEST_CODE = 100; // Constant for permission request ID.
+    Button BtCLick; // Button to start next activity.
+    EditText ET;    // EditText for user to enter their name.
+    private static final int PERMISSION_REQUEST_CODE = 100; // ID for permission request.
     private static final String TAG = "MainActivity";       // Tag for logging messages.
 
-    private FirebaseFirestore db; // Reference to Firestore database.
-
+    private FirebaseFirestore db; // Reference to Firebase Firestore database.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);                 // Calls parent method to set up activity.
-        setContentView(R.layout.activity_main);             // Sets UI layout to activity_main.xml.
+        super.onCreate(savedInstanceState);                 // Call parent setup
+        setContentView(R.layout.activity_main);             // Load main layout
 
-        db = FirebaseFirestore.getInstance();               // Initialize Firestore.
+        db = FirebaseFirestore.getInstance();               // Initialize Firestore
 
+        // Start background music service
         Intent serviceIntent = new Intent(this, MusicService.class);
-        startService(serviceIntent);                        // Starts background music service.
+        startService(serviceIntent);
 
-        initViews();                                        // Finds button & EditText in layout.
+        initViews();                                        // Initialize UI elements
 
-        startForegroundService();                           // Starts foreground service (keeps alive).
+        startForegroundService();                           // Keep app alive in foreground service
 
-        // If Android version >= TIRAMISU (Android 13) → check notification permission.
+        // Check for notification permission on Android 13+ (TIRAMISU)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                // Ask the user for notification permission if not granted.
+                // Ask user for notification permission if not already granted
                 ActivityCompat.requestPermissions(this,
                         new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
                         PERMISSION_REQUEST_CODE);
             } else {
-                setupNotification();                        // If permission granted, setup notifications.
+                setupNotification();                        // If permission granted, set up notifications
             }
         } else {
-            setupNotification();                            // For older Android versions, no permission needed.
+            setupNotification();                            // Older Android versions don't need permission
         }
 
-        checkBatteryOptimization();                         // Check if app is ignored from battery optimization.
+        checkBatteryOptimization();                         // Ensure app is excluded from battery optimization
     }
 
+    // Setup notifications: channel + schedule daily notification
     private void setupNotification() {
-        createNotificationChannel(); // Create notification channel if Android 8+.
-        scheduleNotification();      // Schedule daily notification.
+        createNotificationChannel(); // Create notification channel for Android 8+
+        scheduleNotification();      // Schedule recurring daily notification
     }
 
+    // Create notification channel (Android 8+)
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Notification channels required on Android 8+.
-            String channelId = "slinkypie";                   // Channel ID.
-            CharSequence channelName = "Notifications";       // Channel name.
-            String channelDescription = "Channel for notifications"; // Channel description.
-            int importance = NotificationManager.IMPORTANCE_DEFAULT; // Importance level.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "slinkypie";
+            CharSequence channelName = "Notifications";
+            String channelDescription = "Channel for notifications";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
-            channel.setDescription(channelDescription);        // Set description.
+            channel.setDescription(channelDescription);
+
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             if (notificationManager != null) {
-                notificationManager.createNotificationChannel(channel); // Register the channel.
+                notificationManager.createNotificationChannel(channel); // Register the channel
             }
         }
     }
 
+    // Start foreground service to keep app alive
     private void startForegroundService() {
         Intent serviceIntent = new Intent(this, MyForegroundService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent); // For Android 8+, must call startForegroundService().
+            startForegroundService(serviceIntent); // For Android 8+, must call startForegroundService
         } else {
-            startService(serviceIntent);           // For older versions, normal startService().
+            startService(serviceIntent);           // For older versions, normal startService
         }
     }
 
+    // Schedule daily notifications using AlarmManager
     private void scheduleNotification() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        // Gets system alarm manager for scheduling.
 
         Intent intent = new Intent(this, NotificationReceiver.class);
-        // Intent to trigger NotificationReceiver when alarm fires.
-
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
                 PendingIntent.FLAG_IMMUTABLE);
-        // PendingIntent that will send broadcast to NotificationReceiver.
 
         long triggerTime = System.currentTimeMillis() + AlarmManager.INTERVAL_DAY;
-        // Sets first trigger time to 1 day from now.
 
         if (alarmManager != null) {
             alarmManager.setRepeating(
-                    AlarmManager.RTC_WAKEUP,         // Wakes device if asleep.
-                    triggerTime,                     // Start time.
-                    AlarmManager.INTERVAL_DAY,       // Repeat interval = 1 day.
-                    pendingIntent                    // What to run.
+                    AlarmManager.RTC_WAKEUP,         // Wake device if asleep
+                    triggerTime,                     // Start time
+                    AlarmManager.INTERVAL_DAY,       // Repeat interval = 1 day
+                    pendingIntent                    // Action to execute
             );
             Log.d(TAG, "Alarm scheduled for daily notifications.");
-            // Debug log message.
         }
     }
 
+    // Handle permission request results
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // Called after user responds to a permission request.
 
-        if (requestCode == PERMISSION_REQUEST_CODE) { // If it’s our notification permission request.
+        if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                setupNotification(); // If granted, set up notifications.
+                setupNotification(); // Permission granted → set up notifications
             } else {
                 Toast.makeText(this,
                         "Notification permission is required for this feature.",
-                        Toast.LENGTH_LONG).show();
-                // Show warning if user denied permission.
+                        Toast.LENGTH_LONG).show(); // Show warning if denied
             }
         }
     }
 
+    // Check if app is excluded from battery optimization
     private void checkBatteryOptimization() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Battery optimization introduced in Android 6.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             if (!powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
-                // If app is not exempt from battery optimizations...
+                // If app is not exempt → open settings so user can allow
                 Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-                startActivity(intent); // Open settings screen so user can exempt it.
+                startActivity(intent);
             }
         }
     }
 
+    // Initialize UI elements (Button + EditText)
     private void initViews() {
-        BtCLick = findViewById(R.id.BtClick);   // Finds button in XML layout.
-        BtCLick.setOnClickListener(this);       // Set MainActivity as the click handler.
-        ET = findViewById(R.id.ET);             // Finds EditText in XML layout.
+        BtCLick = findViewById(R.id.BtClick);   // Find button in layout
+        BtCLick.setOnClickListener(this);       // Set click listener
+        ET = findViewById(R.id.ET);             // Find EditText in layout
     }
 
+    // Handle button click
     @Override
     public void onClick(View view) {
         String inputText = ET.getText().toString().trim();  // Get text from EditText
 
         if (inputText.isEmpty()) {
             Toast.makeText(this, "Please enter a name", Toast.LENGTH_SHORT).show();
-            return;
+            return; // Stop if no input
         }
 
-        // Save it in SharedPreferences
+        // Save the name in SharedPreferences
         getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .edit()
                 .putString("last_name", inputText)
                 .apply();
 
-        // Save to Firebase Firestore and load progress
+        // Save to Firebase Firestore or load existing progress
         handleLogin(inputText);
     }
 
+    // Load user progress or create new user
     private void handleLogin(String name) {
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        String documentId = deviceId + "_" + name; // Unique ID per name per device
+        String documentId = deviceId + "_" + name; // Unique ID for user + device
 
         db.collection("users").document(documentId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        // User exists on this device, load their progress
+                        // User exists → load progress
                         Long unlockedLevels = documentSnapshot.getLong("unlockedLevels");
                         if (unlockedLevels != null) {
                             ProgressStorage.setHighestUnlockedLevelOffline(this, unlockedLevels.intValue());
                         }
-                        proceedToSecond(name);
+                        proceedToSecond(name); // Continue to next activity
                     } else {
-                        // New user for this device - Create new record
+                        // New user → save record
                         saveNewUser(name, deviceId, documentId);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    // Fallback to offline if firebase fails
-                    proceedToSecond(name);
-                });
+                .addOnFailureListener(e -> proceedToSecond(name)); // Fallback to offline
     }
 
+    // Save a new user to Firestore
     private void saveNewUser(String name, String deviceId, String documentId) {
         Map<String, Object> user = new HashMap<>();
         user.put("name", name);
         user.put("deviceId", deviceId);
-        user.put("unlockedLevels", 1); // Start at level 1 for new users
+        user.put("unlockedLevels", 1); // Start at level 1
 
         db.collection("users").document(documentId)
                 .set(user)
@@ -217,20 +216,20 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                     ProgressStorage.setHighestUnlockedLevelOffline(this, 1);
                     proceedToSecond(name);
                 })
-                .addOnFailureListener(e -> proceedToSecond(name));
+                .addOnFailureListener(e -> proceedToSecond(name)); // Fallback
     }
 
+    // Proceed to next activity (Second)
     private void proceedToSecond(String name) {
         Intent intent = new Intent(this, Second.class);
-        intent.putExtra("name", name);
+        intent.putExtra("name", name); // Pass name to next screen
         startActivity(intent);
     }
 
-
+    // Stop music when leaving activity
     @Override
     protected void onPause() {
         super.onPause();
         stopService(new Intent(this, MusicService.class));
-        // Stop music service when activity is paused (user leaves screen).
     }
 }

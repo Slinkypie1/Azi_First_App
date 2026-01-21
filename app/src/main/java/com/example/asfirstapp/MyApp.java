@@ -1,70 +1,49 @@
 package com.example.asfirstapp;
-// Defines the package of this class. It must match your app's package structure.
 
-import android.app.Activity;
-// Imports Activity class to track individual activity events.
+// Imports for tracking app state and saving persistent data
+import android.app.Activity;            // For tracking individual activity events
+import android.app.Application;         // Base class for global app-level logic
+import android.content.Context;         // Provides access to system resources
+import android.content.SharedPreferences; // For simple persistent storage
+import android.os.Bundle;               // Used in activity lifecycle callbacks
+import android.util.Log;                // For logging debug information
 
-import android.app.Application;
-// Imports Application class to create a global app-level class.
-
-import android.content.Context;
-// Imports Context for accessing system resources and SharedPreferences.
-
-import android.content.SharedPreferences;
-// Imports SharedPreferences for saving simple persistent data.
-
-import android.os.Bundle;
-// Imports Bundle used in activity lifecycle callbacks.
-
-import android.util.Log;
-// Imports Log for debugging purposes.
-
+/**
+ * MyApp extends Application to track app-wide state.
+ * It monitors whether the app is in the foreground or background.
+ */
 public class MyApp extends Application {
-    // Extends Application to run code at the app level, not just per activity.
 
-    private static final String TAG = "MyApp";
-    // Tag used for logging debug messages.
+    private static final String TAG = "MyApp"; // Log tag
+    private static final String APP_STATE_PREF = "AppStatePref"; // SharedPreferences file name
+    private static final String IS_APP_RUNNING = "IsAppRunning"; // Key for foreground state
 
-    private static final String APP_STATE_PREF = "AppStatePref";
-    // Name of SharedPreferences file to store app state.
-
-    private static final String IS_APP_RUNNING = "IsAppRunning";
-    // Key used in SharedPreferences to store whether the app is in the foreground.
-
-    private int activityCount = 0;
-    // Counter to track how many activities are currently started (foreground).
+    private int activityCount = 0; // Tracks how many activities are currently visible
 
     @Override
     public void onCreate() {
         super.onCreate();
-        // Called when the application is created.
 
+        // Register lifecycle callbacks to monitor all activities globally
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
-            // Registers callbacks to monitor activity lifecycle events globally.
 
             @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
-            // Called when an activity is created. Empty here.
+            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+                // Called when an activity is created. Not used here.
+            }
 
             @Override
             public void onActivityStarted(Activity activity) {
-                activityCount++;
-                // Increment count whenever an activity starts (app moves to foreground).
-
-                updateAppState(true);
-                // Update SharedPreferences to mark the app as running.
-
+                activityCount++; // Increment when activity becomes visible
+                updateAppState(true); // App is in foreground
                 Log.d(TAG, "App moved to foreground.");
-                // Debug log for foreground transition.
             }
 
             @Override
             public void onActivityStopped(Activity activity) {
-                activityCount--;
-                // Decrement count when an activity stops.
-
+                activityCount--; // Decrement when activity is no longer visible
                 if (activityCount == 0) {
-                    // If no activities are visible, app is in background.
+                    // No visible activities → app is in background
                     updateAppState(false);
                     Log.d(TAG, "App moved to background.");
                 }
@@ -73,38 +52,46 @@ public class MyApp extends Application {
             @Override
             public void onActivityDestroyed(Activity activity) {
                 if (activityCount == 0) {
-                    // Optional: app is fully closed when last activity is destroyed.
+                    // Optional: app fully closed if last activity destroyed
                     Log.d(TAG, "App is fully closed.");
                 }
             }
 
             @Override
-            public void onActivityResumed(Activity activity) {}
-            // Called when an activity resumes. Empty here.
+            public void onActivityResumed(Activity activity) {
+                // Called when activity resumes; not used here
+            }
 
             @Override
-            public void onActivityPaused(Activity activity) {}
-            // Called when an activity pauses. Empty here.
+            public void onActivityPaused(Activity activity) {
+                // Called when activity pauses; not used here
+            }
 
             @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
-            // Called when activity state is saved. Empty here.
+            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+                // Called when activity state is saved; not used here
+            }
         });
     }
 
+    /**
+     * Updates the stored app state in SharedPreferences.
+     *
+     * @param isRunning true if app is in foreground, false if background
+     */
     private void updateAppState(boolean isRunning) {
         SharedPreferences prefs = getSharedPreferences(APP_STATE_PREF, MODE_PRIVATE);
-        // Opens SharedPreferences for writing app state.
-
         prefs.edit().putBoolean(IS_APP_RUNNING, isRunning).apply();
-        // Stores boolean indicating if app is in foreground.
     }
 
+    /**
+     * Checks whether the app is currently running in the foreground.
+     *
+     * @param context any context (activity/service/application)
+     * @return true if the app is in the foreground, false otherwise
+     */
     public static boolean isAppRunning(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(APP_STATE_PREF, MODE_PRIVATE);
-        // Access SharedPreferences to read app state.
-
         return prefs.getBoolean(IS_APP_RUNNING, false);
-        // Returns true if app is running, false otherwise.
     }
 }

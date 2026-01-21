@@ -1,65 +1,81 @@
 package com.example.asfirstapp;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.content.Intent; // Used if you want to navigate to another activity
+import android.os.Bundle;     // Holds activity state information
+import android.view.View;     // Base class for all UI widgets
+import android.widget.Button; // Button UI element
+import android.widget.EditText; // Editable text input
+import android.widget.TextView; // Text display
 
-import androidx.activity.EdgeToEdge;
-import androidx.core.view.ViewCompat;
+import androidx.activity.EdgeToEdge; // Enables edge-to-edge layout support
+import androidx.core.view.ViewCompat; // For applying window insets
 
+/**
+ * Second Activity
+ * ----------------
+ * Activity that displays a welcome message to the user,
+ * allows them to input text (like a name), and provides a button
+ * to start Level 1 of the game.
+ */
 public class Second extends BaseMenuActivity implements View.OnClickListener {
 
-    private TextView TV;
-    private EditText ET;
-    private Button BtClick1;
+    private TextView TV;      // Displays welcome message
+    private EditText ET;      // Optional input field (e.g., player name)
+    private Button BtClick1;  // Button to start level
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Enable modern edge-to-edge layouts
         EdgeToEdge.enable(this);
+
+        // Set the layout for this activity
         setContentView(R.layout.activity_second);
 
-        // Initialize views immediately after layout is set
+        // Initialize UI components
         initViews();
 
-        // Keep edge-to-edge padding if needed but DO NOT initialize views here
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main1), (v, insets) -> {
-            return insets;
-        });
+        // Apply insets if using edge-to-edge (optional here)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main1), (v, insets) -> insets);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload latest name when activity returns
+        // Update the welcome message each time the activity resumes
         updateNameDisplay();
     }
 
-    // Initialize all views and listeners
+    /**
+     * Initializes all UI elements and sets click listeners
+     */
     private void initViews() {
+        // Link views from layout
         TV = findViewById(R.id.TV);
         ET = findViewById(R.id.ET);
         BtClick1 = findViewById(R.id.BtClick1);
 
+        // Display the last saved player name
         updateNameDisplay();
 
+        // Set click listener for the button
         BtClick1.setOnClickListener(this);
     }
 
-    // Update welcome message using SharedPreferences
+    /**
+     * Updates the welcome message with the last entered name from SharedPreferences
+     */
     private void updateNameDisplay() {
         String lastName = getSharedPreferences("app_prefs", MODE_PRIVATE)
-                .getString("last_name", "Player");
+                .getString("last_name", "Player"); // Default to "Player" if none saved
 
-        TV.setText("Ready " + lastName + "?");
+        TV.setText("Ready " + lastName + "?"); // Display welcome message
     }
 
     @Override
     public void onClick(View view) {
-        // Always start Level 1
-         startLevel(1);
+        // Start Level 1 when button is clicked
+        startLevel(1);
     }
 }

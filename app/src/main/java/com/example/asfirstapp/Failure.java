@@ -12,12 +12,13 @@ import androidx.core.graphics.Insets;      // Represents system bar insets (stat
 import androidx.core.view.ViewCompat;      // Helps apply UI changes across Android versions.
 import androidx.core.view.WindowInsetsCompat; // Provides info about window insets.
 
+// Activity shown when the player answers incorrectly
 public class Failure extends BaseMenuActivity implements View.OnClickListener {
-    // This activity is shown when the player answers incorrectly.
     // Implements OnClickListener so it can handle button clicks.
 
     Button BtClickLose; // Button to return to the main menu.
 
+    // Called when the activity is first created
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,26 +30,26 @@ public class Failure extends BaseMenuActivity implements View.OnClickListener {
         setContentView(R.layout.activity_failure_screen);
         // Sets this activity’s layout to activity_failure_screen.xml.
 
-        // Handle system window insets (status/nav bar).
+        // Handle system window insets (status/nav bar)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main3), (v, insets) -> {
-            initViews();  // Initialize button view.
-            return insets; // Return insets unchanged.
+            initViews();  // Initialize button view
+            return insets; // Return insets unchanged
         });
     }
 
+    // Initialize views and set click listeners
     private void initViews() {
-        BtClickLose = findViewById(R.id.BtClickLose); // Find the "Try Again" button by ID.
-        BtClickLose.setOnClickListener(this);         // Set this activity as its click handler.
+        BtClickLose = findViewById(R.id.BtClickLose); // Find the "Try Again" button by ID
+        BtClickLose.setOnClickListener(this);         // Set this activity as its click handler
     }
 
+    // Called when the "Lose" button is clicked
     @Override
     public void onClick(View view) {
-        // Called when the "Lose" button is clicked.
-
         Intent intent  = new Intent(this, MainActivity.class);
-        // Create intent to restart the game by opening MainActivity.
+        // Create intent to restart the game by opening MainActivity
 
         startActivity(intent);
-        // Launch MainActivity (back to the beginning).
+        // Launch MainActivity (back to the beginning)
     }
 }

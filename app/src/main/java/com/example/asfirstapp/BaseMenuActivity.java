@@ -1,80 +1,86 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // Defines the package name for this class
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.content.Intent; // Used to start new activities
+import android.os.Bundle;      // Holds activity state data
+import android.view.Menu;      // Represents the options menu
+import android.view.MenuInflater; // Converts menu XML into menu objects
+import android.view.MenuItem;  // Represents a single menu item
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable; // Allows null values safely
+import androidx.appcompat.app.AppCompatActivity; // Base class for activities with menu support
 
+// Abstract base activity that provides a shared menu system for all levels
 public abstract class BaseMenuActivity extends AppCompatActivity {
 
+    // Called when the activity is first created
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // Calls parent activity setup
     }
 
-    // Load the menu XML (level_select.xml)
+    // Creates the options menu from XML
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.level_select, menu);
-        return true;
+        MenuInflater inflater = getMenuInflater(); // Gets menu inflater
+        inflater.inflate(R.menu.level_select, menu); // Loads level_select.xml into the menu
+        return true; // Tells Android to show the menu
     }
 
-    // Update the menu each time it appears (icons + lock state)
+    // Called every time the menu is shown (used to update lock/unlock state)
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
+        // Get the highest level the user has unlocked
         int highest = ProgressStorage.getHighestUnlockedLevel(this);
 
-        // Loop through all levels 1–9
+        // Loop through levels 1 to 9
         for (int level = 1; level <= 9; level++) {
 
+            // Dynamically find the menu item ID (level_1, level_2, etc.)
             int resId = getResources().getIdentifier(
-                    "level_" + level,
-                    "id",
-                    getPackageName()
+                    "level_" + level, // Menu item name
+                    "id",              // Resource type
+                    getPackageName()   // App package name
             );
 
+            // Get the actual menu item
             MenuItem item = menu.findItem(resId);
 
+            // Make sure the item exists
             if (item != null) {
 
-                // If level unlocked → enable + unlock icon
+                // If the level is unlocked
                 if (level <= highest) {
-                    item.setEnabled(true);
-                    item.setIcon(R.drawable.ic_unlock);
+                    item.setEnabled(true);                // Allow clicking
+                    item.setIcon(R.drawable.ic_unlock);   // Show unlocked icon
                 }
-                // If level locked → disable + lock icon
+                // If the level is locked
                 else {
-                    item.setEnabled(false);
-                    item.setIcon(R.drawable.ic_lock);
+                    item.setEnabled(false);               // Disable clicking
+                    item.setIcon(R.drawable.ic_lock);     // Show locked icon
                 }
             }
         }
 
-        return super.onPrepareOptionsMenu(menu);
+        return super.onPrepareOptionsMenu(menu); // Finish menu preparation
     }
+
+    // Starts a level based on its number (currently example only)
     public void startLevel(int level) {
-        // Example: start Level1 activity
-        // You can adjust to different levels dynamically if you have more activities
+        // Creates an intent to start the level activity
         Intent intent = new Intent(this, Third.class);
-        startActivity(intent);
+        startActivity(intent); // Launch the activity
     }
 
-
-    // Handle click events for all menu items
+    // Handles clicks on menu items
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        int id = item.getItemId();
+        int id = item.getItemId(); // Get the clicked menu item's ID
 
         // Main menu button
         if (id == R.id.main_menu) {
-            Intent i = new Intent(this, Second.class);
+            Intent i = new Intent(this, Second.class); // Go to main menu screen
             startActivity(i);
             return true;
         }
@@ -133,13 +139,14 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             return true;
         }
 
+        // If the menu item wasn't handled here, let the parent handle it
         return super.onOptionsItemSelected(item);
     }
 
-    // Make sure menu updates when the user returns
+    // Called when the activity comes back into view
     @Override
     protected void onResume() {
-        super.onResume();
-        invalidateOptionsMenu(); // Refresh icons + locked state
+        super.onResume();         // Resume normal activity behavior
+        invalidateOptionsMenu(); // Forces the menu to refresh lock/unlock states
     }
 }

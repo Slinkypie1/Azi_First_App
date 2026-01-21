@@ -1,56 +1,62 @@
 package com.example.asfirstapp;
-// Defines the package where this activity belongs.
 
-import android.content.Intent;    // Lets you navigate between activities.
-import android.os.Bundle;         // Stores data about the activity's state.
-import android.view.View;         // Base class for UI components.
-import android.widget.Button;     // UI widget for clickable buttons.
-import android.widget.TextView;   // UI widget to display text.
+// Package declaration – must match your app’s structure.
 
-import androidx.activity.EdgeToEdge;       // Enables fullscreen layouts (modern Android look).
-import androidx.appcompat.app.AppCompatActivity; // Base class for activities with AppCompat support.
-import androidx.core.graphics.Insets;      // Represents system bars insets (status/navigation).
-import androidx.core.view.ViewCompat;      // Utility for backward-compatible view handling.
-import androidx.core.view.WindowInsetsCompat; // Provides details about system UI insets.
+import android.content.Intent;    // Used to navigate between activities
+import android.os.Bundle;         // Stores the activity state
+import android.view.View;         // Base class for UI components
+import android.widget.Button;     // Button UI element
+import android.widget.TextView;   // TextView UI element
 
+import androidx.activity.EdgeToEdge;           // Enables modern fullscreen layouts
+import androidx.appcompat.app.AppCompatActivity; // Base class for AppCompat activities
+import androidx.core.view.ViewCompat;          // Backwards-compatible view utilities
+
+/**
+ * SecondQuestion Activity
+ * -----------------------
+ * Displays the second multiple-choice question of the quiz.
+ * Handles button clicks for all four answer options.
+ */
 public class SecondQuestion extends BaseMenuActivity implements View.OnClickListener {
-    // This activity shows the second quiz question.
-    // Implements View.OnClickListener so this class can handle button clicks.
 
-    TextView TV2;        // Displays the question text.
-    Button BtClick6;     // Answer option 1
-    Button BtClick7;     // Answer option 2 (this is the correct one)
-    Button BtClick8;     // Answer option 3
-    Button BtClick9;     // Answer option 4
+    private TextView TV2;       // Displays the question text
+    private Button BtClick6;    // Answer option 1
+    private Button BtClick7;    // Answer option 2 (CORRECT)
+    private Button BtClick8;    // Answer option 3
+    private Button BtClick9;    // Answer option 4
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Calls the parent method to initialize the activity.
 
+        // Enable modern edge-to-edge fullscreen layout
         EdgeToEdge.enable(this);
-        // Enables drawing behind system bars (modern UI style).
 
+        // Load the layout XML for this screen
         setContentView(R.layout.activity_second_question);
-        // Loads the UI layout file for this screen.
 
-        // Attach a listener to apply window insets (for proper fullscreen layout).
+        // Set up a listener to initialize views after layout is applied
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews(); // Initialize text and buttons once layout is ready.
-            return insets; // Return the insets unchanged.
+            initViews();   // Connect TextView and Buttons to Java objects
+            return insets; // Return insets unchanged (optional padding adjustments could be added)
         });
     }
 
+    /**
+     * Initializes the UI components and sets click listeners
+     */
     private void initViews() {
-        // Connects Java objects to the XML UI elements by their IDs.
+        // Link TextView to XML
         TV2 = findViewById(R.id.TV2);
 
+        // Link buttons to XML
         BtClick6 = findViewById(R.id.BtClick6);
         BtClick7 = findViewById(R.id.BtClick7);
         BtClick8 = findViewById(R.id.BtClick8);
         BtClick9 = findViewById(R.id.BtClick9);
 
-        // Set up click listeners so this activity handles button clicks.
+        // Set click listeners so this activity handles button presses
         BtClick6.setOnClickListener(this);
         BtClick7.setOnClickListener(this);
         BtClick8.setOnClickListener(this);
@@ -59,25 +65,16 @@ public class SecondQuestion extends BaseMenuActivity implements View.OnClickList
 
     @Override
     public void onClick(View view) {
-        // Called whenever one of the answer buttons is clicked.
+        // Handle clicks for all four answer buttons
 
         if(view == BtClick7){
-            // If the correct button was clicked (BtClick7)...
-
+            // Correct answer clicked
             Intent intent = new Intent(this, CorrectScreen2.class);
-            // Create intent to open CorrectScreen2 (success page for question 2).
-
-            startActivity(intent);
-            // Launch CorrectScreen2 activity.
-        }
-        else{
-            // If any other button was clicked (wrong answer)...
-
+            startActivity(intent); // Navigate to the correct answer screen
+        } else {
+            // Any other button clicked (wrong answer)
             Intent intent = new Intent(this, Failure.class);
-            // Create intent to open Failure screen.
-
-            startActivity(intent);
-            // Launch Failure activity (game over screen).
+            startActivity(intent); // Navigate to failure/game-over screen
         }
     }
 }

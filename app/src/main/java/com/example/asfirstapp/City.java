@@ -1,17 +1,19 @@
-package com.example.asfirstapp; // Package declaration
+package com.example.asfirstapp; // Defines the package this class belongs to
 
-import com.google.android.gms.maps.model.LatLng; // Import LatLng to store geographic coordinates
+import com.google.android.gms.maps.model.LatLng; // Imports LatLng to store latitude and longitude values
 
-// Class representing a city in the UnlockCityActivity
+// Class that represents a single city in the Unlock City game
 public class City {
-    public String name;       // Name of the city
-    public LatLng location;   // Geographic coordinates (latitude & longitude)
-    public String clue;       // Clue text for the player to guess the city
 
-    // Constructor to initialize all fields
+    public String name;       // Stores the name of the city
+    public LatLng location;   // Stores the city's geographic coordinates
+    public String clue;       // Stores the clue used to guess the city
+
+    // Constructor used to create a City object with all required data
     public City(String name, LatLng location, String clue) {
-        this.name = name;       // Set city name
-        this.location = location; // Set coordinates
-        this.clue = clue;       // Set clue for this city
+        this.name = name;         // Assigns the provided name to this city
+        this.location = location; // Assigns the provided coordinates to this city
+        this.clue = clue;         // Assigns the provided clue text
     }
 }
+
