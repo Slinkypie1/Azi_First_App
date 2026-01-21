@@ -1,27 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CorrectScreen2"
+    android:background="@drawable/correct_screen2"
     android:orientation="vertical"
-    android:background="@drawable/correct_screen2">
-<LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:layout_weight="1"/>
-    <Button
+    android:padding="16dp"
+    tools:context=".CorrectScreen2">
+
+    <TextView
+        android:id="@+id/leaderboardText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:background="#80000000"
+        android:padding="16dp"
+        android:text="Loading Leaderboard..."
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical" />
+
+    <Button
+        android:id="@+id/BtClick15"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:backgroundTint="#5DE01F"
         android:text="Good job!\nare you ready for more?"
         android:textAllCaps="false"
-        android:layout_gravity="center_horizontal"
-        android:textSize="40sp"
-        android:backgroundTint="#5DE01F"
-        android:id="@+id/BtClick15"/>
+        android:textSize="30sp" />
 
 </LinearLayout>

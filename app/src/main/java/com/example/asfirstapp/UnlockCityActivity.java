@@ -1,5 +1,6 @@
 package com.example.asfirstapp;
 
+// Imports for Android UI, maps, location, and navigation
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -20,77 +21,96 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// Activity where the user tries to "unlock" cities by navigating on the map
+/**
+ * UnlockCityActivity
+ * ------------------
+ * Map-based puzzle where the player "unlocks" cities by guessing their location.
+ * The player moves the map to the correct position and submits a guess.
+ * After a set number of correct guesses, the player advances to the success screen.
+ */
 public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap; // Google Map instance
-    private TextView clueText; // TextView to display the clue for the current city
-    private Button submitGuessBtn; // Button to submit the user's guess
+    private GoogleMap mMap;           // Google Map instance
+    private TextView clueText;        // Displays the clue for the current city
+    private Button submitGuessBtn;    // Button to submit user's map guess
 
-    private List<City> cityList = new ArrayList<>(); // All possible cities
-    private List<City> shuffledCities; // Shuffled order of cities to present
-    private int currentIndex = 0; // Current city index
-    private City currentCity; // Currently active city
+    private List<City> cityList = new ArrayList<>();   // Master list of cities
+    private List<City> shuffledCities;                // Randomized order for gameplay
+    private int currentIndex = 0;                     // Index for current city
+    private City currentCity;                         // The city the player is currently guessing
 
-    private int correctGuessCount = 0; // Track how many correct guesses
-    private static final int TOTAL_CORRECT_TO_FINISH = 6; // Finish after 6 correct
-    private static final float ALLOWED_RADIUS_METERS = 500_000; // How close the guess must be (500 km)
+    private int correctGuessCount = 0;               // Track how many correct guesses
+    private static final int TOTAL_CORRECT_TO_FINISH = 6; // Number of correct guesses to finish
+    private static final float ALLOWED_RADIUS_METERS = 500_000; // Allowed guess distance (500 km)
+
+    private long startTime;                           // Track how long the player takes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_unlock_city); // Load layout
 
-        clueText = findViewById(R.id.clueText); // Connect clue TextView
-        submitGuessBtn = findViewById(R.id.submitGuessBtn); // Connect submit button
+        setContentView(R.layout.activity_unlock_city); // Load layout XML
 
-        setupCities(); // Initialize list of cities with names, locations, and clues
-        shuffleCities(); // Shuffle cities for random order
+        startTime = System.currentTimeMillis(); // Record puzzle start time
 
-        // Initialize Google Maps fragment
+        // Link UI elements
+        clueText = findViewById(R.id.clueText);
+        submitGuessBtn = findViewById(R.id.submitGuessBtn);
+
+        // Initialize cities and shuffle order
+        setupCities();
+        shuffleCities();
+
+        // Initialize Google Maps fragment asynchronously
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         if (mapFragment != null) {
-            mapFragment.getMapAsync(this); // Async load map; calls onMapReady when ready
+            mapFragment.getMapAsync(this); // Calls onMapReady when map is loaded
         }
 
         // Handle guess submission
         submitGuessBtn.setOnClickListener(v -> {
             if (mMap == null || currentCity == null) return; // Ensure map and city exist
 
-            // Take the center of the map as the user's guess
+            // Use the map center as player's guess
             LatLng guess = mMap.getCameraPosition().target;
 
             // Calculate distance between guess and actual city location
-            float[] result = new float[1];
+            float[] distanceResult = new float[1];
             Location.distanceBetween(
-                    guess.latitude, guess.longitude, // user's guessed location
-                    currentCity.location.latitude, currentCity.location.longitude, // actual city location
-                    result);
+                    guess.latitude, guess.longitude,
+                    currentCity.location.latitude, currentCity.location.longitude,
+                    distanceResult);
 
-            if (result[0] <= ALLOWED_RADIUS_METERS) { // Check if guess is within allowed radius
-                correctGuessCount++; // Increase correct count
-                Toast.makeText(UnlockCityActivity.this,
+            if (distanceResult[0] <= ALLOWED_RADIUS_METERS) {
+                // Correct guess
+                correctGuessCount++;
+                Toast.makeText(this,
                         "✅ Correct! You unlocked " + currentCity.name + "!",
                         Toast.LENGTH_LONG).show();
 
-                if (correctGuessCount >= TOTAL_CORRECT_TO_FINISH) { // Completed required cities
-                    Intent intent = new Intent(UnlockCityActivity.this, CorrectScreen9.class);
-                    startActivity(intent); // Navigate to success screen
-                    finish(); // Close current activity
-                } else { // Move to next city
+                if (correctGuessCount >= TOTAL_CORRECT_TO_FINISH) {
+                    // Completed required number of cities
+                    long timeTaken = System.currentTimeMillis() - startTime;
+                    Intent intent = new Intent(this, CorrectScreen9.class);
+                    intent.putExtra("TIME_TAKEN", timeTaken);
+                    startActivity(intent);
+                    finish(); // Close activity
+                } else {
+                    // Move to next city
                     pickRandomCity();
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2)); // Reset map zoom
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2)); // Reset map
                 }
-            } else { // Guess too far
-                Toast.makeText(UnlockCityActivity.this,
-                        "❌ Try again, not close enough.",
-                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Guess too far
+                Toast.makeText(this, "❌ Try again, not close enough.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // Initialize all cities with name, coordinates, and a clue
+    /**
+     * Initialize master list of cities with coordinates and clues.
+     */
     private void setupCities() {
         cityList.add(new City("Paris", new LatLng(48.8566, 2.3522), "This city is home to the Eiffel Tower."));
         cityList.add(new City("New York", new LatLng(40.7128, -74.0060), "Known as the Big Apple."));
@@ -106,14 +126,18 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
         cityList.add(new City("San Francisco", new LatLng(37.7749, -122.4194), "Known for the Golden Gate Bridge."));
     }
 
-    // Shuffle city order randomly
+    /**
+     * Shuffle the city order for gameplay.
+     */
     private void shuffleCities() {
-        shuffledCities = new ArrayList<>(cityList); // Copy list
-        Collections.shuffle(shuffledCities); // Randomize order
-        currentIndex = 0; // Reset index for new shuffle
+        shuffledCities = new ArrayList<>(cityList); // Copy master list
+        Collections.shuffle(shuffledCities);        // Randomize order
+        currentIndex = 0;                           // Reset index
     }
 
-    // Pick the next city to show clue for
+    /**
+     * Pick the next city in shuffled order and display its clue.
+     */
     private void pickRandomCity() {
         if (shuffledCities == null || shuffledCities.isEmpty()) {
             shuffleCities(); // Ensure shuffled list exists
@@ -121,16 +145,19 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
         if (currentIndex >= shuffledCities.size()) {
             shuffleCities(); // Reshuffle if reached end
         }
-        currentCity = shuffledCities.get(currentIndex); // Get city for this turn
-        currentIndex++; // Increment index for next round
-        clueText.setText(currentCity.clue); // Display clue to user
+
+        currentCity = shuffledCities.get(currentIndex); // Get current city
+        currentIndex++;                                 // Increment index for next round
+        clueText.setText(currentCity.clue);            // Update clue TextView
     }
 
-    // Called when Google Map is ready
+    /**
+     * Callback when Google Map is ready.
+     */
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        mMap = googleMap; // Store GoogleMap instance
-        pickRandomCity(); // Show first city
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2)); // Set initial zoom to world view
+        mMap = googleMap;        // Store map instance
+        pickRandomCity();         // Show first city clue
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2)); // World view zoom
     }
 }

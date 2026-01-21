@@ -15,32 +15,35 @@ import android.view.View;               // Base class for custom views
  * Hitting walls triggers a failure screen, reaching the goal triggers a success screen.
  */
 public class MazeGridView extends View {
-    // Constants
+
+    // ----- Constants -----
     private static final int GRID_SIZE = 11;     // Maze grid is 11x11 cells
     private static final int BALL_RADIUS = 25;   // Radius of the red ball
 
-    // Maze layout: 0 = path, 1 = wall, 2 = goal
+    // ----- Maze layout -----
+    // 0 = path, 1 = wall, 2 = goal
     private int[][] maze;
 
-    // Ball position
+    // ----- Ball position -----
     private float ballX, ballY;
 
-    // Cell size and offsets to center maze
+    // ----- Cell size and offsets for centering -----
     private float cellSize;
     private float offsetX, offsetY;
 
-    // Paint for drawing walls, ball, goal, and countdown
+    // ----- Paint for drawing -----
     private Paint paint;
 
-    // Countdown and game state
+    // ----- Countdown and game state -----
     private boolean gameStarted = false;  // True after countdown ends
     private int countdown = 10;           // Countdown before game starts
     private Handler handler = new Handler();
 
-    // Context to start activities (for navigating to success/failure screens)
+    // ----- Context to start activities -----
     private Context context;
+    private long startTime;
 
-    // Constructors
+    // ----- Constructors -----
     public MazeGridView(Context context) {
         super(context);
         this.context = context;
@@ -63,8 +66,8 @@ public class MazeGridView extends View {
 
         // Define the maze layout
         maze = new int[][] {
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 1 = wall
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},  // 0 = path
                 {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                 {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -72,7 +75,7 @@ public class MazeGridView extends View {
                 {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                 {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1},
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1},  // 2 = goal
                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
         };
 
@@ -166,6 +169,7 @@ public class MazeGridView extends View {
                     handler.postDelayed(this, 1000); // Repeat every second
                 } else {
                     gameStarted = true;     // Countdown finished, start the game
+                    startTime = System.currentTimeMillis();
                     invalidate();
                 }
             }
@@ -220,7 +224,9 @@ public class MazeGridView extends View {
      * Navigates to the CorrectScreen6 after completing the maze
      */
     private void navigateToCorrectScreen() {
+        long timeTaken = System.currentTimeMillis() - startTime;
         Intent intent = new Intent(context, CorrectScreen6.class);
+        intent.putExtra("TIME_TAKEN", timeTaken);
         context.startActivity(intent);
     }
 }
