@@ -1,53 +1,123 @@
 package com.example.asfirstapp;
 
-import android.content.Context;         // Needed to start activities and access resources
-import android.content.Intent;          // Used to navigate to new activities
-import android.graphics.Canvas;         // Drawing surface for custom view
-import android.graphics.Color;          // Colors for drawing
-import android.graphics.Paint;          // Paint object for drawing shapes/text
-import android.os.Handler;              // Handler for countdown timer
-import android.util.AttributeSet;       // For XML inflation
-import android.view.View;               // Base class for custom views
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.os.Handler;
+import android.util.AttributeSet;
+import android.view.View;
+
+import java.util.Random;
 
 /**
  * MazeGridView is a custom View representing a tilt-controlled maze.
- * The user moves a red ball through the maze toward a green goal.
- * Hitting walls triggers a failure screen, reaching the goal triggers a success screen.
+ * The maze is randomly selected from a library each time the game starts.
  */
 public class MazeGridView extends View {
 
     // ----- Constants -----
-    private static final int GRID_SIZE = 11;     // Maze grid is 11x11 cells
-    private static final int BALL_RADIUS = 25;   // Radius of the red ball
+    private static final int GRID_SIZE = 11;
+    private static final int BALL_RADIUS = 25;
 
-    // ----- Maze layout -----
-    // 0 = path, 1 = wall, 2 = goal
+    // ----- Maze Library (Add as many as you like here) -----
+    private final int[][][] MAZE_LIBRARY = {
+            {
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
+                    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
+                    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+            },
+            {
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+                    {1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1},
+                    {1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1},
+                    {1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+                    {1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1},
+                    {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 0, 0, 2, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+            },
+            {
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+                    {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+                    {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1},
+                    {1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+            },
+            {
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
+                    {1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+                    {1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+            },
+            {
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1},
+                    {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
+                    {1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1},
+                    {1, 0, 1, 1, 1, 2, 1, 0, 1, 0, 1},
+                    {1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+            },
+            {
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                    {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
+                    {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1},
+                    {1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1},
+                    {1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1},
+                    {1, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1},
+                    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+            }
+    };
+
     private int[][] maze;
-
-    // ----- Ball position -----
     private float ballX, ballY;
-
-    // ----- Cell size and offsets for centering -----
     private float cellSize;
     private float offsetX, offsetY;
-
-    // ----- Paint for drawing -----
     private Paint paint;
-
-    // ----- Countdown and game state -----
-    private boolean gameStarted = false;  // True after countdown ends
-    private int countdown = 10;           // Countdown before game starts
+    private boolean gameStarted = false;
+    private int countdown = 10;
     private Handler handler = new Handler();
-
-    // ----- Context to start activities -----
     private Context context;
     private long startTime;
 
-    // ----- Constructors -----
     public MazeGridView(Context context) {
         super(context);
         this.context = context;
-        init();  // Initialize maze, paint, and countdown
+        init();
     }
 
     public MazeGridView(Context context, AttributeSet attrs) {
@@ -56,78 +126,59 @@ public class MazeGridView extends View {
         init();
     }
 
-    /**
-     * Initializes the maze grid, paint object, and starts the countdown
-     */
     private void init() {
-        // Initialize paint
         paint = new Paint();
-        paint.setAntiAlias(true);  // Smooth edges
+        paint.setAntiAlias(true);
 
-        // Define the maze layout
-        maze = new int[][] {
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},  // 1 = wall
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},  // 0 = path
-                {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-                {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-                {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1},  // 2 = goal
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-        };
+        // Pick a random maze from our library
+        Random random = new Random();
+        int randomIndex = random.nextInt(MAZE_LIBRARY.length);
+        maze = MAZE_LIBRARY[randomIndex];
 
-        // Start 10-second countdown before allowing movement
         startCountdown();
     }
 
-    /**
-     * Calculates cell size and offsets when view size changes
-     */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        // Determine maximum cell size that fits the view
         cellSize = Math.min(w / (float) GRID_SIZE, h / (float) GRID_SIZE);
-
-        // Calculate offsets to center the maze
         offsetX = (w - (cellSize * GRID_SIZE)) / 2;
         offsetY = (h - (cellSize * GRID_SIZE)) / 2;
 
-        // Place the ball at the first open path
-        ballX = offsetX + cellSize + BALL_RADIUS;
-        ballY = offsetY + cellSize + BALL_RADIUS;
-    }
-
-    /**
-     * Draws the maze, ball, and countdown if applicable
-     */
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        drawMaze(canvas);   // Draw walls and goal
-        drawBall(canvas);   // Draw red ball
-
-        if (!gameStarted) {
-            drawCountdown(canvas);  // Draw countdown before game starts
+        // Automatically find the first '0' (path) to place the ball
+        boolean ballPlaced = false;
+        for (int r = 0; r < GRID_SIZE && !ballPlaced; r++) {
+            for (int c = 0; c < GRID_SIZE && !ballPlaced; c++) {
+                if (maze[r][c] == 0) {
+                    ballX = offsetX + (c * cellSize) + (cellSize / 2);
+                    ballY = offsetY + (r * cellSize) + (cellSize / 2);
+                    ballPlaced = true;
+                }
+            }
         }
     }
 
-    /**
-     * Draws walls (black) and goal (green) squares
-     */
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        drawMaze(canvas);
+        drawBall(canvas);
+
+        if (!gameStarted) {
+            drawCountdown(canvas);
+        }
+    }
+
     private void drawMaze(Canvas canvas) {
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
                 if (maze[row][col] == 1) {
-                    paint.setColor(Color.BLACK); // Wall
+                    paint.setColor(Color.BLACK);
                 } else if (maze[row][col] == 2) {
-                    paint.setColor(Color.GREEN); // Goal
+                    paint.setColor(Color.GREEN);
                 } else {
-                    continue; // Path, no need to draw
+                    continue;
                 }
                 canvas.drawRect(offsetX + col * cellSize,
                         offsetY + row * cellSize,
@@ -138,17 +189,11 @@ public class MazeGridView extends View {
         }
     }
 
-    /**
-     * Draws the red ball at its current coordinates
-     */
     private void drawBall(Canvas canvas) {
         paint.setColor(Color.RED);
         canvas.drawCircle(ballX, ballY, BALL_RADIUS, paint);
     }
 
-    /**
-     * Draws the countdown number at the center of the screen
-     */
     private void drawCountdown(Canvas canvas) {
         paint.setColor(Color.BLUE);
         paint.setTextSize(100);
@@ -156,19 +201,16 @@ public class MazeGridView extends View {
         canvas.drawText(String.valueOf(countdown), getWidth() / 2f, getHeight() / 2f, paint);
     }
 
-    /**
-     * Starts the 10-second countdown before the player can move the ball
-     */
     private void startCountdown() {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (countdown > 0) {
                     countdown--;
-                    invalidate();           // Redraw countdown
-                    handler.postDelayed(this, 1000); // Repeat every second
+                    invalidate();
+                    handler.postDelayed(this, 1000);
                 } else {
-                    gameStarted = true;     // Countdown finished, start the game
+                    gameStarted = true;
                     startTime = System.currentTimeMillis();
                     invalidate();
                 }
@@ -176,53 +218,34 @@ public class MazeGridView extends View {
         }, 1000);
     }
 
-    /**
-     * Updates the ball position based on tilt input
-     *
-     * @param tiltX float representing horizontal tilt (accelerometer)
-     * @param tiltY float representing vertical tilt (accelerometer)
-     */
     public void updateBall(float tiltX, float tiltY) {
-        if (!gameStarted) return;  // Ignore movement before countdown ends
+        if (!gameStarted) return;
 
-        // Movement speed proportional to cell size
         float speed = cellSize / 50;
         float newBallX = ballX - tiltX * speed;
         float newBallY = ballY + tiltY * speed;
 
-        // Determine the cell the ball is moving into
         int col = (int) ((newBallX - offsetX) / cellSize);
         int row = (int) ((newBallY - offsetY) / cellSize);
 
-        // Bounds check
         if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
             if (maze[row][col] == 0) {
-                // Free path, move ball
                 ballX = newBallX;
                 ballY = newBallY;
             } else if (maze[row][col] == 2) {
-                // Reached goal
                 navigateToCorrectScreen();
-            } else {
-                // Hit wall
+            } else if (maze[row][col] == 1) {
                 navigateToFailureScreen();
             }
         }
-
-        invalidate(); // Redraw ball at new position
+        invalidate();
     }
 
-    /**
-     * Navigates to the Failure screen
-     */
     private void navigateToFailureScreen() {
         Intent intent = new Intent(context, Failure.class);
         context.startActivity(intent);
     }
 
-    /**
-     * Navigates to the CorrectScreen6 after completing the maze
-     */
     private void navigateToCorrectScreen() {
         long timeTaken = System.currentTimeMillis() - startTime;
         Intent intent = new Intent(context, CorrectScreen6.class);
