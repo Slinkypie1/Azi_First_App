@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity; // Base class for modern activi
 import androidx.core.app.ActivityCompat;      // Helps request runtime permissions.
 import androidx.core.content.ContextCompat;   // Helps check if permissions are granted.
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore; // Firebase Firestore database access.
 import java.util.HashMap;
 import java.util.Map;
