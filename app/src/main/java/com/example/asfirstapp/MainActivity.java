@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat;      // Helps request runtime permissio
 import androidx.core.content.ContextCompat;   // Helps check if permissions are granted.
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth; // Firebase Authentication access.
 import com.google.firebase.firestore.FirebaseFirestore; // Firebase Firestore database access.
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
     private static final String TAG = "MainActivity";       // Tag for logging messages.
 
     private FirebaseFirestore db; // Reference to Firebase Firestore database.
+    private FirebaseAuth mAuth;   // Reference to Firebase Authentication.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,19 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         setContentView(R.layout.activity_main);             // Load main layout
 
         db = FirebaseFirestore.getInstance();               // Initialize Firestore
+        mAuth = FirebaseAuth.getInstance();                 // Initialize Firebase Auth
+
+        // Use the EXACT same email and password you just typed into the console
+        mAuth.signInWithEmailAndPassword("azriel.zev@gmail.com", "A'$Sc80ol@9p")
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Success!
+                        Log.d("FIREBASE_AUTH", "Logged in successfully");
+                    } else {
+                        // Check Logcat to see why it failed (e.g. "Wrong password")
+                        Log.w("FIREBASE_AUTH", "signInWithEmail:failure", task.getException());
+                    }
+                });
 
         // Start background music service
         Intent serviceIntent = new Intent(this, MusicService.class);
