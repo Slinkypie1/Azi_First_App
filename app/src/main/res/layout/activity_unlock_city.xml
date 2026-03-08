@@ -31,6 +31,20 @@
         android:text="City clue will appear here"
         android:layout_gravity="top" />
 
+    <!-- Hearts TextView at the top right -->
+    <TextView
+        android:id="@+id/heartsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="16dp"
+        android:background="#88000000"
+        android:padding="8dp"
+        android:text="❤️❤️❤️"
+        android:textColor="#FF0000"
+        android:textSize="20sp" />
+
     <!-- Submit Guess button at the bottom center -->
     <Button
         android:id="@+id/submitGuessBtn"

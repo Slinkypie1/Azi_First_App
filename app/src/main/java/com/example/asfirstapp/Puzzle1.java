@@ -27,10 +27,11 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
     private TextView lightTextView;            // Shows current light level to the user
 
     // Flags and helpers
-    private static boolean hasNavigated = false; // Ensures success screen is triggered only once
+    private static boolean hasNavigated = false; // Ensures screen transitions happen only once
     private boolean isFirstReading = true;      // Skip the first reading to avoid spurious sensor values
     private Handler handler = new Handler(Looper.getMainLooper()); // Handles delayed tasks on main thread
-    private Runnable navigateRunnable;          // Runnable to navigate to CorrectScreen4
+    private Runnable navigateRunnable;          // Runnable to navigate to CorrectScreen4 (Success)
+    private Runnable failureRunnable;           // Runnable to navigate to Failure screen (Timeout)
     private long startTime;                     // Records the time when the puzzle started
 
     @Override
@@ -38,9 +39,9 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_puzzle1); // Load the layout
 
-        Log.d("Puzzle1", "Puzzle1 started!"); // Debug log
+        Log.d("Puzzle1", "Puzzle1 started!");
 
-        startTime = System.currentTimeMillis(); // Record start time to calculate time taken
+        startTime = System.currentTimeMillis(); // Record start time
 
         // Link TextView from layout
         lightTextView = findViewById(R.id.lightTextView);
@@ -54,33 +55,52 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
             lightTextView.setText("No Light Sensor Found!");
         }
 
-        // Reset navigation flag if returning from success screen
-        if (getIntent().getBooleanExtra("from_correct_screen", false)) {
-            hasNavigated = false;
-        }
+        // Reset navigation flag
+        hasNavigated = false;
 
-        // Runnable to navigate to CorrectScreen4 when the light condition is satisfied
+        // Runnable for failure (10-second timeout)
+        failureRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!hasNavigated) {
+                    hasNavigated = true;
+                    Log.d("Puzzle1", "10 seconds up! Navigating to Failure.");
+                    
+                    // Stop listening to sensor updates
+                    sensorManager.unregisterListener(Puzzle1.this);
+                    
+                    // Navigate to Failure activity
+                    Intent intent = new Intent(Puzzle1.this, Failure.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        };
+
+        // Runnable for success (Low light detected)
         navigateRunnable = new Runnable() {
             @Override
             public void run() {
-                if (!hasNavigated) { // Only navigate once
-                    Log.d("Puzzle1", "Navigating to CorrectScreen4...");
+                if (!hasNavigated) {
                     hasNavigated = true;
+                    Log.d("Puzzle1", "Navigating to CorrectScreen4...");
 
                     // Stop listening to sensor updates
                     sensorManager.unregisterListener(Puzzle1.this);
+                    
+                    // Cancel the failure timer since the user succeeded
+                    handler.removeCallbacks(failureRunnable);
 
-                    long timeTaken = System.currentTimeMillis() - startTime; // Calculate time taken
+                    long timeTaken = System.currentTimeMillis() - startTime;
 
-                    // Start CorrectScreen4 and pass time taken
+                    // Start CorrectScreen4
                     Intent intent = new Intent(Puzzle1.this, CorrectScreen4.class);
                     intent.putExtra("TIME_TAKEN", timeTaken);
-
-                    // Clear previous activities from back stack
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
                     startActivity(intent);
-                    finish(); // Close current activity
+                    finish();
                 }
             }
         };
@@ -88,23 +108,21 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float lightValue = event.values[0]; // Current ambient light in lux
+        float lightValue = event.values[0];
         Log.d("Puzzle1", "Light Sensor Value: " + lightValue);
 
-        // Skip first reading (sometimes inaccurate)
         if (isFirstReading) {
             isFirstReading = false;
             return;
         }
 
-        // Display current light value
         lightTextView.setText("Light Intensity: " + lightValue + " lx");
 
         if (lightValue <= 5 && !hasNavigated) {
-            // Low light detected, schedule navigation after 3 seconds
+            // Low light detected, schedule success navigation after 3 seconds
             handler.postDelayed(navigateRunnable, 3000);
         } else {
-            // Light above threshold: cancel pending navigation
+            // Light above threshold: cancel pending success navigation
             handler.removeCallbacks(navigateRunnable);
         }
     }
@@ -113,28 +131,28 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
     protected void onResume() {
         super.onResume();
         if (lightSensor != null) {
-            // Start listening to light sensor updates
             sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
-
-        // Reset navigation flag if not returning from success screen
-        if (!getIntent().getBooleanExtra("from_correct_screen", false)) {
-            hasNavigated = false;
+        
+        // Start the 10-second failure timer
+        if (!hasNavigated) {
+            handler.postDelayed(failureRunnable, 10000);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Stop sensor updates to save battery
+        // Stop sensor updates
         sensorManager.unregisterListener(this);
 
-        // Cancel any pending navigation
+        // Cancel any pending transitions to avoid background leaks
         handler.removeCallbacks(navigateRunnable);
+        handler.removeCallbacks(failureRunnable);
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Required override for SensorEventListener; not used here
+        // Not used
     }
 }

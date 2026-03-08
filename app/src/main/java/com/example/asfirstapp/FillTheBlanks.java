@@ -31,6 +31,9 @@ public class FillTheBlanks extends BaseMenuActivity {
     private long startTime;
     // Records when the quiz starts, used to calculate completion time
 
+    private int attempts = 0;
+    // Tracks the number of failed attempts
+
     // Called when the activity is first created
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,11 +98,21 @@ public class FillTheBlanks extends BaseMenuActivity {
 
                     startActivity(intent);
                     // Launch CorrectScreen7
+                    finish();
                 } else {
-                    // If any answer is wrong, go to the Failure screen
-                    Intent intent = new Intent(FillTheBlanks.this, Failure.class);
-                    startActivity(intent);
-                    // Launch the failure screen
+                    attempts++;
+                    // Increment attempt counter on wrong answer
+
+                    if (attempts >= 2) {
+                        // If 2 attempts reached, go to the Failure screen
+                        Intent intent = new Intent(FillTheBlanks.this, Failure.class);
+                        startActivity(intent);
+                        finish();
+                        // Launch the failure screen and close this activity
+                    } else {
+                        // If it's the first wrong attempt, show a warning
+                        Toast.makeText(FillTheBlanks.this, "Incorrect! 1 try remaining.", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });

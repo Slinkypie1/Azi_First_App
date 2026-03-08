@@ -7,10 +7,12 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Puzzle2 Activity
@@ -18,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
  * Compass-based riddle puzzle:
  * The player must face specific cardinal directions (East, West, North)
  * in order to progress through the steps and reach the success screen.
+ * Includes a 20-second timeout that leads to the Failure screen.
  */
 public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
 
@@ -28,7 +31,7 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
     private TextView directionText;         // Shows current detected compass direction
 
     // Puzzle state
-    private boolean puzzleCompleted = false; // Prevent multiple success triggers
+    private boolean puzzleCompleted = false; // Prevent multiple transitions
     private String lastDirection = "";       // Last detected compass direction
     private long lastUpdateTime = 0;         // Timestamp of last direction change
     private int currentStep = 0;             // Tracks which riddle step the user is on
@@ -36,6 +39,9 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
 
     private static final long SENSOR_UPDATE_THRESHOLD = 500; // Minimum ms between sensor updates
     private long lastSensorUpdate = 0; // Timestamp of last sensor reading
+
+    private Handler handler = new Handler(Looper.getMainLooper()); // Main thread handler
+    private Runnable failureRunnable; // Timeout task
 
     // Array of riddles for each step
     private final String[] riddles = {
@@ -72,6 +78,26 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
             // Exit if no rotation sensor (compass) is available
             finish();
         }
+
+        // Initialize the failure timeout runnable
+        failureRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!puzzleCompleted) {
+                    puzzleCompleted = true;
+                    Log.d("Puzzle2", "20 seconds up! Navigating to Failure.");
+                    
+                    // Stop listening to sensors
+                    sensorManager.unregisterListener(Puzzle2.this);
+
+                    // Navigate to Failure activity
+                    Intent intent = new Intent(Puzzle2.this, Failure.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        };
     }
 
     @Override
@@ -80,6 +106,11 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
         if (rotationSensor != null) {
             // Start receiving sensor updates
             sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_UI);
+        }
+
+        // Start the 20-second failure timer
+        if (!puzzleCompleted) {
+            handler.postDelayed(failureRunnable, 20000);
         }
     }
 
@@ -90,6 +121,8 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
             // Stop sensor updates to save battery
             sensorManager.unregisterListener(this);
         }
+        // Cancel the timeout if the activity is paused
+        handler.removeCallbacks(failureRunnable);
     }
 
     @Override
@@ -135,11 +168,15 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
                 puzzleCompleted = true;
                 sensorManager.unregisterListener(this); // Stop listening
 
+                // Cancel the failure timer since the user succeeded
+                handler.removeCallbacks(failureRunnable);
+
                 long timeTaken = System.currentTimeMillis() - startTime;
 
                 // Navigate to success screen
                 Intent intent = new Intent(this, CorrectScreen5.class);
                 intent.putExtra("TIME_TAKEN", timeTaken);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish(); // Close this activity
             } else {

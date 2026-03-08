@@ -9,7 +9,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,11 +26,13 @@ import java.util.List;
  * Map-based puzzle where the player "unlocks" cities by guessing their location.
  * The player moves the map to the correct position and submits a guess.
  * After a set number of correct guesses, the player advances to the success screen.
+ * The player has 3 hearts; losing all results in failure.
  */
 public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;           // Google Map instance
     private TextView clueText;        // Displays the clue for the current city
+    private TextView heartsText;      // Displays remaining hearts
     private Button submitGuessBtn;    // Button to submit user's map guess
 
     private List<City> cityList = new ArrayList<>();   // Master list of cities
@@ -40,6 +41,7 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
     private City currentCity;                         // The city the player is currently guessing
 
     private int correctGuessCount = 0;               // Track how many correct guesses
+    private int hearts = 3;                          // Number of lives remaining
     private static final int TOTAL_CORRECT_TO_FINISH = 6; // Number of correct guesses to finish
     private static final float ALLOWED_RADIUS_METERS = 500_000; // Allowed guess distance (500 km)
 
@@ -55,7 +57,10 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
 
         // Link UI elements
         clueText = findViewById(R.id.clueText);
+        heartsText = findViewById(R.id.heartsText);
         submitGuessBtn = findViewById(R.id.submitGuessBtn);
+
+        updateHeartsUI(); // Initial heart display
 
         // Initialize cities and shuffle order
         setupCities();
@@ -102,10 +107,35 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2)); // Reset map
                 }
             } else {
-                // Guess too far
-                Toast.makeText(this, "❌ Try again, not close enough.", Toast.LENGTH_SHORT).show();
+                // Incorrect guess - lose a heart
+                hearts--;
+                updateHeartsUI();
+
+                if (hearts <= 0) {
+                    // Game Over
+                    Toast.makeText(this, "❌ No hearts left!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(this, Failure.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    // Try again with the same city (progress not reset)
+                    Toast.makeText(this, "❌ Incorrect! " + hearts + " hearts left.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+    }
+
+    /**
+     * Updates the heart display TextView based on remaining lives.
+     */
+    private void updateHeartsUI() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < hearts; i++) {
+            sb.append("❤️");
+        }
+        if (heartsText != null) {
+            heartsText.setText(sb.toString());
+        }
     }
 
     /**

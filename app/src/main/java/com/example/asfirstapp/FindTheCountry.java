@@ -9,6 +9,8 @@ import android.os.Bundle;
 
 import android.widget.TextView;
 // Used to display the current question and feedback
+import android.widget.Toast;
+// Needed to show feedback for incorrect attempts
 
 import androidx.appcompat.app.AppCompatActivity;
 // Base class for activities with AppCompat support
@@ -29,7 +31,7 @@ public class FindTheCountry extends BaseMenuActivity {
     String[] allCountries = {"India", "USA", "France", "Germany", "Japan", "Brazil", "Canada", "Italy", "China"};
 
     int correctCount = 0; // Number of correct selections the user has made
-    boolean failed = false; // Tracks if the user clicked a wrong country
+    int wrongCount = 0;   // Number of incorrect selections the user has made
 
     TextView questionText; // Displays the "Find: Country" question
     RecyclerView recyclerView; // Shows selectable countries in a grid
@@ -129,7 +131,7 @@ public class FindTheCountry extends BaseMenuActivity {
                 // Increment correct answer count
 
                 TextView textView = findViewById(R.id.winOrLose);
-                textView.setText("Correct");
+                if (textView != null) textView.setText("Correct");
                 // Display positive feedback
 
                 if (correctCount == 5) {
@@ -149,14 +151,20 @@ public class FindTheCountry extends BaseMenuActivity {
                 }
             } else {
                 // User clicked a wrong country
-                failed = true;
-                // Mark as failed
+                wrongCount++;
 
-                startActivity(new Intent(this, Failure.class));
-                // Go to failure screen
-
-                finish();
-                // Close current activity
+                if (wrongCount >= 3) {
+                    // 3 strikes and you're out
+                    startActivity(new Intent(this, Failure.class));
+                    finish();
+                } else {
+                    // Show how many tries are left
+                    int remaining = 3 - wrongCount;
+                    Toast.makeText(this, "Incorrect! " + remaining + " tries remaining.", Toast.LENGTH_SHORT).show();
+                    
+                    // Optional: reload the puzzle to provide a new challenge after a mistake
+                    loadPuzzle();
+                }
             }
         }));
     }

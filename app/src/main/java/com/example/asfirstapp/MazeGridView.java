@@ -259,7 +259,7 @@ public class MazeGridView extends View {
     public void updateBall(float tiltX, float tiltY) {
         if (!gameStarted) return; // Ignore movement during countdown
 
-        float speed = cellSize / 50; // Movement speed
+        float speed = cellSize /100; // Movement speed
         float newX = ballX - tiltX * speed;
         float newY = ballY + tiltY * speed;
 
