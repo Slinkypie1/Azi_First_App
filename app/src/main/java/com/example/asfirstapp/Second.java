@@ -75,6 +75,9 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+        // Start tracking total game time when starting Level 1
+        ProgressStorage.setGameStartTime(this, System.currentTimeMillis());
+
         // Start Level 1 when button is clicked
         startLevel(1);
     }

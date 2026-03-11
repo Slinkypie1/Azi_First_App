@@ -18,6 +18,7 @@ public class ProgressStorage {
     // ----- Constants -----
     private static final String PREF_NAME = "game_progress"; // SharedPreferences file name
     private static final String KEY_HIGHEST_LEVEL = "highest_unlocked_level"; // Key for highest level
+    private static final String KEY_GAME_START_TIME = "game_start_time"; // Key for game start time
     private static final String TAG = "ProgressStorage"; // Tag for logging
 
     // Helper to get SharedPreferences instance
@@ -53,6 +54,20 @@ public class ProgressStorage {
 
         // Then sync to Firebase
         syncToFirebase(context, level);
+    }
+
+    /**
+     * Sets the game start time.
+     */
+    public static void setGameStartTime(Context context, long startTime) {
+        getPrefs(context).edit().putLong(KEY_GAME_START_TIME, startTime).apply();
+    }
+
+    /**
+     * Gets the game start time. Returns 0 if not set.
+     */
+    public static long getGameStartTime(Context context) {
+        return getPrefs(context).getLong(KEY_GAME_START_TIME, 0);
     }
 
     /**

@@ -146,14 +146,9 @@ public class CorrectScreen9 extends BaseMenuActivity implements View.OnClickList
     // Called when the button is clicked
     @Override
     public void onClick(View view) {
-
-        Intent intent = new Intent(this, Second.class);
-        // Creates an intent to return to the main menu or game-complete screen
-
+        // Go to Final Score screen instead of Second
+        Intent intent = new Intent(this, FinalScore.class);
         startActivity(intent);
-        // Starts the target activity
-
         finish();
-        // Closes this activity so it is removed from the back stack
     }
 }
