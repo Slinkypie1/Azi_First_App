@@ -39,6 +39,11 @@ public class Third extends BaseMenuActivity implements View.OnClickListener {
         // Set the layout XML for this activity
         setContentView(R.layout.activity_third);
 
+        // Start background music for Level 1 (Third screen)
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.third_music);
+        startService(serviceIntent);
+
         // Record the start time to measure how long the user takes to answer
         startTime = System.currentTimeMillis();
 

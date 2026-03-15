@@ -8,65 +8,60 @@ import android.os.IBinder;        // Used for bound services (not used here)
 
 /**
  * MusicService is a background service that plays looping music
- * throughout the app. It starts when MainActivity launches and stops
- * when the app or activity stops the service.
+ * throughout the app. It can play different tracks based on the intent passed.
  */
 public class MusicService extends Service {
 
     private MediaPlayer mediaPlayer; // MediaPlayer instance to handle audio
+    private int currentResId = -1;    // Currently playing resource ID
 
-    /**
-     * Called when the service is first created. Initialize MediaPlayer here.
-     */
     @Override
     public void onCreate() {
         super.onCreate();
-
-        // Load the audio file from res/raw folder
-        mediaPlayer = MediaPlayer.create(this, R.raw.puzzle_game_music);
-
-        // Set the music to loop indefinitely
-        mediaPlayer.setLooping(true);
     }
 
     /**
      * Called whenever startService() is invoked.
-     *
-     * @param intent The Intent supplied to startService()
-     * @param flags  Additional data about how the service was started
-     * @param startId Unique ID for this start request
-     * @return START_STICKY to restart if killed
+     * Checks if a specific music resource was requested.
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
-            mediaPlayer.start(); // Begin playback
+        int musicResId = R.raw.main_activity_music; // Default music
+
+        if (intent != null && intent.hasExtra("MUSIC_RES_ID")) {
+            musicResId = intent.getIntExtra("MUSIC_RES_ID", R.raw.main_activity_music);
         }
 
-        // START_STICKY ensures the service restarts if killed by the system
+        // Only restart if the resource has changed or isn't playing
+        if (mediaPlayer == null || currentResId != musicResId) {
+            stopCurrentMusic();
+            currentResId = musicResId;
+            mediaPlayer = MediaPlayer.create(this, musicResId);
+            if (mediaPlayer != null) {
+                mediaPlayer.setLooping(true);
+                mediaPlayer.start();
+            }
+        } else if (!mediaPlayer.isPlaying()) {
+            mediaPlayer.start();
+        }
+
         return START_STICKY;
     }
 
-    /**
-     * Called when the service is stopped or destroyed.
-     * Release MediaPlayer resources to avoid memory leaks.
-     */
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
+    private void stopCurrentMusic() {
         if (mediaPlayer != null) {
-            mediaPlayer.stop();    // Stop playback
-            mediaPlayer.release(); // Release MediaPlayer resources
-            mediaPlayer = null;    // Prevent memory leaks
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
 
-    /**
-     * Binding is not used in this service.
-     * @param intent The Intent supplied to bindService()
-     * @return null because we do not support binding
-     */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopCurrentMusic();
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;

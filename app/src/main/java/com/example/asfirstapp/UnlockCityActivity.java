@@ -53,6 +53,11 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
 
         setContentView(R.layout.activity_unlock_city); // Load layout XML
 
+        // Start background music for Unlock City
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.unlock_city_music);
+        startService(serviceIntent);
+
         startTime = System.currentTimeMillis(); // Record puzzle start time
 
         // Link UI elements

@@ -41,6 +41,11 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
 
         Log.d("Puzzle1", "Puzzle1 started!");
 
+        // Start background music for Puzzle 1
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.puzzle1_music);
+        startService(serviceIntent);
+
         startTime = System.currentTimeMillis(); // Record start time
 
         // Link TextView from layout

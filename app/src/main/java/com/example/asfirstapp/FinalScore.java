@@ -18,12 +18,19 @@ public class FinalScore extends AppCompatActivity {
 
     private TextView tvTotalTime;
     private Button btnBackToMenu;
+    private Button btnViewRanking;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_final_score);
+
+        // Start background music for Final Score Screen
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.final_score_music);
+        startService(serviceIntent);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -32,21 +39,31 @@ public class FinalScore extends AppCompatActivity {
 
         tvTotalTime = findViewById(R.id.tvTotalTime);
         btnBackToMenu = findViewById(R.id.btnBackToMenu);
+        btnViewRanking = findViewById(R.id.btnViewRanking);
 
-        displayFinalTime();
+        displayAndSaveFinalTime();
 
         btnBackToMenu.setOnClickListener(v -> {
-            // Return to the welcome screen (Second activity)
-            Intent intent = new Intent(FinalScore.this, Second.class);
+            // Re-lock all levels by setting the highest unlocked level to 1
+            ProgressStorage.setHighestUnlockedLevel(FinalScore.this, 1);
+
+            // Navigate back to MainActivity
+            Intent intent = new Intent(FinalScore.this, MainActivity.class);
             // Clear activity stack so the user can't "go back" to the score screen
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });
+
+        if (btnViewRanking != null) {
+            btnViewRanking.setOnClickListener(v -> {
+                Intent intent = new Intent(FinalScore.this, Ranking.class);
+                startActivity(intent);
+            });
+        }
     }
 
-    private void displayFinalTime() {
-        // Retrieve the start time saved when the user started the first level
+    private void displayAndSaveFinalTime() {
         long startTime = ProgressStorage.getGameStartTime(this);
         
         if (startTime == 0) {
@@ -54,14 +71,15 @@ public class FinalScore extends AppCompatActivity {
             return;
         }
 
-        // Calculate total elapsed time
         long endTime = System.currentTimeMillis();
         long durationMillis = endTime - startTime;
 
-        // Convert milliseconds to hours, minutes, and seconds
+        // Save to Firebase
+        ProgressStorage.saveGameCompletion(this, durationMillis);
+
         long seconds = (durationMillis / 1000) % 60;
         long minutes = (durationMillis / (1000 * 60)) % 60;
-        long hours = (durationMillis / (1000 * 60 * 60));
+        long hours = (durationMillis / (1000 * 60 * (long)60));
 
         String timeFormatted;
         if (hours > 0) {

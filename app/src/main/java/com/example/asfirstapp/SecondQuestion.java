@@ -39,6 +39,11 @@ public class SecondQuestion extends BaseMenuActivity implements View.OnClickList
         // Set the layout XML for this activity
         setContentView(R.layout.activity_second_question);
 
+        // Start background music for Level 2 (SecondQuestion screen)
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.second_question_music);
+        startService(serviceIntent);
+
         // Record the time the question started
         startTime = System.currentTimeMillis();
 

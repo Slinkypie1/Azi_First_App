@@ -62,6 +62,11 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
 
         setContentView(R.layout.activity_puzzle2); // Load layout
 
+        // Start background music for Puzzle 2
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.puzzle2_music);
+        startService(serviceIntent);
+
         startTime = System.currentTimeMillis(); // Record start time
 
         // Link UI components

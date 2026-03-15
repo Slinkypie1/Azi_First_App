@@ -136,11 +136,79 @@ public class ProgressStorage {
     }
 
     /**
+     * Saves total game completion time to Firebase if it's the player's best total time.
+     */
+    public static void saveGameCompletion(Context context, long totalTimeMillis) {
+        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String savedName = appPrefs.getString("last_name", "Anonymous");
+        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String entryId = deviceId + "_" + savedName + "_total";
+
+        db.collection("game_leaderboard").document(entryId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Long existingTime = documentSnapshot.getLong("totalTimeMillis");
+                        if (existingTime != null && totalTimeMillis < existingTime) {
+                            updateGameLeaderboardEntry(db, entryId, savedName, totalTimeMillis, deviceId);
+                        }
+                    } else {
+                        updateGameLeaderboardEntry(db, entryId, savedName, totalTimeMillis, deviceId);
+                    }
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Error checking game leaderboard", e));
+    }
+
+    private static void updateGameLeaderboardEntry(FirebaseFirestore db, String entryId, String name, long time, String deviceId) {
+        Map<String, Object> entry = new HashMap<>();
+        entry.put("userName", name);
+        entry.put("totalTimeMillis", time);
+        entry.put("timestamp", FieldValue.serverTimestamp());
+        entry.put("deviceId", deviceId);
+
+        db.collection("game_leaderboard").document(entryId)
+                .set(entry)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Game leaderboard entry updated"))
+                .addOnFailureListener(e -> Log.e(TAG, "Error updating game leaderboard", e));
+    }
+
+    /**
      * Interface for leaderboard results.
      */
     public interface LeaderboardCallback {
         void onLeaderboardLoaded(List<Map<String, Object>> entries); // Success
         void onError(Exception e);                                   // Failure
+    }
+
+    /**
+     * Fetches top 10 completions for the entire game.
+     */
+    public static void getGameLeaderboard(LeaderboardCallback callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("game_leaderboard")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Map<String, Object>> results = new ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                        results.add(doc.getData());
+                    }
+
+                    Collections.sort(results, (o1, o2) -> {
+                        Long t1 = (Long) o1.get("totalTimeMillis");
+                        Long t2 = (Long) o2.get("totalTimeMillis");
+                        if (t1 == null) return 1;
+                        if (t2 == null) return -1;
+                        return t1.compareTo(t2);
+                    });
+
+                    if (results.size() > 10) {
+                        results = results.subList(0, 10);
+                    }
+
+                    callback.onLeaderboardLoaded(results);
+                })
+                .addOnFailureListener(callback::onError);
     }
 
     /**

@@ -38,6 +38,11 @@ public class ThirdQuestion extends BaseMenuActivity implements View.OnClickListe
         // Load layout XML for this activity
         setContentView(R.layout.activity_third_question);
 
+        // Start background music for Level 3 (ThirdQuestion screen)
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.third_question_music);
+        startService(serviceIntent);
+
         // Record start time for timing purposes
         startTime = System.currentTimeMillis();
 

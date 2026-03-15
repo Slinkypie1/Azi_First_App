@@ -2,6 +2,7 @@ package com.example.asfirstapp;
 
 // Imports for sensors, context, and activity management
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -25,6 +26,11 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Start background music for Puzzle 3
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.puzzle3_music);
+        startService(serviceIntent);
 
         // Instantiate custom maze view
         mazeGridView = new MazeGridView(this);

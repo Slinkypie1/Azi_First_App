@@ -30,6 +30,11 @@ public class Failure extends BaseMenuActivity implements View.OnClickListener {
         setContentView(R.layout.activity_failure_screen);
         // Sets this activity’s layout to activity_failure_screen.xml.
 
+        // Start background music for Failure Screen
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.failure_music);
+        startService(serviceIntent);
+
         // Handle system window insets (status/nav bar)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main3), (v, insets) -> {
             initViews();  // Initialize button view

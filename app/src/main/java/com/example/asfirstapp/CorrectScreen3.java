@@ -53,6 +53,11 @@ public class CorrectScreen3 extends BaseMenuActivity implements View.OnClickList
         setContentView(R.layout.activity_correct_screen3);
         // Loads the XML layout for this screen
 
+        // Start background music for Correct Screens
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.correct_screens_music);
+        startService(serviceIntent);
+
         timeTaken = getIntent().getLongExtra("TIME_TAKEN", 0);
         // Gets the completion time passed from the previous activity
 

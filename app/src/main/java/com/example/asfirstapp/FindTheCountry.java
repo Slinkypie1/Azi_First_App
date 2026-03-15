@@ -51,6 +51,11 @@ public class FindTheCountry extends BaseMenuActivity {
         setContentView(R.layout.activity_find_the_country);
         // Load the layout XML for this activity
 
+        // Start background music for Find The Country
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.find_the_country_music);
+        startService(serviceIntent);
+
         startTime = System.currentTimeMillis();
         // Record start time
 

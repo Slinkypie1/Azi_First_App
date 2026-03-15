@@ -43,6 +43,11 @@ public class FillTheBlanks extends BaseMenuActivity {
         setContentView(R.layout.activity_fill_the_blanks);
         // Loads the layout XML for this activity
 
+        // Start background music for Fill the Blanks
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.fill_the_blanks_music);
+        startService(serviceIntent);
+
         startTime = System.currentTimeMillis();
         // Records the start time for timing the quiz
 
