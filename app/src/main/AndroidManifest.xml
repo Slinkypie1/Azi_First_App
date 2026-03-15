@@ -26,13 +26,16 @@
         tools:targetApi="31">
         <activity
             android:name=".Ranking"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".FinalScore"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".CorrectScreen9"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -40,7 +43,8 @@
 
         <activity
             android:name=".UnlockCityActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".CorrectScreen8"
             android:exported="false"
@@ -59,7 +63,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".CorrectScreen6"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Puzzle3"
             android:exported="false"
