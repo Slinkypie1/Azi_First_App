@@ -33,6 +33,11 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
         // Set the layout for this activity
         setContentView(R.layout.activity_second);
 
+        // Start background music for Second Screen
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.second_music);
+        startService(serviceIntent);
+
         // Initialize UI components
         initViews();
 
