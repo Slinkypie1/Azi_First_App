@@ -19,6 +19,7 @@ public class ProgressStorage {
     private static final String PREF_NAME = "game_progress"; // SharedPreferences file name
     private static final String KEY_HIGHEST_LEVEL = "highest_unlocked_level"; // Key for highest level
     private static final String KEY_GAME_START_TIME = "game_start_time"; // Key for game start time
+    private static final String KEY_PAUSED_TIME = "paused_time"; // Key for accumulated paused time
     private static final String TAG = "ProgressStorage"; // Tag for logging
 
     // Helper to get SharedPreferences instance
@@ -68,6 +69,32 @@ public class ProgressStorage {
      */
     public static long getGameStartTime(Context context) {
         return getPrefs(context).getLong(KEY_GAME_START_TIME, 0);
+    }
+
+    /**
+     * Adds time to the total paused duration.
+     * This time will be subtracted from the final total score.
+     */
+    public static void addPausedTime(Context context, long durationMillis) {
+        long currentPaused = getPrefs(context).getLong(KEY_PAUSED_TIME, 0);
+        getPrefs(context).edit().putLong(KEY_PAUSED_TIME, currentPaused + durationMillis).apply();
+    }
+
+    /**
+     * Gets the total accumulated paused time.
+     */
+    public static long getTotalPausedTime(Context context) {
+        return getPrefs(context).getLong(KEY_PAUSED_TIME, 0);
+    }
+
+    /**
+     * Resets both start time and paused time for a new game.
+     */
+    public static void resetGameTimer(Context context) {
+        getPrefs(context).edit()
+                .putLong(KEY_GAME_START_TIME, System.currentTimeMillis())
+                .putLong(KEY_PAUSED_TIME, 0)
+                .apply();
     }
 
     /**

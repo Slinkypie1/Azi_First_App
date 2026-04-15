@@ -65,6 +65,7 @@ public class FinalScore extends AppCompatActivity {
 
     private void displayAndSaveFinalTime() {
         long startTime = ProgressStorage.getGameStartTime(this);
+        long pausedTime = ProgressStorage.getTotalPausedTime(this);
         
         if (startTime == 0) {
             tvTotalTime.setText("Total Time: N/A");
@@ -72,14 +73,20 @@ public class FinalScore extends AppCompatActivity {
         }
 
         long endTime = System.currentTimeMillis();
-        long durationMillis = endTime - startTime;
+        long rawDurationMillis = endTime - startTime;
+        
+        // Subtract the time spent reading instructions
+        long finalDurationMillis = rawDurationMillis - pausedTime;
+        
+        // Ensure we don't end up with a negative time (though unlikely)
+        if (finalDurationMillis < 0) finalDurationMillis = 0;
 
         // Save to Firebase
-        ProgressStorage.saveGameCompletion(this, durationMillis);
+        ProgressStorage.saveGameCompletion(this, finalDurationMillis);
 
-        long seconds = (durationMillis / 1000) % 60;
-        long minutes = (durationMillis / (1000 * 60)) % 60;
-        long hours = (durationMillis / (1000 * 60 * (long)60));
+        long seconds = (finalDurationMillis / 1000) % 60;
+        long minutes = (finalDurationMillis / (1000 * 60)) % 60;
+        long hours = (finalDurationMillis / (1000 * 60 * (long)60));
 
         String timeFormatted;
         if (hours > 0) {

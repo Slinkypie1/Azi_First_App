@@ -141,7 +141,7 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
         
         // Start the 10-second failure timer
         if (!hasNavigated) {
-            handler.postDelayed(failureRunnable, 10000);
+            handler.postDelayed(failureRunnable, 20000);
         }
     }
 

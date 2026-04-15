@@ -51,7 +51,7 @@ public class Failure extends BaseMenuActivity implements View.OnClickListener {
     // Called when the "Lose" button is clicked
     @Override
     public void onClick(View view) {
-        Intent intent  = new Intent(this, MainActivity.class);
+        Intent intent  = new Intent(this, Second.class);
         // Create intent to restart the game by opening MainActivity
 
         startActivity(intent);

@@ -4,6 +4,7 @@ package com.example.asfirstapp;
 import android.app.Activity;            // For tracking individual activity events
 import android.app.Application;         // Base class for global app-level logic
 import android.content.Context;         // Provides access to system resources
+import android.content.Intent;          // Added to start services
 import android.content.SharedPreferences; // For simple persistent storage
 import android.os.Bundle;               // Used in activity lifecycle callbacks
 import android.util.Log;                // For logging debug information
@@ -34,9 +35,15 @@ public class MyApp extends Application {
 
             @Override
             public void onActivityStarted(Activity activity) {
+                if (activityCount == 0) {
+                    // App moved to foreground from background
+                    Intent serviceIntent = new Intent(activity, MusicService.class);
+                    serviceIntent.setAction("ACTION_RESUME");
+                    activity.startService(serviceIntent);
+                    Log.d(TAG, "App moved to foreground.");
+                }
                 activityCount++; // Increment when activity becomes visible
                 updateAppState(true); // App is in foreground
-                Log.d(TAG, "App moved to foreground.");
             }
 
             @Override
@@ -44,6 +51,9 @@ public class MyApp extends Application {
                 activityCount--; // Decrement when activity is no longer visible
                 if (activityCount == 0) {
                     // No visible activities → app is in background
+                    Intent serviceIntent = new Intent(activity, MusicService.class);
+                    serviceIntent.setAction("ACTION_PAUSE");
+                    activity.startService(serviceIntent);
                     updateAppState(false);
                     Log.d(TAG, "App moved to background.");
                 }

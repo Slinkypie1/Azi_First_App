@@ -132,7 +132,7 @@ public class MazeGridView extends View {
     private float offsetX, offsetY; // Offset to center maze on screen
     private Paint paint;            // Paint used for drawing
     private boolean gameStarted = false; // Prevents movement before countdown
-    private int countdown = 10;     // Countdown timer in seconds
+    private int countdown = 3;     // Countdown timer in seconds
     private Handler handler = new Handler(); // Handles countdown updates
     private Context context;        // Context for navigation
     private long startTime;         // Time when the game starts
@@ -160,8 +160,14 @@ public class MazeGridView extends View {
         // Choose a random maze from the library
         Random random = new Random();
         maze = MAZE_LIBRARY[random.nextInt(MAZE_LIBRARY.length)];
+    }
 
-        startCountdown(); // Begin countdown before game starts
+    /**
+     * Public method to start the countdown and then the game.
+     * This allows the activity to show an explanation before the timer begins.
+     */
+    public void beginGame() {
+        startCountdown();
     }
 
     // ----- Size Handling -----

@@ -22,10 +22,25 @@ public class MusicService extends Service {
 
     /**
      * Called whenever startService() is invoked.
-     * Checks if a specific music resource was requested.
+     * Checks if a specific music resource was requested or if a pause/resume action is needed.
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null) {
+            String action = intent.getAction();
+            if ("ACTION_PAUSE".equals(action)) {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                }
+                return START_STICKY;
+            } else if ("ACTION_RESUME".equals(action)) {
+                if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
+                    mediaPlayer.start();
+                }
+                return START_STICKY;
+            }
+        }
+
         int musicResId = R.raw.main_activity_music; // Default music
 
         if (intent != null && intent.hasExtra("MUSIC_RES_ID")) {

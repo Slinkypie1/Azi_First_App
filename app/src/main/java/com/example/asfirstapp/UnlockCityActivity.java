@@ -9,6 +9,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import android.content.DialogInterface;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -46,6 +48,7 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
     private static final float ALLOWED_RADIUS_METERS = 500_000; // Allowed guess distance (500 km)
 
     private long startTime;                           // Track how long the player takes
+    private long pauseStartTime;                      // When the instruction dialog appeared
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,12 +61,14 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.unlock_city_music);
         startService(serviceIntent);
 
-        startTime = System.currentTimeMillis(); // Record puzzle start time
-
         // Link UI elements
         clueText = findViewById(R.id.clueText);
         heartsText = findViewById(R.id.heartsText);
         submitGuessBtn = findViewById(R.id.submitGuessBtn);
+        submitGuessBtn.setEnabled(false); // Disable until instructions are read
+
+        // Show instructions and start timer only when dismissed
+        showInstructions();
 
         updateHeartsUI(); // Initial heart display
 
@@ -141,6 +146,32 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
         if (heartsText != null) {
             heartsText.setText(sb.toString());
         }
+    }
+
+    /**
+     * Shows an explanation dialog. The timer starts and button enables only after the user clicks "Start".
+     */
+    private void showInstructions() {
+        pauseStartTime = System.currentTimeMillis();
+        new AlertDialog.Builder(this)
+                .setTitle("Level 9: Unlock the Cities")
+                .setMessage("A clue will appear for a famous city.\n\n" +
+                        "1. Move the map so the center is over where you think the city is.\n" +
+                        "2. Tap 'Submit Guess'.\n" +
+                        "3. Unlock " + TOTAL_CORRECT_TO_FINISH + " cities to win.\n\n" +
+                        "Careful! You only have 3 hearts.")
+                .setCancelable(false)
+                .setPositiveButton("Start Guessing", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        long pausedDuration = System.currentTimeMillis() - pauseStartTime;
+                        ProgressStorage.addPausedTime(UnlockCityActivity.this, pausedDuration);
+                        
+                        startTime = System.currentTimeMillis(); // Start level timer
+                        submitGuessBtn.setEnabled(true);         // Enable gameplay
+                    }
+                })
+                .show();
     }
 
     /**
