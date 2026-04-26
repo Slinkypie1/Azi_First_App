@@ -18,16 +18,16 @@ public class BalanceGameView extends View {
     // Constructor used when the view is created in Java code
     public BalanceGameView(Context context) {
         super(context); // Call the parent View constructor
-        init();         // Initialize paint and settings
+        init();         // Initialize paint and settings.svg
     }
 
     // Constructor used when the view is created from an XML layout
     public BalanceGameView(Context context, AttributeSet attrs) {
         super(context, attrs); // Call the parent View constructor with XML attributes
-        init();                // Initialize paint and settings
+        init();                // Initialize paint and settings.svg
     }
 
-    // Initializes drawing settings
+    // Initializes drawing settings.svg
     private void init() {
         paint = new Paint();             // Create a new Paint object
         paint.setColor(Color.BLACK);     // Set the ball color to black

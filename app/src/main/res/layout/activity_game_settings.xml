@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="?attr/actionBarSize"
+    android:gravity="center"
+    android:background="@color/white"
+    tools:context=".GameSettings">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Game Settings"
+        android:textColor="@color/black"
+        android:textSize="32sp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="32dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Game Mode:"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:layout_marginBottom="16dp"/>
+
+    <RadioGroup
+        android:id="@+id/rgGameMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/rbCasual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Casual (Untimed)"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:buttonTint="@color/black"/>
+
+        <RadioButton
+            android:id="@+id/rbTimed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Timed (Challenge)"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:buttonTint="@color/black"/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btnSaveSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp"/>
+
+</LinearLayout>

@@ -18,24 +18,28 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/quiz_icon"
-        android:label="@string/app_name"
+        android:label="A's First App"
         android:roundIcon="@drawable/quiz_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light"
+        android:theme="@style/Theme.AsFirstApp"
         tools:ignore="MissingClass"
         tools:targetApi="31">
         <activity
-            android:name=".Ranking"
+            android:name=".GameSettings"
             android:exported="false"
             android:screenOrientation="portrait"/>
+        <activity
+            android:name=".Ranking"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".FinalScore"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".CorrectScreen9"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -64,7 +68,7 @@
         <activity
             android:name=".CorrectScreen6"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Puzzle3"
             android:exported="false"

@@ -8,25 +8,24 @@
     android:layout_height="match_parent"
     tools:context=".Third"
     android:orientation="vertical"
-    android:padding="?attr/actionBarSize">
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"/>
+    android:padding="?attr/actionBarSize"
+    android:background="@color/white">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/TV1"
         android:text="What should you use for text while making an application?"
        android:textSize="30sp"
-        android:textAllCaps="false"/>
+        android:textAllCaps="false"
+        android:textColor="@color/black"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/BtClick2"
         android:text="A. dp"
         android:textSize="30sp"
-        android:textAllCaps="false"/>
+        android:textAllCaps="false"
+        android:textColor="@color/black"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,15 +33,17 @@
         android:text="B. sp"
         android:textSize="30sp"
         android:backgroundTint="#0014FF"
-        android:textAllCaps="false"/>
+        android:textAllCaps="false"
+        android:textColor="@color/black"/>
     <Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/BtClick4"
-    android:text="C. pt"
-    android:textSize="30sp"
-    android:backgroundTint="#FF0000"
-    android:textAllCaps="false"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/BtClick4"
+        android:text="C. pt"
+        android:textSize="30sp"
+        android:backgroundTint="#FF0000"
+        android:textAllCaps="false"
+        android:textColor="@color/black"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

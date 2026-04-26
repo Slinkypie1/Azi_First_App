@@ -2,6 +2,8 @@ package com.example.asfirstapp;
 
 import android.content.Intent; // Used if you want to navigate to another activity
 import android.os.Bundle;     // Holds activity state information
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;     // Base class for all UI widgets
 import android.widget.Button; // Button UI element
 import android.widget.EditText; // Editable text input
@@ -22,6 +24,7 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
     private TextView TV;      // Displays welcome message
     private EditText ET;      // Optional input field (e.g., player name)
     private Button BtClick1;  // Button to start level
+    private Button BtSettings; // Button to go to settings.svg
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +63,14 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
         TV = findViewById(R.id.TV);
         ET = findViewById(R.id.ET);
         BtClick1 = findViewById(R.id.BtClick1);
+        BtSettings = findViewById(R.id.BtSettings);
 
         // Display the last saved player name
         updateNameDisplay();
 
         // Set click listener for the button
         BtClick1.setOnClickListener(this);
+        BtSettings.setOnClickListener(this);
     }
 
     /**
@@ -79,11 +84,41 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
     }
 
     @Override
-    public void onClick(View view) {
-        // Start tracking total game time when starting Level 1
-        ProgressStorage.setGameStartTime(this, System.currentTimeMillis());
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Add the Settings item specifically for this activity FIRST to place it on the left
+        MenuItem settingsItem = menu.add(Menu.NONE, 1001, 0, "Settings");
+        settingsItem.setIcon(R.drawable.settings);
+        settingsItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        // Start Level 1 when button is clicked
-        startLevel(1);
+        // Inflate the base menu (Home, Level Select) from BaseMenuActivity AFTER
+        super.onCreateOptionsMenu(menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle the Settings item click
+        if (item.getItemId() == 1001) {
+            Intent intent = new Intent(this, GameSettings.class);
+            startActivity(intent);
+            return true;
+        }
+        // Handle other menu items via BaseMenuActivity
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.BtClick1) {
+            // Start tracking total game time when starting Level 1
+            ProgressStorage.setGameStartTime(this, System.currentTimeMillis());
+
+            // Start Level 1 when button is clicked
+            startLevel(1);
+        } else if (view.getId() == R.id.BtSettings) {
+            Intent intent = new Intent(this, GameSettings.class);
+            startActivity(intent);
+        }
     }
 }

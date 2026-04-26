@@ -11,7 +11,7 @@ import android.content.pm.PackageManager;     // Used to check app permissions.
 import android.os.Build;                      // Provides device OS version info.
 import android.os.Bundle;                     // Holds saved state data for activity recreation.
 import android.os.PowerManager;               // Manages power/battery features.
-import android.provider.Settings;             // Lets you open system settings screens.
+import android.provider.Settings;             // Lets you open system settings.svg screens.
 import android.util.Log;                      // For logging debug/error messages.
 import android.view.View;                     // Base class for UI components.
 import android.widget.Button;                 // Represents a clickable button.
@@ -163,7 +163,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             if (!powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
-                // If app is not exempt → open settings so user can allow
+                // If app is not exempt → open settings.svg so user can allow
                 Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
                 startActivity(intent);
             }

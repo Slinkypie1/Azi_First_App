@@ -6,6 +6,7 @@ import android.view.Menu;      // Represents the options menu
 import android.view.MenuInflater; // Converts menu XML into menu objects
 import android.view.MenuItem;  // Represents a single menu item
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable; // Allows null values safely
 import androidx.appcompat.app.AppCompatActivity; // Base class for activities with menu support
 
@@ -16,6 +17,19 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState); // Calls parent activity setup
+
+        // Hide the title from the Action Bar (removes the app name/activity name from the top)
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
+        // Disable the back button
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Do nothing to lock the back button
+            }
+        });
     }
 
     // Creates the options menu from XML
@@ -80,7 +94,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
 
         // Main menu button
         if (id == R.id.main_menu) {
-            Intent i = new Intent(this, Second.class); // Go to main menu screen
+            Intent i = new Intent(this, MainActivity.class); // Go to main menu screen
             startActivity(i);
             return true;
         }

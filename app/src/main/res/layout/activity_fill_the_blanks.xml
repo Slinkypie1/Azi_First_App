@@ -7,7 +7,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FillTheBlanks">
+    tools:context=".FillTheBlanks"
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/quoteText"
