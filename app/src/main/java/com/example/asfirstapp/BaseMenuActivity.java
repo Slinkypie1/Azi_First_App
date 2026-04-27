@@ -5,6 +5,12 @@ import android.os.Bundle;      // Holds activity state data
 import android.view.Menu;      // Represents the options menu
 import android.view.MenuInflater; // Converts menu XML into menu objects
 import android.view.MenuItem;  // Represents a single menu item
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RadioButton;
+import android.widget.TextView;
+import android.graphics.Color;
+import android.content.SharedPreferences;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable; // Allows null values safely
@@ -162,5 +168,56 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();         // Resume normal activity behavior
         invalidateOptionsMenu(); // Forces the menu to refresh lock/unlock states
+        applyAppearance();       // Apply background and text color settings
+    }
+
+    /**
+     * Applies background and text color based on SharedPreferences
+     */
+    private void applyAppearance() {
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        String bgColor = prefs.getString("bg_color", "white");
+
+        int backgroundColor = bgColor.equals("black") ? Color.BLACK : Color.WHITE;
+        int textColor = bgColor.equals("black") ? Color.WHITE : Color.BLACK;
+
+        // Set window background
+        getWindow().getDecorView().setBackgroundColor(backgroundColor);
+
+        // Find root view and apply recursively
+        View rootView = findViewById(android.R.id.content);
+        if (rootView != null) {
+            applyColorsRecursively(rootView, backgroundColor, textColor, true);
+        }
+    }
+
+    private void applyColorsRecursively(View view, int bgColor, int textColor, boolean isRoot) {
+        if (isRoot) {
+            view.setBackgroundColor(bgColor);
+        } else if (view instanceof ViewGroup && !(view instanceof android.widget.AdapterView)) {
+            // Make inner layouts transparent so the root background shows through,
+            // but avoid AdapterView (ListView/Spinner) as it might break their look.
+            view.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        if (view instanceof TextView) {
+            TextView tv = (TextView) view;
+            // Only change text color if it's not a Button (buttons have their own style)
+            // or if the background is black (to ensure readability)
+            if (!(view instanceof android.widget.Button) || bgColor == Color.BLACK) {
+                tv.setTextColor(textColor);
+            }
+            
+            if (view instanceof RadioButton) {
+                ((RadioButton) view).setButtonTintList(android.content.res.ColorStateList.valueOf(textColor));
+            }
+        }
+
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                applyColorsRecursively(group.getChildAt(i), bgColor, textColor, false);
+            }
+        }
     }
 }

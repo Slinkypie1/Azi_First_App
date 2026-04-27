@@ -63,19 +63,27 @@ public class CorrectScreen9 extends BaseMenuActivity implements View.OnClickList
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             initViews();
-            // Finds UI elements and sets listeners once layout is ready
+            // Marks Level 9 as completed and unlocks the next level if applicable
+            unlockNextLevel(9);
+            // Saves the player's score and loads the leaderboard
+            saveAndLoadLeaderboard();
             return insets;
         });
-
-        // Marks Level 9 as completed and unlocks the next level if applicable
-        unlockNextLevel(9);
-
-        // Saves the player's score and loads the leaderboard
-        saveAndLoadLeaderboard();
     }
 
     // Saves the level completion time and loads leaderboard data
     private void saveAndLoadLeaderboard() {
+        // Check game mode
+        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getString("game_mode", "casual");
+
+        // If in casual mode, hide the leaderboard and don't save time
+        if (mode.equals("casual")) {
+            if (leaderboardText != null) {
+                leaderboardText.setVisibility(View.GONE);
+            }
+            return;
+        }
 
         if (timeTaken > 0) {
             // Only save if a valid completion time exists
@@ -151,8 +159,19 @@ public class CorrectScreen9 extends BaseMenuActivity implements View.OnClickList
     // Called when the button is clicked
     @Override
     public void onClick(View view) {
-        // Go to Final Score screen instead of Second
-        Intent intent = new Intent(this, FinalScore.class);
+        // Check game mode
+        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getString("game_mode", "casual");
+
+        Intent intent;
+        if (mode.equals("timed")) {
+            // Timed mode goes to Final Score to see total time
+            intent = new Intent(this, FinalScore.class);
+        } else {
+            // Casual mode goes to a simpler finish screen
+            intent = new Intent(this, CasualFinish.class);
+        }
+
         startActivity(intent);
         finish();
     }

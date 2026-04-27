@@ -100,7 +100,7 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle the Settings item click
         if (item.getItemId() == 1001) {
-            Intent intent = new Intent(this, GameSettings.class);
+            Intent intent = new Intent(this, AppearanceSettings.class);
             startActivity(intent);
             return true;
         }

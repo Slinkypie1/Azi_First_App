@@ -63,19 +63,25 @@ public class CorrectScreen8 extends BaseMenuActivity implements View.OnClickList
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             initViews();
-            // Finds UI elements and sets listeners after layout is ready
+            unlockNextLevel(8);
+            saveAndLoadLeaderboard();
             return insets;
         });
-
-        // Marks Level 8 as completed and unlocks Level 9 if needed
-        unlockNextLevel(8);
-
-        // Saves the player's score and loads the leaderboard
-        saveAndLoadLeaderboard();
     }
 
     // Saves the user's time and loads leaderboard data for Level 8
     private void saveAndLoadLeaderboard() {
+        // Check game mode
+        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getString("game_mode", "casual");
+
+        // If in casual mode, hide the leaderboard and don't save time
+        if (mode.equals("casual")) {
+            if (leaderboardText != null) {
+                leaderboardText.setVisibility(View.GONE);
+            }
+            return;
+        }
 
         if (timeTaken > 0) {
             // Only save if a valid time exists

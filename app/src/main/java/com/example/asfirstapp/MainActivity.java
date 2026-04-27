@@ -65,6 +65,14 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         Intent serviceIntent = new Intent(this, MusicService.class);
         startService(serviceIntent);
 
+        // Initialize default game mode to casual if not already set
+        if (!getSharedPreferences("app_prefs", MODE_PRIVATE).contains("game_mode")) {
+            getSharedPreferences("app_prefs", MODE_PRIVATE)
+                    .edit()
+                    .putString("game_mode", "casual")
+                    .apply();
+        }
+
         initViews();                                        // Initialize UI elements
 
         startForegroundService();                           // Keep app alive in foreground service

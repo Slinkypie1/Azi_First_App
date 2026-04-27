@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="?attr/actionBarSize"
+    android:gravity="center"
+    android:background="@color/white"
+    tools:context=".AppearanceSettings">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Appearance Settings"
+        android:textColor="@color/black"
+        android:textSize="32sp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="32dp"/>
+
+    <TextView
+        android:id="@+id/tvLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Theme:"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:layout_marginBottom="16dp"/>
+
+    <RadioGroup
+        android:id="@+id/rgBgColor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <RadioButton
+            android:id="@+id/rbWhite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Light"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:buttonTint="@color/black"/>
+
+        <RadioButton
+            android:id="@+id/rbBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dark"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:buttonTint="@color/black"/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btnSaveAppearance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save &amp; Apply"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp"/>
+
+</LinearLayout>

@@ -63,23 +63,26 @@ public class CorrectScreen3 extends BaseMenuActivity implements View.OnClickList
 
         // Applies window insets and initializes UI elements
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-
             initViews();
-            // Finds views and sets click listeners
-
+            unlockNextLevel(3);
+            saveAndLoadLeaderboard();
             return insets;
-            // Returns the insets without modifying them
         });
-
-        unlockNextLevel(3);
-        // Marks Level 3 as completed and unlocks Level 4 if allowed
-
-        saveAndLoadLeaderboard();
-        // Saves the player's score and loads the leaderboard
     }
 
     // Saves the completion time and loads the leaderboard for Level 3
     private void saveAndLoadLeaderboard() {
+        // Check game mode
+        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getString("game_mode", "casual");
+
+        // If in casual mode, hide the leaderboard and don't save time
+        if (mode.equals("casual")) {
+            if (leaderboardText != null) {
+                leaderboardText.setVisibility(View.GONE);
+            }
+            return;
+        }
 
         if (timeTaken > 0) {
             // Only save if the time is valid

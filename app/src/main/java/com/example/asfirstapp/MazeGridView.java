@@ -24,7 +24,7 @@ public class MazeGridView extends View {
     // ----- Constants -----
 
     private static final int GRID_SIZE = 11;   // Maze width and height (11x11 grid)
-    private static final int BALL_RADIUS = 25; // Radius of the player ball in pixels
+    private static final int BALL_RADIUS = 12; // Radius of the player ball in pixels
 
     // ----- Maze Library -----
     // Each maze is an 11x11 grid:
@@ -132,6 +132,7 @@ public class MazeGridView extends View {
     private float offsetX, offsetY; // Offset to center maze on screen
     private Paint paint;            // Paint used for drawing
     private boolean gameStarted = false; // Prevents movement before countdown
+    private boolean isNavigating = false; // Prevents multiple screen triggers
     private int countdown = 3;     // Countdown timer in seconds
     private Handler handler = new Handler(); // Handles countdown updates
     private Context context;        // Context for navigation
@@ -203,15 +204,20 @@ public class MazeGridView extends View {
         drawMaze(canvas); // Draw maze walls and goal
         drawBall(canvas); // Draw the red ball
 
-        if (!gameStarted) {
+        if (!gameStarted && !isNavigating && countdown > 0) {
             drawCountdown(canvas); // Show countdown before game starts
         }
     }
 
     private void drawMaze(Canvas canvas) {
+        // Get the current background color setting to decide wall color
+        String bgColor = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                .getString("bg_color", "white");
+        int wallColor = bgColor.equals("black") ? Color.WHITE : Color.BLACK;
+
         for (int r = 0; r < GRID_SIZE; r++) {
             for (int c = 0; c < GRID_SIZE; c++) {
-                if (maze[r][c] == 1) paint.setColor(Color.BLACK); // Wall
+                if (maze[r][c] == 1) paint.setColor(wallColor); // Wall
                 else if (maze[r][c] == 2) paint.setColor(Color.GREEN); // Goal
                 else continue; // Path (not drawn)
 
@@ -232,7 +238,12 @@ public class MazeGridView extends View {
     }
 
     private void drawCountdown(Canvas canvas) {
-        paint.setColor(Color.BLUE);
+        // Ensure countdown text is visible on black background
+        String bgColor = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                .getString("bg_color", "white");
+        int textColor = bgColor.equals("black") ? Color.YELLOW : Color.BLUE;
+
+        paint.setColor(textColor);
         paint.setTextSize(100);
         paint.setTextAlign(Paint.Align.CENTER);
         canvas.drawText(String.valueOf(countdown),
@@ -263,24 +274,54 @@ public class MazeGridView extends View {
     // ----- Ball Movement -----
 
     public void updateBall(float tiltX, float tiltY) {
-        if (!gameStarted) return; // Ignore movement during countdown
+        if (!gameStarted || isNavigating) return; // Ignore movement during countdown or navigation
 
-        float speed = cellSize /100; // Movement speed
+        float speed = cellSize / 200; // Movement speed
         float newX = ballX - tiltX * speed;
         float newY = ballY + tiltY * speed;
 
-        int col = (int) ((newX - offsetX) / cellSize);
-        int row = (int) ((newY - offsetY) / cellSize);
+        // Bounding box of the ball for collision detection
+        float left = newX - BALL_RADIUS;
+        float right = newX + BALL_RADIUS;
+        float top = newY - BALL_RADIUS;
+        float bottom = newY + BALL_RADIUS;
 
-        if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
-            if (maze[row][col] == 0) {
-                ballX = newX;
-                ballY = newY;
-            } else if (maze[row][col] == 2) {
-                navigateToCorrectScreen();
-            } else if (maze[row][col] == 1) {
-                navigateToFailureScreen();
+        // Check all four corners of the ball's bounding box
+        int[][] corners = {
+                {(int) ((left - offsetX) / cellSize), (int) ((top - offsetY) / cellSize)},
+                {(int) ((right - offsetX) / cellSize), (int) ((top - offsetY) / cellSize)},
+                {(int) ((left - offsetX) / cellSize), (int) ((bottom - offsetY) / cellSize)},
+                {(int) ((right - offsetX) / cellSize), (int) ((bottom - offsetY) / cellSize)}
+        };
+
+        boolean canMove = true;
+        boolean hitGoal = false;
+        boolean hitWall = false;
+
+        for (int[] corner : corners) {
+            int col = corner[0];
+            int row = corner[1];
+
+            if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
+                if (maze[row][col] == 1) {
+                    hitWall = true;
+                    canMove = false;
+                } else if (maze[row][col] == 2) {
+                    hitGoal = true;
+                }
+            } else {
+                canMove = false; // Out of bounds
             }
+        }
+
+        if (canMove) {
+            ballX = newX;
+            ballY = newY;
+            if (hitGoal) {
+                navigateToCorrectScreen();
+            }
+        } else if (hitWall) {
+            navigateToFailureScreen();
         }
 
         invalidate();
@@ -289,10 +330,16 @@ public class MazeGridView extends View {
     // ----- Navigation -----
 
     private void navigateToFailureScreen() {
+        if (isNavigating) return;
+        isNavigating = true;
+        gameStarted = false;
         context.startActivity(new Intent(context, Failure.class));
     }
 
     private void navigateToCorrectScreen() {
+        if (isNavigating) return;
+        isNavigating = true;
+        gameStarted = false;
         long timeTaken = System.currentTimeMillis() - startTime;
         Intent intent = new Intent(context, CorrectScreen6.class);
         intent.putExtra("TIME_TAKEN", timeTaken);
