@@ -35,7 +35,7 @@ public class MyForegroundService extends Service {
                 // Notification title
                 .setContentText("This app is staying active in the foreground.")
                 // Notification description text
-                .setSmallIcon(R.drawable.quiz_icon)
+                .setSmallIcon(R.drawable.app_icon)
                 // Small icon that appears in the status bar
                 .setPriority(NotificationCompat.PRIORITY_LOW);
         // Low priority: minimal interruption for the user

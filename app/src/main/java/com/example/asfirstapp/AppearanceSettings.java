@@ -1,5 +1,6 @@
 package com.example.asfirstapp;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -40,6 +41,7 @@ public class AppearanceSettings extends BaseMenuActivity {
         rbWhite = findViewById(R.id.rbWhite);
         rbBlack = findViewById(R.id.rbBlack);
         btnSaveAppearance = findViewById(R.id.btnSaveAppearance);
+        Button btnBackToSecond = findViewById(R.id.btnBackToSecond);
 
         // Load existing setting
         String bgColor = sharedPreferences.getString("bg_color", "white");
@@ -62,6 +64,12 @@ public class AppearanceSettings extends BaseMenuActivity {
             
             // Re-create the activity to apply changes immediately (if implemented in BaseMenuActivity)
             recreate();
+        });
+
+        btnBackToSecond.setOnClickListener(v -> {
+            Intent intent = new Intent(AppearanceSettings.this, Second.class);
+            startActivity(intent);
+            finish();
         });
     }
 }

@@ -56,6 +56,16 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
      * Shows an explanation dialog. The game timer only starts after the user clicks "Start".
      */
     private void showInstructions() {
+        // Check game mode
+        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getString("game_mode", "casual");
+
+        if (mode.equals("timed")) {
+            // Skip instructions in timed mode to save time
+            mazeGridView.beginGame();
+            return;
+        }
+
         pauseStartTime = System.currentTimeMillis();
         new AlertDialog.Builder(this)
                 .setTitle("Level 6: Tilt Maze")

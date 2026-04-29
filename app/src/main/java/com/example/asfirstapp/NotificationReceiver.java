@@ -68,7 +68,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 
             // Build the notification
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "slinkypie")
-                    .setSmallIcon(R.drawable.quiz_icon) // Icon shown in status bar
+                    .setSmallIcon(R.drawable.app_icon) // Icon shown in status bar
                     .setContentTitle("SlinkyPie's Quiz") // Notification title
                     .setContentText("Come and play me!") // Notification body
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT) // Normal priority

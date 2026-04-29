@@ -152,6 +152,17 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
      * Shows an explanation dialog. The timer starts and button enables only after the user clicks "Start".
      */
     private void showInstructions() {
+        // Check game mode
+        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getString("game_mode", "casual");
+
+        if (mode.equals("timed")) {
+            // Skip instructions in timed mode to save time
+            startTime = System.currentTimeMillis(); // Start level timer
+            submitGuessBtn.setEnabled(true);         // Enable gameplay
+            return;
+        }
+
         pauseStartTime = System.currentTimeMillis();
         new AlertDialog.Builder(this)
                 .setTitle("Level 9: Unlock the Cities")
