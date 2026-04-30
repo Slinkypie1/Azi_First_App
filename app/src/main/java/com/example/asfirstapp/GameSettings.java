@@ -49,12 +49,18 @@ public class GameSettings extends BaseMenuActivity {
 
         btnSaveSettings.setOnClickListener(v -> {
             SharedPreferences.Editor editor = sharedPreferences.edit();
+            String chosenMode;
             if (rbTimed.isChecked()) {
-                editor.putString("game_mode", "timed");
+                chosenMode = "timed";
             } else {
-                editor.putString("game_mode", "casual");
+                chosenMode = "casual";
             }
+            editor.putString("game_mode", chosenMode);
             editor.apply();
+
+            // Sync to Firebase
+            ProgressStorage.syncGameModeToFirebase(this, chosenMode);
+
             Toast.makeText(this, "Settings Saved", Toast.LENGTH_SHORT).show();
             finish(); // Go back to the previous activity
         });

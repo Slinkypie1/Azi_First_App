@@ -14,7 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import java.util.Locale;
 
-public class FinalScore extends AppCompatActivity {
+public class FinalScore extends BaseMenuActivity {
 
     private TextView tvTotalTime;
     private Button btnBackToMenu;

@@ -39,6 +39,9 @@ public class CasualFinish extends BaseMenuActivity {
                     .putString("game_mode", "timed")
                     .apply();
 
+            // Sync to Firebase
+            ProgressStorage.syncGameModeToFirebase(this, "timed");
+
             // Go back to the menu
             Intent intent = new Intent(CasualFinish.this, Second.class);
             startActivity(intent);

@@ -24,7 +24,8 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
     private TextView TV;      // Displays welcome message
     private EditText ET;      // Optional input field (e.g., player name)
     private Button BtClick1;  // Button to start level
-    private Button BtSettings; // Button to go to settings.svg
+    private Button BtSettings; // Button to go to settings
+    private Button btnSwitchUser; // Button to logout/switch player
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +65,7 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
         ET = findViewById(R.id.ET);
         BtClick1 = findViewById(R.id.BtClick1);
         BtSettings = findViewById(R.id.BtSettings);
+        btnSwitchUser = findViewById(R.id.btnSwitchUser);
 
         // Display the last saved player name
         updateNameDisplay();
@@ -71,6 +73,7 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
         // Set click listener for the button
         BtClick1.setOnClickListener(this);
         BtSettings.setOnClickListener(this);
+        btnSwitchUser.setOnClickListener(this);
     }
 
     /**
@@ -87,7 +90,7 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Add the Settings item specifically for this activity FIRST to place it on the left
         MenuItem settingsItem = menu.add(Menu.NONE, 1001, 0, "Settings");
-        settingsItem.setIcon(R.drawable.settings);
+        settingsItem.setIcon(R.drawable.light_dark_mode);
         settingsItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         // Inflate the base menu (Home, Level Select) from BaseMenuActivity AFTER
@@ -119,6 +122,28 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
         } else if (view.getId() == R.id.BtSettings) {
             Intent intent = new Intent(this, GameSettings.class);
             startActivity(intent);
+        } else if (view.getId() == R.id.btnSwitchUser) {
+            handleLogout();
         }
+    }
+
+    /**
+     * Clears user preferences and returns to the login screen.
+     */
+    private void handleLogout() {
+        // Clear the saved name
+        getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .edit()
+                .remove("last_name")
+                .apply();
+
+        // Reset highest level for the next user (UI only, cloud is safe)
+        ProgressStorage.setHighestUnlockedLevelOffline(this, 1);
+
+        // Go back to Login
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

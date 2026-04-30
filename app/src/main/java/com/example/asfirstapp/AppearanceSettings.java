@@ -53,12 +53,18 @@ public class AppearanceSettings extends BaseMenuActivity {
 
         btnSaveAppearance.setOnClickListener(v -> {
             SharedPreferences.Editor editor = sharedPreferences.edit();
+            String chosenColor;
             if (rbBlack.isChecked()) {
-                editor.putString("bg_color", "black");
+                chosenColor = "black";
             } else {
-                editor.putString("bg_color", "white");
+                chosenColor = "white";
             }
+            
+            editor.putString("bg_color", chosenColor);
             editor.apply();
+            
+            // Sync to Firebase
+            ProgressStorage.syncAppearanceToFirebase(this, chosenColor);
             
             Toast.makeText(this, "Appearance Saved", Toast.LENGTH_SHORT).show();
             

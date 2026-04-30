@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class Ranking extends AppCompatActivity {
+public class Ranking extends BaseMenuActivity {
 
     private TextView leaderboardText;
     private Button btnBackFromRanking;

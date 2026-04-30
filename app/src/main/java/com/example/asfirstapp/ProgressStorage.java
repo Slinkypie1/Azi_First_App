@@ -117,6 +117,63 @@ public class ProgressStorage {
     }
 
     /**
+     * Syncs the appearance (bg_color) to Firebase.
+     */
+    public static void syncAppearanceToFirebase(Context context, String bgColor) {
+        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String savedName = appPrefs.getString("last_name", "");
+        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        if (!savedName.isEmpty()) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            String documentId = deviceId + "_" + savedName;
+
+            db.collection("users").document(documentId)
+                    .update("bg_color", bgColor)
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Firebase appearance updated"))
+                    .addOnFailureListener(e -> Log.e(TAG, "Error updating firebase appearance", e));
+        }
+    }
+
+    /**
+     * Syncs the game mode to Firebase.
+     */
+    public static void syncGameModeToFirebase(Context context, String gameMode) {
+        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String savedName = appPrefs.getString("last_name", "");
+        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        if (!savedName.isEmpty()) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            String documentId = deviceId + "_" + savedName;
+
+            db.collection("users").document(documentId)
+                    .update("game_mode", gameMode)
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Firebase game mode updated"))
+                    .addOnFailureListener(e -> Log.e(TAG, "Error updating firebase game mode", e));
+        }
+    }
+
+    /**
+     * Syncs the music state (muted/unmuted) to Firebase.
+     */
+    public static void syncMusicToFirebase(Context context, boolean isMuted) {
+        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String savedName = appPrefs.getString("last_name", "");
+        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        if (!savedName.isEmpty()) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            String documentId = deviceId + "_" + savedName;
+
+            db.collection("users").document(documentId)
+                    .update("music_muted", isMuted)
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Firebase music state updated"))
+                    .addOnFailureListener(e -> Log.e(TAG, "Error updating firebase music state", e));
+        }
+    }
+
+    /**
      * Saves level completion time to Firebase if it's the player's best time.
      */
     public static void saveLevelCompletion(Context context, int level, long timeTakenMillis) {

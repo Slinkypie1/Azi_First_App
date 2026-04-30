@@ -11,10 +11,21 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.graphics.Color;
 import android.content.SharedPreferences;
+import android.widget.FrameLayout;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable; // Allows null values safely
 import androidx.appcompat.app.AppCompatActivity; // Base class for activities with menu support
+
+import java.util.concurrent.TimeUnit;
+
+import nl.dionsegijn.konfetti.core.Party;
+import nl.dionsegijn.konfetti.core.PartyFactory;
+import nl.dionsegijn.konfetti.core.emitter.Emitter;
+import nl.dionsegijn.konfetti.core.emitter.EmitterConfig;
+import nl.dionsegijn.konfetti.core.models.Shape;
+import nl.dionsegijn.konfetti.core.models.Size;
+import nl.dionsegijn.konfetti.xml.KonfettiView;
 
 // Abstract base activity that provides a shared menu system for all levels
 public abstract class BaseMenuActivity extends AppCompatActivity {
@@ -29,13 +40,45 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Disable the back button
+        // Handle the back button with a confirmation dialog
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // Do nothing to lock the back button
+                showExitConfirmationDialog();
             }
         });
+    }
+
+    /**
+     * Shows a dialog to confirm if the user wants to leave the current screen.
+     */
+    private void showExitConfirmationDialog() {
+        String message;
+        if (this instanceof MainActivity) {
+            message = "Are you sure you want to exit the app?";
+        } else if (this instanceof Second) {
+            message = "Are you sure you want to go back to the login screen?";
+        } else {
+            message = "Are you sure you want to quit this level? Your current progress will be lost.";
+        }
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Exit Confirmation")
+                .setMessage(message)
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    if (this instanceof MainActivity) {
+                        finishAffinity(); // Close the app entirely
+                    } else if (this instanceof Second) {
+                        startActivity(new Intent(this, MainActivity.class));
+                        finish();
+                    } else {
+                        // Go back to the Hub (Second activity)
+                        startActivity(new Intent(this, Second.class));
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
     // Creates the options menu from XML
@@ -50,8 +93,27 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
+        // Handle Music Toggle Icon
+        MenuItem musicItem = menu.findItem(R.id.music_toggle);
+        if (musicItem != null) {
+            boolean isMuted = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                    .getBoolean("music_muted", false);
+            musicItem.setIcon(isMuted ? R.drawable.music_off : R.drawable.music_on);
+        }
+
+        // Hide the entire menu if we are on the login screen (MainActivity)
+        if (this instanceof MainActivity) {
+            for (int i = 0; i < menu.size(); i++) {
+                menu.getItem(i).setVisible(false);
+            }
+            return true;
+        }
+
         // Get the highest level the user has unlocked
         int highest = ProgressStorage.getHighestUnlockedLevel(this);
+
+        // Only show level selection if we are on the Second activity
+        boolean isSecondActivity = this instanceof Second;
 
         // Loop through levels 1 to 9
         for (int level = 1; level <= 9; level++) {
@@ -68,6 +130,11 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
 
             // Make sure the item exists
             if (item != null) {
+                // If not on Second activity, hide the level selection entirely
+                if (!isSecondActivity) {
+                    item.setVisible(false);
+                    continue;
+                }
 
                 // If the level is unlocked
                 if (level <= highest) {
@@ -102,6 +169,33 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         if (id == R.id.main_menu) {
             Intent i = new Intent(this, MainActivity.class); // Go to main menu screen
             startActivity(i);
+            return true;
+        }
+
+        // Music Toggle
+        if (id == R.id.music_toggle) {
+            SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+            boolean isMuted = prefs.getBoolean("music_muted", false);
+            boolean newMuted = !isMuted;
+
+            // Save locally
+            prefs.edit().putBoolean("music_muted", newMuted).apply();
+
+            // Sync to Firebase
+            ProgressStorage.syncMusicToFirebase(this, newMuted);
+
+            // Update Music Service
+            Intent serviceIntent = new Intent(this, MusicService.class);
+            if (newMuted) {
+                stopService(serviceIntent);
+            } else {
+                // Try to restart music. Note: individual activities usually start specific tracks.
+                // We'll just call startService which triggers onStartCommand check.
+                startService(serviceIntent);
+            }
+
+            // Refresh the icon
+            invalidateOptionsMenu();
             return true;
         }
 
@@ -169,6 +263,52 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         super.onResume();         // Resume normal activity behavior
         invalidateOptionsMenu(); // Forces the menu to refresh lock/unlock states
         applyAppearance();       // Apply background and text color settings
+
+        // If this is a success/correct screen, show confetti automatically
+        if (this.getClass().getSimpleName().contains("Correct") || 
+            this.getClass().getSimpleName().contains("Finish") ||
+            this instanceof FinalScore) {
+            triggerConfetti();
+        }
+    }
+
+    /**
+     * Programmatically adds a KonfettiView and triggers a confetti explosion.
+     */
+    public void triggerConfetti() {
+        View rootView = findViewById(android.R.id.content);
+        if (!(rootView instanceof ViewGroup)) return;
+        ViewGroup rootGroup = (ViewGroup) rootView;
+
+        // Create or find KonfettiView
+        KonfettiView konfettiView = null;
+        for (int i = 0; i < rootGroup.getChildCount(); i++) {
+            if (rootGroup.getChildAt(i) instanceof KonfettiView) {
+                konfettiView = (KonfettiView) rootGroup.getChildAt(i);
+                break;
+            }
+        }
+
+        if (konfettiView == null) {
+            konfettiView = new KonfettiView(this);
+            konfettiView.setLayoutParams(new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            rootGroup.addView(konfettiView);
+        }
+
+        EmitterConfig emitterConfig = new Emitter(5L, TimeUnit.SECONDS).perSecond(30);
+        Party party = new PartyFactory(emitterConfig)
+                .angle(270)
+                .spread(90)
+                .setSpeedBetween(1f, 5f)
+                .timeToLive(2000L)
+                .shapes(new Shape.Rectangle(0.2f), Shape.Circle.INSTANCE)
+                .sizes(new Size(12, 5f, 0.2f))
+                .position(0.0, 0.0, 1.0, 0.0) // Top of screen
+                .build();
+
+        konfettiView.start(party);
     }
 
     /**

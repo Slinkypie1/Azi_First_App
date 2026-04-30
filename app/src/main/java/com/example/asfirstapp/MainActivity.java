@@ -7,11 +7,12 @@ import android.app.NotificationManager;       // Manages notifications for the a
 import android.app.PendingIntent;             // Grants permission to another app/component to run code later.
 import android.content.Context;               // Provides app context (global info about the app).
 import android.content.Intent;                // Used to start activities/services or send broadcasts.
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;     // Used to check app permissions.
 import android.os.Build;                      // Provides device OS version info.
 import android.os.Bundle;                     // Holds saved state data for activity recreation.
 import android.os.PowerManager;               // Manages power/battery features.
-import android.provider.Settings;             // Lets you open system settings.svg screens.
+import android.provider.Settings;             // Lets you open system settings screens.
 import android.util.Log;                      // For logging debug/error messages.
 import android.view.View;                     // Base class for UI components.
 import android.widget.Button;                 // Represents a clickable button.
@@ -44,26 +45,44 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);                 // Call parent setup
-        setContentView(R.layout.activity_main);             // Load main layout
 
         db = FirebaseFirestore.getInstance();               // Initialize Firestore
         mAuth = FirebaseAuth.getInstance();                 // Initialize Firebase Auth
 
-        // Use the EXACT same email and password you just typed into the console
-        mAuth.signInWithEmailAndPassword("azriel.zev@gmail.com", "A'$Sc80ol@9p")
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        // Success!
-                        Log.d("FIREBASE_AUTH", "Logged in successfully");
-                    } else {
-                        // Check Logcat to see why it failed (e.g. "Wrong password")
-                        Log.w("FIREBASE_AUTH", "signInWithEmail:failure", task.getException());
-                    }
-                });
+        // Check if a player is already logged in
+        String savedName = getSharedPreferences("app_prefs", MODE_PRIVATE).getString("last_name", "");
+        if (!savedName.isEmpty()) {
+            // Re-authenticate and proceed
+            mAuth.signInWithEmailAndPassword("azriel.zev@gmail.com", "A'$Sc80ol@9p")
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            handleLogin(savedName);
+                        } else {
+                            // If silent auth fails, show the login UI as a fallback
+                            setupLoginUI();
+                        }
+                    });
+            return; 
+        }
 
-        // Start background music service
-        Intent serviceIntent = new Intent(this, MusicService.class);
-        startService(serviceIntent);
+        setupLoginUI();
+    }
+
+    /**
+     * Sets up the standard login screen UI and background services.
+     */
+    private void setupLoginUI() {
+        setContentView(R.layout.activity_main);             // Load main layout
+
+        // Sign in if not already signed in (path for first-time users)
+        if (mAuth.getCurrentUser() == null) {
+            mAuth.signInWithEmailAndPassword("azriel.zev@gmail.com", "A'$Sc80ol@9p")
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            Log.d("FIREBASE_AUTH", "Logged in successfully");
+                        }
+                    });
+        }
 
         // Initialize default game mode to casual if not already set
         if (!getSharedPreferences("app_prefs", MODE_PRIVATE).contains("game_mode")) {
@@ -72,6 +91,11 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                     .putString("game_mode", "casual")
                     .apply();
         }
+
+        // Start background music service
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.main_activity_music);
+        startService(serviceIntent);
 
         initViews();                                        // Initialize UI elements
 
@@ -93,6 +117,15 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         }
 
         checkBatteryOptimization();                         // Ensure app is excluded from battery optimization
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Start background music service when the activity becomes visible
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("MUSIC_RES_ID", R.raw.main_activity_music);
+        startService(serviceIntent);
     }
 
     // Setup notifications: channel + schedule daily notification
@@ -171,7 +204,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             if (!powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
-                // If app is not exempt → open settings.svg so user can allow
+                // If app is not exempt → open settings so user can allow
                 Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
                 startActivity(intent);
             }
@@ -218,6 +251,24 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                         if (unlockedLevels != null) {
                             ProgressStorage.setHighestUnlockedLevelOffline(this, unlockedLevels.intValue());
                         }
+
+                        // Load appearance and game mode settings from Firebase
+                        String bgColor = documentSnapshot.getString("bg_color");
+                        String gameMode = documentSnapshot.getString("game_mode");
+                        Boolean isMuted = documentSnapshot.getBoolean("music_muted");
+
+                        SharedPreferences.Editor editor = getSharedPreferences("app_prefs", MODE_PRIVATE).edit();
+                        if (bgColor != null) {
+                            editor.putString("bg_color", bgColor);
+                        }
+                        if (gameMode != null) {
+                            editor.putString("game_mode", gameMode);
+                        }
+                        if (isMuted != null) {
+                            editor.putBoolean("music_muted", isMuted);
+                        }
+                        editor.apply();
+
                         proceedToSecond(name); // Continue to next activity
                     } else {
                         // New user → save record
@@ -233,6 +284,9 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         user.put("name", name);
         user.put("deviceId", deviceId);
         user.put("unlockedLevels", 1); // Start at level 1
+        user.put("bg_color", "white"); // Default appearance
+        user.put("game_mode", "casual"); // Default game mode
+        user.put("music_muted", false); // Default music state
 
         db.collection("users").document(documentId)
                 .set(user)

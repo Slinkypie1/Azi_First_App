@@ -9,6 +9,14 @@
     <style name="Theme.AsFirstApp" parent="Base.Theme.AsFirstApp">
         <item name="actionBarStyle">@style/Widget.App.ActionBar</item>
         <item name="actionBarPopupTheme">@style/ThemeOverlay.Material3.Light</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimations</item>
+    </style>
+
+    <style name="WindowAnimations">
+        <item name="android:activityOpenEnterAnimation">@anim/fade_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/fade_out</item>
     </style>
 
     <style name="Widget.App.ActionBar" parent="Widget.Material3.ActionBar.Solid">

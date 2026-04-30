@@ -3,6 +3,7 @@ package com.example.asfirstapp;
 // Imports necessary Android classes for a service and audio playback
 import android.app.Service;       // Base class for Android services
 import android.content.Intent;    // Needed to start/stop service via Intents
+import android.content.SharedPreferences;
 import android.media.MediaPlayer; // Used to play audio files
 import android.os.IBinder;        // Used for bound services (not used here)
 
@@ -26,6 +27,30 @@ public class MusicService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        
+        // 1. If a specific music track is requested, remember it
+        if (intent != null && intent.hasExtra("MUSIC_RES_ID")) {
+            int requestedMusicId = intent.getIntExtra("MUSIC_RES_ID", R.raw.main_activity_music);
+            prefs.edit().putInt("last_music_res_id", requestedMusicId).apply();
+        }
+
+        // 2. Check if music is muted in preferences
+        if (prefs.getBoolean("music_muted", false)) {
+            stopCurrentMusic();
+            return START_STICKY;
+        }
+
+        // 3. Determine which track should be playing now
+        // We use the ID from the intent if available, otherwise fallback to saved/default
+        int musicResId;
+        if (intent != null && intent.hasExtra("MUSIC_RES_ID")) {
+            musicResId = intent.getIntExtra("MUSIC_RES_ID", R.raw.main_activity_music);
+        } else {
+            musicResId = prefs.getInt("last_music_res_id", R.raw.main_activity_music);
+        }
+
+        // Handle pause/resume actions
         if (intent != null) {
             String action = intent.getAction();
             if ("ACTION_PAUSE".equals(action)) {
@@ -41,13 +66,7 @@ public class MusicService extends Service {
             }
         }
 
-        int musicResId = R.raw.main_activity_music; // Default music
-
-        if (intent != null && intent.hasExtra("MUSIC_RES_ID")) {
-            musicResId = intent.getIntExtra("MUSIC_RES_ID", R.raw.main_activity_music);
-        }
-
-        // Only restart if the resource has changed or isn't playing
+        // 4. Only restart if the resource has changed or isn't playing
         if (mediaPlayer == null || currentResId != musicResId) {
             stopCurrentMusic();
             currentResId = musicResId;
