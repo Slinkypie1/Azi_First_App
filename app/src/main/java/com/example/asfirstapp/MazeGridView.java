@@ -327,12 +327,14 @@ public class MazeGridView extends View {
         invalidate();
     }
 
-    // ----- Navigation -----
-
     private void navigateToFailureScreen() {
         if (isNavigating) return;
         isNavigating = true;
         gameStarted = false;
+        
+        // Record wall hit for Perfectionist achievement
+        ProgressStorage.recordWallHit();
+
         context.startActivity(new Intent(context, Failure.class));
     }
 

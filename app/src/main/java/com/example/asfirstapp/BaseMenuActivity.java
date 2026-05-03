@@ -112,8 +112,14 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         // Get the highest level the user has unlocked
         int highest = ProgressStorage.getHighestUnlockedLevel(this);
 
-        // Only show level selection if we are on the Second activity
+        // Check if level selection should be shown
+        // 1. Must be on the Second activity
+        // 2. Must NOT be in "Timed" mode
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        String mode = prefs.getString("game_mode", "casual");
+        boolean isTimedMode = mode.equals("timed");
         boolean isSecondActivity = this instanceof Second;
+        boolean showLevels = isSecondActivity && !isTimedMode;
 
         // Loop through levels 1 to 9
         for (int level = 1; level <= 9; level++) {
@@ -130,8 +136,8 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
 
             // Make sure the item exists
             if (item != null) {
-                // If not on Second activity, hide the level selection entirely
-                if (!isSecondActivity) {
+                // Hide the level selection entirely if conditions aren't met
+                if (!showLevels) {
                     item.setVisible(false);
                     continue;
                 }
@@ -351,6 +357,10 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             if (view instanceof RadioButton) {
                 ((RadioButton) view).setButtonTintList(android.content.res.ColorStateList.valueOf(textColor));
             }
+        }
+
+        if (view instanceof android.widget.ProgressBar) {
+            ((android.widget.ProgressBar) view).setIndeterminateTintList(android.content.res.ColorStateList.valueOf(textColor));
         }
 
         if (view instanceof ViewGroup) {

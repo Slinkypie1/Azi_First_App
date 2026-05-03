@@ -84,6 +84,14 @@ public class FinalScore extends BaseMenuActivity {
         // Save to Firebase
         ProgressStorage.saveGameCompletion(this, finalDurationMillis);
 
+        // Achievement: Ranked (Finish timed mode)
+        ProgressStorage.awardAchievement(this, ProgressStorage.ACHIEV_RANKED);
+
+        // Achievement: Perfectionist (No walls hit)
+        if (!ProgressStorage.wasWallHit()) {
+            ProgressStorage.awardAchievement(this, ProgressStorage.ACHIEV_PERFECTIONIST);
+        }
+
         long seconds = (finalDurationMillis / 1000) % 60;
         long minutes = (finalDurationMillis / (1000 * 60)) % 60;
         long hours = (finalDurationMillis / (1000 * 60 * (long)60));

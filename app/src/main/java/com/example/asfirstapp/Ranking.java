@@ -47,7 +47,7 @@ public class Ranking extends BaseMenuActivity {
     }
 
     private void loadLeaderboard() {
-        ProgressStorage.getGameLeaderboard(new ProgressStorage.LeaderboardCallback() {
+        ProgressStorage.getGameLeaderboard(this, new ProgressStorage.LeaderboardCallback() {
             @Override
             public void onLeaderboardLoaded(List<Map<String, Object>> entries) {
                 StringBuilder sb = new StringBuilder();

@@ -105,6 +105,9 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
                         Toast.LENGTH_LONG).show();
 
                 if (correctGuessCount >= TOTAL_CORRECT_TO_FINISH) {
+                    // Achievement: World Traveler
+                    ProgressStorage.awardAchievement(this, ProgressStorage.ACHIEV_WORLD_TRAVELER);
+
                     // Completed required number of cities
                     long timeTaken = System.currentTimeMillis() - startTime;
                     Intent intent = new Intent(this, CorrectScreen9.class);

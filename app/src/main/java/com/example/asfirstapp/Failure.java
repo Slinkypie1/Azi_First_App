@@ -30,6 +30,9 @@ public class Failure extends BaseMenuActivity implements View.OnClickListener {
         setContentView(R.layout.activity_failure_screen);
         // Sets this activity’s layout to activity_failure_screen.xml.
 
+        // Record failure for Perfectionist achievement
+        ProgressStorage.recordWallHit();
+
         // Start background music for Failure Screen
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.failure_music);

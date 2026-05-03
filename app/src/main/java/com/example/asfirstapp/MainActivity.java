@@ -27,7 +27,9 @@ import androidx.core.content.ContextCompat;   // Helps check if permissions are 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth; // Firebase Authentication access.
 import com.google.firebase.firestore.FirebaseFirestore; // Firebase Firestore database access.
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends BaseMenuActivity implements View.OnClickListener {
@@ -249,7 +251,13 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                         // User exists → load progress
                         Long unlockedLevels = documentSnapshot.getLong("unlockedLevels");
                         if (unlockedLevels != null) {
-                            ProgressStorage.setHighestUnlockedLevelOffline(this, unlockedLevels.intValue());
+                            ProgressStorage.setHighestUnlockedLevelOffline(MainActivity.this, unlockedLevels.intValue());
+                        }
+
+                        // Load achievements
+                        List<String> achievements = (List<String>) documentSnapshot.get("achievements");
+                        if (achievements != null) {
+                            ProgressStorage.setAchievementsOffline(MainActivity.this, achievements);
                         }
 
                         // Load appearance and game mode settings from Firebase
@@ -287,6 +295,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         user.put("bg_color", "white"); // Default appearance
         user.put("game_mode", "casual"); // Default game mode
         user.put("music_muted", false); // Default music state
+        user.put("achievements", new ArrayList<String>()); // Default achievements list
 
         db.collection("users").document(documentId)
                 .set(user)

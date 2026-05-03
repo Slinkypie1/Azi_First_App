@@ -2,8 +2,11 @@ package com.example.asfirstapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;  // For local storage
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;          // To get device ID
 import android.util.Log;                   // Logging
+import android.widget.Toast;
 
 import com.google.firebase.firestore.FieldValue; // For server timestamps
 import com.google.firebase.firestore.FirebaseFirestore; // Firestore database
@@ -20,11 +23,88 @@ public class ProgressStorage {
     private static final String KEY_HIGHEST_LEVEL = "highest_unlocked_level"; // Key for highest level
     private static final String KEY_GAME_START_TIME = "game_start_time"; // Key for game start time
     private static final String KEY_PAUSED_TIME = "paused_time"; // Key for accumulated paused time
+    private static final String KEY_ACHIEVEMENTS = "earned_achievements"; // Key for achievements string set
     private static final String TAG = "ProgressStorage"; // Tag for logging
+
+    private static boolean didHitWallThisRun = false; // Flag for Perfectionist achievement
+
+    // Achievement constants
+    public static final String ACHIEV_SPEED_DEMON = "speed_demon";
+    public static final String ACHIEV_PERFECTIONIST = "perfectionist";
+    public static final String ACHIEV_WORLD_TRAVELER = "world_traveler";
+    public static final String ACHIEV_RANKED = "ranked";
+    public static final String ACHIEV_TOP_10 = "top_10";
+
+    /**
+     * Resets the wall-hit flag for a new perfectionist attempt.
+     */
+    public static void resetPerfectionistFlag() {
+        didHitWallThisRun = false;
+    }
+
+    /**
+     * Marks that a wall was hit during the current run.
+     */
+    public static void recordWallHit() {
+        didHitWallThisRun = true;
+    }
+
+    /**
+     * Checks if the player has hit any walls during the current run.
+     */
+    public static boolean wasWallHit() {
+        return didHitWallThisRun;
+    }
 
     // Helper to get SharedPreferences instance
     private static SharedPreferences getPrefs(Context context) {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    }
+
+    /**
+     * Awards an achievement to the user.
+     */
+    public static void awardAchievement(Context context, String achievementId) {
+        Set<String> earned = new HashSet<>(getPrefs(context).getStringSet(KEY_ACHIEVEMENTS, new HashSet<>()));
+        
+        if (!earned.contains(achievementId)) {
+            earned.add(achievementId);
+            getPrefs(context).edit().putStringSet(KEY_ACHIEVEMENTS, earned).apply();
+            
+            // Sync to Firebase
+            syncAchievementsToFirebase(context, new ArrayList<>(earned));
+            
+            Log.d(TAG, "Achievement Unlocked: " + achievementId);
+
+            // Show confirmation toast
+            new Handler(Looper.getMainLooper()).post(() -> {
+                String name = achievementId.replace("_", " ").toUpperCase();
+                Toast.makeText(context, "🏆 Achievement Unlocked: " + name, Toast.LENGTH_LONG).show();
+            });
+        }
+    }
+
+    /**
+     * Returns the set of earned achievement IDs.
+     */
+    public static Set<String> getEarnedAchievements(Context context) {
+        return getPrefs(context).getStringSet(KEY_ACHIEVEMENTS, new HashSet<>());
+    }
+
+    private static void syncAchievementsToFirebase(Context context, List<String> achievements) {
+        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String savedName = appPrefs.getString("last_name", "");
+        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        if (!savedName.isEmpty()) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            String documentId = deviceId + "_" + savedName;
+
+            db.collection("users").document(documentId)
+                    .update("achievements", achievements)
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Firebase achievements updated"))
+                    .addOnFailureListener(e -> Log.e(TAG, "Error updating firebase achievements", e));
+        }
     }
 
     /**
@@ -55,6 +135,14 @@ public class ProgressStorage {
 
         // Then sync to Firebase
         syncToFirebase(context, level);
+    }
+
+    /**
+     * Updates the local achievements from a list.
+     */
+    public static void setAchievementsOffline(Context context, List<String> achievements) {
+        if (achievements == null) return;
+        getPrefs(context).edit().putStringSet(KEY_ACHIEVEMENTS, new HashSet<>(achievements)).apply();
     }
 
     /**
@@ -177,7 +265,19 @@ public class ProgressStorage {
      * Saves level completion time to Firebase if it's the player's best time.
      */
     public static void saveLevelCompletion(Context context, int level, long timeTakenMillis) {
+        // Achievement: Speed Demon (under 5 seconds)
+        if (timeTakenMillis < 5000) {
+            awardAchievement(context, ACHIEV_SPEED_DEMON);
+        }
+
         SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        
+        // If in casual mode, skip saving to the leaderboard
+        String mode = appPrefs.getString("game_mode", "casual");
+        if (mode.equals("casual")) {
+            return;
+        }
+
         String savedName = appPrefs.getString("last_name", "Anonymous");
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -268,7 +368,7 @@ public class ProgressStorage {
     /**
      * Fetches top 10 completions for the entire game.
      */
-    public static void getGameLeaderboard(LeaderboardCallback callback) {
+    public static void getGameLeaderboard(Context context, LeaderboardCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("game_leaderboard")
                 .get()
@@ -290,16 +390,25 @@ public class ProgressStorage {
                         results = results.subList(0, 10);
                     }
 
+                    // Achievement: Top 10
+                    String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    for (Map<String, Object> entry : results) {
+                        if (deviceId.equals(entry.get("deviceId"))) {
+                            awardAchievement(context, ACHIEV_TOP_10);
+                            break;
+                        }
+                    }
+
                     callback.onLeaderboardLoaded(results);
                 })
                 .addOnFailureListener(callback::onError);
     }
 
     /**
-     * Fetches top 5 completions for a specific level.
+     * Fetches top 10 completions for a specific level.
      * Modified to sort locally to avoid Firestore index requirements.
      */
-    public static void getLeaderboard(int level, LeaderboardCallback callback) {
+    public static void getLeaderboard(Context context, int level, LeaderboardCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("leaderboard")
                 .whereEqualTo("level", level) // Filter by level
@@ -319,9 +428,18 @@ public class ProgressStorage {
                         return t1.compareTo(t2);
                     });
 
-                    // Limit to top 5 entries
-                    if (results.size() > 5) {
-                        results = results.subList(0, 5);
+                    // Limit to top 10 entries
+                    if (results.size() > 10) {
+                        results = results.subList(0, 10);
+                    }
+
+                    // Achievement: Top 10
+                    String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    for (Map<String, Object> entry : results) {
+                        if (deviceId.equals(entry.get("deviceId"))) {
+                            awardAchievement(context, ACHIEV_TOP_10);
+                            break;
+                        }
                     }
 
                     callback.onLeaderboardLoaded(results); // Return results

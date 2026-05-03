@@ -76,7 +76,12 @@ public class CorrectScreen5 extends BaseMenuActivity implements View.OnClickList
         String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .getString("game_mode", "casual");
 
-        // If in casual mode, hide the leaderboard and don't save time
+        // Save completion (handles achievements even in casual mode)
+        if (timeTaken > 0) {
+            ProgressStorage.saveLevelCompletion(this, 5, timeTaken);
+        }
+
+        // If in casual mode, hide the leaderboard
         if (mode.equals("casual")) {
             if (leaderboardText != null) {
                 leaderboardText.setVisibility(View.GONE);
@@ -84,15 +89,8 @@ public class CorrectScreen5 extends BaseMenuActivity implements View.OnClickList
             return;
         }
 
-        if (timeTaken > 0) {
-            // Only save if a valid time exists
-
-            ProgressStorage.saveLevelCompletion(this, 5, timeTaken);
-            // Saves completion time for Level 5
-        }
-
         // Requests leaderboard data for Level 5
-        ProgressStorage.getLeaderboard(5, new ProgressStorage.LeaderboardCallback() {
+        ProgressStorage.getLeaderboard(this, 5, new ProgressStorage.LeaderboardCallback() {
 
             @Override
             public void onLeaderboardLoaded(List<Map<String, Object>> entries) {
@@ -170,3 +168,4 @@ public class CorrectScreen5 extends BaseMenuActivity implements View.OnClickList
         // Launches the next activity
     }
 }
+

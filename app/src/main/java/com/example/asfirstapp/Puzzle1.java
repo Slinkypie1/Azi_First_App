@@ -139,8 +139,12 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
             sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
         
-        // Start the 10-second failure timer
-        if (!hasNavigated) {
+        // Check game mode
+        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getString("game_mode", "casual");
+
+        // Start the failure timer ONLY in Timed Mode
+        if (mode.equals("timed") && !hasNavigated) {
             handler.postDelayed(failureRunnable, 20000);
         }
     }

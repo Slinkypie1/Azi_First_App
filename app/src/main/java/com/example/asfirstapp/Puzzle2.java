@@ -113,8 +113,12 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
             sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_UI);
         }
 
-        // Start the 20-second failure timer
-        if (!puzzleCompleted) {
+        // Check game mode
+        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getString("game_mode", "casual");
+
+        // Start the failure timer ONLY in Timed Mode
+        if (mode.equals("timed") && !puzzleCompleted) {
             handler.postDelayed(failureRunnable, 20000);
         }
     }

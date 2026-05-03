@@ -88,8 +88,13 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Add the Settings item specifically for this activity FIRST to place it on the left
-        MenuItem settingsItem = menu.add(Menu.NONE, 1001, 0, "Settings");
+        // Add Achievements (Trophy Room) item
+        MenuItem trophyItem = menu.add(Menu.NONE, 1002, 0, "Achievements");
+        trophyItem.setIcon(R.drawable.achievements);
+        trophyItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+        // Add the Settings item specifically for this activity
+        MenuItem settingsItem = menu.add(Menu.NONE, 1001, 1, "Settings");
         settingsItem.setIcon(R.drawable.light_dark_mode);
         settingsItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
@@ -107,6 +112,12 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
             startActivity(intent);
             return true;
         }
+        // Handle Achievements (Trophy Room) click
+        if (item.getItemId() == 1002) {
+            Intent intent = new Intent(this, TrophyRoom.class);
+            startActivity(intent);
+            return true;
+        }
         // Handle other menu items via BaseMenuActivity
         return super.onOptionsItemSelected(item);
     }
@@ -116,6 +127,9 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
         if (view.getId() == R.id.BtClick1) {
             // Start tracking total game time when starting Level 1
             ProgressStorage.setGameStartTime(this, System.currentTimeMillis());
+
+            // Reset perfectionist flag for new run
+            ProgressStorage.resetPerfectionistFlag();
 
             // Start Level 1 when button is clicked
             startLevel(1);
