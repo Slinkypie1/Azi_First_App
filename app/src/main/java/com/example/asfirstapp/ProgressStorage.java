@@ -62,6 +62,16 @@ public class ProgressStorage {
     }
 
     /**
+     * Gets the unique document ID for Firestore based on the user's email.
+     */
+    private static String getDocumentId(Context context) {
+        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String email = appPrefs.getString("last_email", "");
+        if (email.isEmpty()) return null;
+        return email.toLowerCase().replace(".", "_");
+    }
+
+    /**
      * Awards an achievement to the user.
      */
     public static void awardAchievement(Context context, String achievementId) {
@@ -92,13 +102,10 @@ public class ProgressStorage {
     }
 
     private static void syncAchievementsToFirebase(Context context, List<String> achievements) {
-        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String savedName = appPrefs.getString("last_name", "");
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String documentId = getDocumentId(context);
 
-        if (!savedName.isEmpty()) {
+        if (documentId != null) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            String documentId = deviceId + "_" + savedName;
 
             db.collection("users").document(documentId)
                     .update("achievements", achievements)
@@ -189,18 +196,15 @@ public class ProgressStorage {
      * Sends the current progress to Firebase for the user identified by deviceId + last_name.
      */
     private static void syncToFirebase(Context context, int level) {
-        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String savedName = appPrefs.getString("last_name", ""); // Last entered player name
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String documentId = getDocumentId(context);
 
-        if (!savedName.isEmpty()) {
+        if (documentId != null) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            String documentId = deviceId + "_" + savedName; // Unique document per device+player
 
             db.collection("users").document(documentId)
                     .update("unlockedLevels", level) // Update the field in Firestore
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Firebase progress updated for " + savedName))
-                    .addOnFailureListener(e -> Log.e(TAG, "Error updating firebase", e));
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Firebase progress updated"))
+                    .addOnFailureListener(e -> Log.e(TAG, "Error updating firebase progress", e));
         }
     }
 
@@ -208,13 +212,10 @@ public class ProgressStorage {
      * Syncs the appearance (bg_color) to Firebase.
      */
     public static void syncAppearanceToFirebase(Context context, String bgColor) {
-        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String savedName = appPrefs.getString("last_name", "");
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String documentId = getDocumentId(context);
 
-        if (!savedName.isEmpty()) {
+        if (documentId != null) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            String documentId = deviceId + "_" + savedName;
 
             db.collection("users").document(documentId)
                     .update("bg_color", bgColor)
@@ -227,13 +228,10 @@ public class ProgressStorage {
      * Syncs the game mode to Firebase.
      */
     public static void syncGameModeToFirebase(Context context, String gameMode) {
-        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String savedName = appPrefs.getString("last_name", "");
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String documentId = getDocumentId(context);
 
-        if (!savedName.isEmpty()) {
+        if (documentId != null) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            String documentId = deviceId + "_" + savedName;
 
             db.collection("users").document(documentId)
                     .update("game_mode", gameMode)
@@ -246,13 +244,10 @@ public class ProgressStorage {
      * Syncs the music state (muted/unmuted) to Firebase.
      */
     public static void syncMusicToFirebase(Context context, boolean isMuted) {
-        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String savedName = appPrefs.getString("last_name", "");
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String documentId = getDocumentId(context);
 
-        if (!savedName.isEmpty()) {
+        if (documentId != null) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            String documentId = deviceId + "_" + savedName;
 
             db.collection("users").document(documentId)
                     .update("music_muted", isMuted)
@@ -279,10 +274,14 @@ public class ProgressStorage {
         }
 
         String savedName = appPrefs.getString("last_name", "Anonymous");
+        String savedEmail = appPrefs.getString("last_email", "");
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String entryId = deviceId + "_" + savedName + "_level" + level;
+        
+        // Use email for unique leaderboard entry if available, otherwise fallback to deviceId+name
+        String identifier = !savedEmail.isEmpty() ? savedEmail.toLowerCase().replace(".", "_") : (deviceId + "_" + savedName);
+        String entryId = identifier + "_level" + level;
 
         db.collection("leaderboard").document(entryId).get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -325,10 +324,13 @@ public class ProgressStorage {
     public static void saveGameCompletion(Context context, long totalTimeMillis) {
         SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
         String savedName = appPrefs.getString("last_name", "Anonymous");
+        String savedEmail = appPrefs.getString("last_email", "");
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String entryId = deviceId + "_" + savedName + "_total";
+        
+        String identifier = !savedEmail.isEmpty() ? savedEmail.toLowerCase().replace(".", "_") : (deviceId + "_" + savedName);
+        String entryId = identifier + "_total";
 
         db.collection("game_leaderboard").document(entryId).get()
                 .addOnSuccessListener(documentSnapshot -> {

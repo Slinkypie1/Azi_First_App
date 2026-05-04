@@ -145,10 +145,11 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
      * Clears user preferences and returns to the login screen.
      */
     private void handleLogout() {
-        // Clear the saved name
+        // Clear the saved name and email
         getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .edit()
                 .remove("last_name")
+                .remove("last_email")
                 .apply();
 
         // Reset highest level for the next user (UI only, cloud is safe)

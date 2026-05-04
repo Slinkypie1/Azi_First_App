@@ -38,6 +38,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
 
     Button BtCLick; // Button to start next activity.
     EditText ET;    // EditText for user to enter their name.
+    EditText etEmail; // EditText for user to enter their email.
     private static final int PERMISSION_REQUEST_CODE = 100; // ID for permission request.
     private static final String TAG = "MainActivity";       // Tag for logging messages.
 
@@ -52,13 +53,16 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         mAuth = FirebaseAuth.getInstance();                 // Initialize Firebase Auth
 
         // Check if a player is already logged in
-        String savedName = getSharedPreferences("app_prefs", MODE_PRIVATE).getString("last_name", "");
-        if (!savedName.isEmpty()) {
+        SharedPreferences appPrefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        String savedName = appPrefs.getString("last_name", "");
+        String savedEmail = appPrefs.getString("last_email", "");
+
+        if (!savedName.isEmpty() && !savedEmail.isEmpty()) {
             // Re-authenticate and proceed
             mAuth.signInWithEmailAndPassword("azriel.zev@gmail.com", "A'$Sc80ol@9p")
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
-                            handleLogin(savedName);
+                            handleLogin(savedName, savedEmail);
                         } else {
                             // If silent auth fails, show the login UI as a fallback
                             setupLoginUI();
@@ -218,32 +222,42 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         BtCLick = findViewById(R.id.BtClick);   // Find button in layout
         BtCLick.setOnClickListener(this);       // Set click listener
         ET = findViewById(R.id.ET);             // Find EditText in layout
+        etEmail = findViewById(R.id.etEmail);   // Find Email EditText
     }
 
     // Handle button click
     @Override
     public void onClick(View view) {
         String inputText = ET.getText().toString().trim();  // Get text from EditText
+        String inputEmail = etEmail.getText().toString().trim();
 
         if (inputText.isEmpty()) {
             Toast.makeText(this, "Please enter a name", Toast.LENGTH_SHORT).show();
-            return; // Stop if no input
+            return;
         }
 
-        // Save the name in SharedPreferences
+        if (inputEmail.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(inputEmail).matches()) {
+            Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Save the details in SharedPreferences
         getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .edit()
                 .putString("last_name", inputText)
+                .putString("last_email", inputEmail)
                 .apply();
 
         // Save to Firebase Firestore or load existing progress
-        handleLogin(inputText);
+        handleLogin(inputText, inputEmail);
     }
 
     // Load user progress or create new user
-    private void handleLogin(String name) {
+    private void handleLogin(String name, String email) {
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        String documentId = deviceId + "_" + name; // Unique ID for user + device
+        // We now use email as the primary document ID for cross-device support,
+        // but we still store the deviceId for tracking.
+        String documentId = email.toLowerCase().replace(".", "_");
 
         db.collection("users").document(documentId).get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -280,16 +294,17 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                         proceedToSecond(name); // Continue to next activity
                     } else {
                         // New user → save record
-                        saveNewUser(name, deviceId, documentId);
+                        saveNewUser(name, email, deviceId, documentId);
                     }
                 })
                 .addOnFailureListener(e -> proceedToSecond(name)); // Fallback to offline
     }
 
     // Save a new user to Firestore
-    private void saveNewUser(String name, String deviceId, String documentId) {
+    private void saveNewUser(String name, String email, String deviceId, String documentId) {
         Map<String, Object> user = new HashMap<>();
         user.put("name", name);
+        user.put("email", email);
         user.put("deviceId", deviceId);
         user.put("unlockedLevels", 1); // Start at level 1
         user.put("bg_color", "white"); // Default appearance
@@ -300,7 +315,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         db.collection("users").document(documentId)
                 .set(user)
                 .addOnSuccessListener(aVoid -> {
-                    ProgressStorage.setHighestUnlockedLevelOffline(this, 1);
+                    ProgressStorage.setHighestUnlockedLevelOffline(MainActivity.this, 1);
                     proceedToSecond(name);
                 })
                 .addOnFailureListener(e -> proceedToSecond(name)); // Fallback

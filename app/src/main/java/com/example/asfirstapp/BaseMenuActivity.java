@@ -58,6 +58,8 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             message = "Are you sure you want to exit the app?";
         } else if (this instanceof Second) {
             message = "Are you sure you want to go back to the login screen?";
+        } else if (this instanceof GameSettings || this instanceof AppearanceSettings) {
+            message = "Are you sure you want to exit the settings? Your changes may not change";
         } else {
             message = "Are you sure you want to quit this level? Your current progress will be lost.";
         }
@@ -71,6 +73,8 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
                     } else if (this instanceof Second) {
                         startActivity(new Intent(this, MainActivity.class));
                         finish();
+                    } else if (this instanceof GameSettings || this instanceof AppearanceSettings) {
+                        finish(); // Just go back to the previous screen (usually the Hub)
                     } else {
                         // Go back to the Hub (Second activity)
                         startActivity(new Intent(this, Second.class));
