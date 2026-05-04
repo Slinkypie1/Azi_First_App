@@ -1,90 +1,65 @@
-package com.example.asfirstapp;
-// Defines the package name where this class is located
+package com.example.asfirstapp; // Package name for this activity
 
-import android.content.Intent;
-// Allows this activity to start another activity (screen)
+import android.content.Intent; // Used to navigate between screens
+import android.os.Bundle; // Contains saved state data for activity lifecycle
+import android.view.View; // Base class for all UI elements
+import android.widget.Button; // Button UI element
+import android.widget.TextView; // Displays text on screen
+import android.widget.Toast; // Shows small popup messages (not used here)
 
-import android.os.Bundle;
-// Used to pass saved state data when the activity is created
+import androidx.activity.EdgeToEdge; // Enables edge-to-edge UI layout
+import androidx.core.view.ViewCompat; // Helps handle window insets safely
 
-import android.view.View;
-// Base class for all UI elements like buttons and text
+import java.util.List; // List data structure for leaderboard entries
+import java.util.Map; // Key-value pairs for leaderboard data
 
-import android.widget.Button;
-// Button UI element
-
-import android.widget.TextView;
-// TextView UI element used to display text
-
-import android.widget.Toast;
-// Used to show short popup messages (not used yet)
-
-import androidx.activity.EdgeToEdge;
-// Enables drawing the UI edge-to-edge on the screen
-
-import androidx.core.view.ViewCompat;
-// Provides compatibility helpers for views across Android versions
-
-import java.util.List;
-// Represents a list of items
-
-import java.util.Map;
-// Represents key-value pairs
-
-// This screen appears when the user answers Level 1 correctly
+// Screen shown when the player answers Level 1 correctly
 public class CorrectScreen1 extends BaseMenuActivity implements View.OnClickListener {
 
-    Button BtClick10;
-    // Button that sends the player to the next level
+    Button BtClick10; // Button that continues to next question
+    TextView leaderboardText; // Displays leaderboard results
+    long timeTaken; // Stores how long the player took to finish level
 
-    TextView leaderboardText;
-    // TextView that displays the leaderboard
-
-    long timeTaken;
-    // Stores how long the player took to finish the level
-
-    // Runs when the activity is first created
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate(savedInstanceState);
-        // Calls the parent activity's setup code
+        super.onCreate(savedInstanceState); // Call parent setup
+        EdgeToEdge.enable(this); // Enable fullscreen edge-to-edge UI
 
-        EdgeToEdge.enable(this);
-        // Enables edge-to-edge screen layout
+        setContentView(R.layout.activity_correct_screen1); // Load layout XML
 
-        setContentView(R.layout.activity_correct_screen1);
-        // Loads the XML layout for this screen
-
-        // Start background music for Correct Screens
+        // Start background music for correct answer screen
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.correct_screens_music);
         startService(serviceIntent);
 
+        // Get time taken from previous screen (default = 0 if missing)
         timeTaken = getIntent().getLongExtra("TIME_TAKEN", 0);
-        // Gets the time taken from the previous activity (default is 0)
 
-        // Applies window insets (safe areas) and initializes UI elements
+        // Apply safe window insets and initialize UI
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews();
-            unlockNextLevel(1);
-            saveAndLoadLeaderboard();
-            return insets;
+
+            initViews(); // Setup buttons and text views
+            unlockNextLevel(1); // Unlock next level if needed
+            saveAndLoadLeaderboard(); // Save score + load leaderboard
+
+            return insets; // Return unchanged insets
         });
     }
 
-    // Saves the player's score and loads leaderboard data
+    // Saves score and loads leaderboard from storage/cloud
     private void saveAndLoadLeaderboard() {
-        // Check game mode
+
+        // Get current game mode (casual or timed)
         String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .getString("game_mode", "casual");
 
-        // Save completion (handles achievements even in casual mode)
+        // Save level completion time (also triggers achievements logic)
         if (timeTaken > 0) {
             ProgressStorage.saveLevelCompletion(this, 1, timeTaken);
         }
 
-        // If in casual mode, hide the leaderboard
+        // If casual mode → hide leaderboard entirely
         if (mode.equals("casual")) {
             if (leaderboardText != null) {
                 leaderboardText.setVisibility(View.GONE);
@@ -92,83 +67,63 @@ public class CorrectScreen1 extends BaseMenuActivity implements View.OnClickList
             return;
         }
 
-        // Loads leaderboard data asynchronously
+        // Load leaderboard data asynchronously from storage/backend
         ProgressStorage.getLeaderboard(this, 1, new ProgressStorage.LeaderboardCallback() {
 
             @Override
             public void onLeaderboardLoaded(List<Map<String, Object>> entries) {
-                // Called when leaderboard data is successfully loaded
 
                 StringBuilder sb = new StringBuilder("--- LEADERBOARD ---\n");
-                // Builds a formatted leaderboard string
+                int rank = 1; // ranking counter
 
-                int rank = 1;
-                // Ranking counter
-
+                // Loop through leaderboard entries
                 for (Map<String, Object> entry : entries) {
-                    // Loop through each leaderboard entry
 
-                    String name = (String) entry.get("userName");
-                    // Get the player's name
+                    String name = (String) entry.get("userName"); // player name
+                    long time = (long) entry.get("timeTakenMillis"); // completion time
 
-                    long time = (long) entry.get("timeTakenMillis");
-                    // Get the time taken in milliseconds
-
+                    // Format and append entry
                     sb.append(rank).append(". ").append(name)
                             .append(": ").append(time / 1000.0).append("s\n");
-                    // Add formatted entry to the leaderboard text
 
-                    rank++;
-                    // Move to the next rank
+                    rank++; // increase rank
                 }
 
-                leaderboardText.setText(sb.toString());
-                // Display the leaderboard on screen
+                leaderboardText.setText(sb.toString()); // show leaderboard
             }
 
             @Override
             public void onError(Exception e) {
-                // Called if loading the leaderboard fails
-
+                // If leaderboard fails to load
                 leaderboardText.setText("Leaderboard unavailable");
-                // Show an error message
             }
         });
     }
 
-    // Unlocks the next level if the current level is the highest unlocked
+    // Unlocks next level if player completed current highest level
     private void unlockNextLevel(int currentLevel) {
 
         if (currentLevel == ProgressStorage.getHighestUnlockedLevel(this)) {
-            // Check if the player finished the highest unlocked level
-
             ProgressStorage.setHighestUnlockedLevel(this, currentLevel + 1);
-            // Unlock the next level
         }
     }
 
-    // Finds UI elements and sets click listeners
+    // Finds UI elements and attaches listeners
     private void initViews() {
 
-        BtClick10 = findViewById(R.id.BtClick10);
-        // Connects the button from XML to Java
+        BtClick10 = findViewById(R.id.BtClick10); // connect button from XML
+        BtClick10.setOnClickListener(this); // set click listener
 
-        BtClick10.setOnClickListener(this);
-        // Sets this activity to handle button clicks
-
-        leaderboardText = findViewById(R.id.leaderboardText);
-        // Connects the leaderboard TextView from XML
+        leaderboardText = findViewById(R.id.leaderboardText); // connect text view
     }
 
-    // Runs when the button is clicked
+    // Handles button click events
     @Override
     public void onClick(View view) {
 
+        // Move to next question screen
         Intent intent = new Intent(this, SecondQuestion.class);
-        // Creates an intent to move to the second question screen
 
-        startActivity(intent);
-        // Starts the next activity
+        startActivity(intent); // open next activity
     }
 }
-

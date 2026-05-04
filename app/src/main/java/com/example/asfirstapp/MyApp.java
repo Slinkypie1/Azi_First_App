@@ -40,8 +40,11 @@ public class MyApp extends Application {
                     Intent serviceIntent = new Intent(activity, MusicService.class);
                     serviceIntent.setAction("ACTION_RESUME");
                     activity.startService(serviceIntent);
+                    // Resume music when app returns to foreground
+
                     Log.d(TAG, "App moved to foreground.");
                 }
+
                 activityCount++; // Increment when activity becomes visible
                 updateAppState(true); // App is in foreground
             }
@@ -49,11 +52,14 @@ public class MyApp extends Application {
             @Override
             public void onActivityStopped(Activity activity) {
                 activityCount--; // Decrement when activity is no longer visible
+
                 if (activityCount == 0) {
                     // No visible activities → app is in background
                     Intent serviceIntent = new Intent(activity, MusicService.class);
                     serviceIntent.setAction("ACTION_PAUSE");
                     activity.startService(serviceIntent);
+                    // Pause music when app goes to background
+
                     updateAppState(false);
                     Log.d(TAG, "App moved to background.");
                 }
@@ -92,6 +98,7 @@ public class MyApp extends Application {
     private void updateAppState(boolean isRunning) {
         SharedPreferences prefs = getSharedPreferences(APP_STATE_PREF, MODE_PRIVATE);
         prefs.edit().putBoolean(IS_APP_RUNNING, isRunning).apply();
+        // Persist whether the app is currently active
     }
 
     /**
@@ -103,5 +110,6 @@ public class MyApp extends Application {
     public static boolean isAppRunning(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(APP_STATE_PREF, MODE_PRIVATE);
         return prefs.getBoolean(IS_APP_RUNNING, false);
+        // Reads stored foreground/background state
     }
 }

@@ -15,90 +15,101 @@ import androidx.core.view.ViewCompat; // For applying window insets
 /**
  * Second Activity
  * ----------------
- * Activity that displays a welcome message to the user,
- * allows them to input text (like a name), and provides a button
- * to start Level 1 of the game.
+ * This is the main hub screen after login.
+ * It shows a welcome message, allows the user to start the game,
+ * open settings, or switch user accounts.
  */
 public class Second extends BaseMenuActivity implements View.OnClickListener {
 
-    private TextView TV;      // Displays welcome message
-    private EditText ET;      // Optional input field (e.g., player name)
-    private Button BtClick1;  // Button to start level
-    private Button BtSettings; // Button to go to settings
-    private Button btnSwitchUser; // Button to logout/switch player
+    // UI elements
+    private TextView TV;          // Displays welcome message to the player
+    private EditText ET;          // Input field for player name (currently optional)
+    private Button BtClick1;      // Button to start Level 1
+    private Button BtSettings;    // Button to open settings screen
+    private Button btnSwitchUser; // Button to log out and switch user
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Enable modern edge-to-edge layouts
+        // Enable modern edge-to-edge layout (content extends behind system bars)
         EdgeToEdge.enable(this);
 
-        // Set the layout for this activity
+        // Set the layout XML for this activity
         setContentView(R.layout.activity_second);
 
-        // Start background music for Second Screen
+        // Start background music for this screen
         Intent serviceIntent = new Intent(this, MusicService.class);
+
+        // Pass which music track should be played
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.second_music);
+
+        // Start the music service
         startService(serviceIntent);
 
-        // Initialize UI components
+        // Initialize all UI components and listeners
         initViews();
 
-        // Apply insets if using edge-to-edge (optional here)
+        // Apply window insets (safe area handling for system bars)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main1), (v, insets) -> insets);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Update the welcome message each time the activity resumes
+
+        // Refresh welcome text every time the activity comes back into view
         updateNameDisplay();
     }
 
     /**
-     * Initializes all UI elements and sets click listeners
+     * Initializes UI components and sets click listeners
      */
     private void initViews() {
-        // Link views from layout
+
+        // Link XML views to Java variables
         TV = findViewById(R.id.TV);
         ET = findViewById(R.id.ET);
         BtClick1 = findViewById(R.id.BtClick1);
         BtSettings = findViewById(R.id.BtSettings);
         btnSwitchUser = findViewById(R.id.btnSwitchUser);
 
-        // Display the last saved player name
+        // Show stored player name in welcome text
         updateNameDisplay();
 
-        // Set click listener for the button
+        // Set click listeners for all buttons
         BtClick1.setOnClickListener(this);
         BtSettings.setOnClickListener(this);
         btnSwitchUser.setOnClickListener(this);
     }
 
     /**
-     * Updates the welcome message with the last entered name from SharedPreferences
+     * Updates welcome text using saved player name from SharedPreferences
      */
     private void updateNameDisplay() {
-        String lastName = getSharedPreferences("app_prefs", MODE_PRIVATE)
-                .getString("last_name", "Player"); // Default to "Player" if none saved
 
-        TV.setText("Ready " + lastName + "?"); // Display welcome message
+        // Retrieve last saved player name
+        String lastName = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getString("last_name", "Player"); // Default value if none exists
+
+        // Update TextView with greeting
+        TV.setText("Ready " + lastName + "?");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Add Achievements (Trophy Room) item
+
+        // Add Achievements button to top menu
         MenuItem trophyItem = menu.add(Menu.NONE, 1002, 0, "Achievements");
         trophyItem.setIcon(R.drawable.achievements);
         trophyItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        // Add the Settings item specifically for this activity
+        // Add Settings button to top menu
         MenuItem settingsItem = menu.add(Menu.NONE, 1001, 1, "Settings");
         settingsItem.setIcon(R.drawable.light_dark_mode);
         settingsItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        // Inflate the base menu (Home, Level Select) from BaseMenuActivity AFTER
+        // Load base menu items from parent class (Home, Level Select, etc.)
         super.onCreateOptionsMenu(menu);
 
         return true;
@@ -106,58 +117,72 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle the Settings item click
+
+        // Open Appearance Settings screen
         if (item.getItemId() == 1001) {
             Intent intent = new Intent(this, AppearanceSettings.class);
             startActivity(intent);
             return true;
         }
-        // Handle Achievements (Trophy Room) click
+
+        // Open Trophy Room (Achievements screen)
         if (item.getItemId() == 1002) {
             Intent intent = new Intent(this, TrophyRoom.class);
             startActivity(intent);
             return true;
         }
-        // Handle other menu items via BaseMenuActivity
+
+        // Let BaseMenuActivity handle other menu actions
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onClick(View view) {
+
+        // Start game when main button is pressed
         if (view.getId() == R.id.BtClick1) {
-            // Start tracking total game time when starting Level 1
+
+            // Record game start time for tracking total playtime
             ProgressStorage.setGameStartTime(this, System.currentTimeMillis());
 
-            // Reset perfectionist flag for new run
+            // Reset "perfect run" tracking flag
             ProgressStorage.resetPerfectionistFlag();
 
-            // Start Level 1 when button is clicked
+            // Start Level 1
             startLevel(1);
-        } else if (view.getId() == R.id.BtSettings) {
+
+        }
+        // Open game settings screen
+        else if (view.getId() == R.id.BtSettings) {
             Intent intent = new Intent(this, GameSettings.class);
             startActivity(intent);
-        } else if (view.getId() == R.id.btnSwitchUser) {
+
+        }
+        // Switch user / log out
+        else if (view.getId() == R.id.btnSwitchUser) {
             handleLogout();
         }
     }
 
     /**
-     * Clears user preferences and returns to the login screen.
+     * Logs the user out and returns to login screen
      */
     private void handleLogout() {
-        // Clear the saved name and email
+
+        // Remove stored user data
         getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .edit()
                 .remove("last_name")
                 .remove("last_email")
                 .apply();
 
-        // Reset highest level for the next user (UI only, cloud is safe)
+        // Reset local progress (does not affect cloud data)
         ProgressStorage.setHighestUnlockedLevelOffline(this, 1);
 
-        // Go back to Login
+        // Return to login screen and clear activity stack
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
         startActivity(intent);
         finish();
     }

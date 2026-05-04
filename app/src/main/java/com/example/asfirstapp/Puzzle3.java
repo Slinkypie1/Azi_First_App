@@ -21,11 +21,15 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
 
+    // Sensor system used to detect device tilt
     private SensorManager sensorManager;  // Manages all device sensors
-    private Sensor accelerometer;         // Detects device tilt
-    private MazeGridView mazeGridView;    // Custom view that draws maze and ball
+    private Sensor accelerometer;         // Detects device tilt (x/y movement)
 
-    private long pauseStartTime;          // When the instruction dialog appeared
+    // Custom view that handles drawing maze + ball logic
+    private MazeGridView mazeGridView;
+
+    // Used to measure pause duration before starting game
+    private long pauseStartTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,37 +40,44 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.puzzle3_music);
         startService(serviceIntent);
 
-        // Instantiate custom maze view
+        // Create maze view programmatically
         mazeGridView = new MazeGridView(this);
-        // Set the custom maze view as the activity’s content
+
+        // Set custom view as the entire screen content
         setContentView(mazeGridView);
 
-        // Show instructions before starting the game
+        // Show instructions dialog before gameplay begins
         showInstructions();
 
-        // Get sensor service
+        // Get system sensor service
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
         if (sensorManager != null) {
-            // Get accelerometer sensor
+            // Get accelerometer sensor (used for tilt controls)
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         }
     }
 
     /**
-     * Shows an explanation dialog. The game timer only starts after the user clicks "Start".
+     * Displays instructions before starting the puzzle.
+     * In timed mode, this is skipped automatically.
      */
     private void showInstructions() {
-        // Check game mode
+
+        // Check current game mode from shared preferences
         String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .getString("game_mode", "casual");
 
         if (mode.equals("timed")) {
-            // Skip instructions in timed mode to save time
+            // Skip instructions in timed mode to avoid wasting time
             mazeGridView.beginGame();
             return;
         }
 
+        // Record when instruction screen started
         pauseStartTime = System.currentTimeMillis();
+
+        // Show popup dialog with instructions
         new AlertDialog.Builder(this)
                 .setTitle("Level 6: Tilt Maze")
                 .setMessage("Tilt your phone to guide the red ball to the green goal!\n\n" +
@@ -75,10 +86,14 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
                 .setPositiveButton("Start Game", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        // Calculate how long player spent on instructions
                         long pausedDuration = System.currentTimeMillis() - pauseStartTime;
+
+                        // Save paused time for scoring adjustments
                         ProgressStorage.addPausedTime(Puzzle3.this, pausedDuration);
 
-                        // Start the maze countdown and movement
+                        // Start maze countdown + gameplay
                         mazeGridView.beginGame();
                     }
                 })
@@ -88,32 +103,44 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Register accelerometer listener when screen is active
         if (accelerometer != null) {
-            // Register listener for accelerometer updates
-            // SENSOR_DELAY_GAME is suitable for games with moderate refresh
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(
+                    this,
+                    accelerometer,
+                    SensorManager.SENSOR_DELAY_GAME // Balanced speed for gameplay
+            );
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Unregister sensor listener to save battery when activity is not visible
+
+        // Stop listening to sensors to save battery and performance
         sensorManager.unregisterListener(this);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+
+        // Only respond to accelerometer updates
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float tiltX = event.values[0]; // Tilt left/right
-            float tiltY = event.values[1]; // Tilt forward/backward
-            // Update the ball position in the maze based on tilt
+
+            // X axis = left/right tilt
+            float tiltX = event.values[0];
+
+            // Y axis = forward/back tilt
+            float tiltY = event.values[1];
+
+            // Send movement data to maze view
             mazeGridView.updateBall(tiltX, tiltY);
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Not required for this puzzle but must be implemented
+        // Not needed for this puzzle
     }
 }

@@ -23,6 +23,7 @@ public class MyForegroundService extends Service {
     public void onCreate() {
         super.onCreate();
         // Called when the service is first created (once per lifecycle)
+
         createNotificationChannel();
         // Ensure the notification channel exists for Android 8.0+
     }
@@ -30,35 +31,40 @@ public class MyForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Build the notification that the user sees while the service runs
+
         NotificationCompat.Builder notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("App is running")
                 // Notification title
+
                 .setContentText("This app is staying active in the foreground.")
                 // Notification description text
+
                 .setSmallIcon(R.drawable.app_icon)
-                // Small icon that appears in the status bar
+                // Small icon shown in the status bar
+
                 .setPriority(NotificationCompat.PRIORITY_LOW);
-        // Low priority: minimal interruption for the user
+        // Low priority reduces interruption (no sound/alert)
 
         startForeground(1, notification.build());
-        // Starts the service as a foreground service with notification ID 1
+        // Promotes service to foreground so system keeps it alive
 
         return START_STICKY;
-        // If the system kills this service, restart it automatically with null intent
+        // If system kills service, it will try to recreate it
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+
         stopForeground(true);
-        // Stop foreground status and remove the notification
+        // Removes the foreground notification and stops foreground mode
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-        // Not a bound service, so binding is not supported
+        // This service is not bound to any activity
     }
 
     /**
@@ -67,16 +73,19 @@ public class MyForegroundService extends Service {
      */
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID, // Unique channel ID
-                    "Foreground Service Channel", // User-visible name of channel
-                    NotificationManager.IMPORTANCE_LOW // Low importance (no sound)
+                    "Foreground Service Channel", // User-visible channel name
+                    NotificationManager.IMPORTANCE_LOW // Low importance (silent)
             );
+
             NotificationManager manager = getSystemService(NotificationManager.class);
-            // Get the system's notification manager
+            // Access system notification manager
+
             if (manager != null) {
                 manager.createNotificationChannel(serviceChannel);
-                // Register the channel with the system
+                // Register channel with system
             }
         }
     }

@@ -1,122 +1,110 @@
-package com.example.asfirstapp;
-// Defines the package this class belongs to
+package com.example.asfirstapp; // Package this class belongs to
 
-import android.content.Intent;
-// Needed to switch between activities (screens)
+import android.content.Intent; // Used to navigate between activities (screens)
+import android.os.Bundle; // Used for activity lifecycle data
+import android.view.View; // Base class for UI interactions
+import android.widget.*; // Imports UI widgets like Spinner, Button, Toast
 
-import android.os.Bundle;
-// Needed for activity lifecycle methods like onCreate
-
-import android.view.View;
-// Needed to handle clicks and UI interactions
-
-import android.widget.*;
-// Imports Spinner, Button, and other widgets
-
-import androidx.appcompat.app.AppCompatActivity;
-// Base class for activities with AppCompat support
+import androidx.appcompat.app.AppCompatActivity; // Base activity class (not directly used since BaseMenuActivity extends it)
 
 // Activity for the "Fill the Blanks" quiz
 public class FillTheBlanks extends BaseMenuActivity {
 
-    // Array of all possible choices for the blanks
+    // All possible choices shown in the dropdowns
     String[] choices = {"choose here", "jumping", "rising", "falling", "happiness", "glory", "walking"};
 
-    // Correct answers for each blank, in order
+    // Correct answers in order for each blank
     String[] correctAnswers = {"glory", "falling", "rising"};
 
-    // Array to store references to the three Spinner widgets
+    // Array holding the 3 spinner UI elements
     Spinner[] spinners = new Spinner[3];
 
-    private long startTime;
-    // Records when the quiz starts, used to calculate completion time
+    private long startTime; // Stores when the quiz starts (for timing)
+    private int attempts = 0; // Tracks incorrect attempts
 
-    private int attempts = 0;
-    // Tracks the number of failed attempts
-
-    // Called when the activity is first created
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Calls the parent activity's setup code
 
-        setContentView(R.layout.activity_fill_the_blanks);
-        // Loads the layout XML for this activity
+        super.onCreate(savedInstanceState); // Call parent setup
+        setContentView(R.layout.activity_fill_the_blanks); // Load layout XML
 
-        // Start background music for Fill the Blanks
+        // Start background music for this level
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.fill_the_blanks_music);
         startService(serviceIntent);
 
-        startTime = System.currentTimeMillis();
-        // Records the start time for timing the quiz
+        startTime = System.currentTimeMillis(); // Record start time
 
-        // Initialize spinner references by finding them in the layout
-        spinners[0] = findViewById(R.id.spinner1); // First blank
-        spinners[1] = findViewById(R.id.spinner2); // Second blank
-        spinners[2] = findViewById(R.id.spinner3); // Third blank
+        // Connect spinner UI elements from XML
+        spinners[0] = findViewById(R.id.spinner1);
+        spinners[1] = findViewById(R.id.spinner2);
+        spinners[2] = findViewById(R.id.spinner3);
 
-        // Find the submit button in the layout
+        // Connect submit button
         Button submitButton = findViewById(R.id.submitButton);
 
-        // Create an ArrayAdapter to populate the spinners with choices
+        // Create adapter to show dropdown choices
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_dropdown_item,
                 choices
         );
 
-        // Attach the adapter to each spinner to show the choices in a dropdown
+        // Attach adapter to each spinner
         for (Spinner spinner : spinners) {
             spinner.setAdapter(adapter);
         }
 
-        // Set a click listener for the submit button
+        // Handle submit button click
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolean allCorrect = true;
-                // Flag to track if all blanks are answered correctly
 
-                // Check each spinner's selected value against the correct answers
+                boolean allCorrect = true; // Track if all answers are correct
+
+                // Check each spinner answer
                 for (int i = 0; i < spinners.length; i++) {
+
                     String selectedAnswer = spinners[i].getSelectedItem().toString();
-                    // Get the user's selected choice from spinner
+                    // Get selected value from spinner
 
                     if (!selectedAnswer.equals(correctAnswers[i])) {
-                        // Compare the selected answer with the correct one
-                        allCorrect = false; // Mark as incorrect if any answer is wrong
-                        break; // Stop checking further
+                        // If answer is wrong
+                        allCorrect = false;
+                        break; // stop checking early
                     }
                 }
 
-                // If all answers are correct, go to CorrectScreen7
+                // If all answers are correct → success
                 if (allCorrect) {
+
                     long timeTaken = System.currentTimeMillis() - startTime;
-                    // Calculate the total time taken for this quiz
+                    // Calculate completion time
 
                     Intent intent = new Intent(FillTheBlanks.this, CorrectScreen7.class);
-                    // Prepare to start the correct answer screen
+                    // Go to success screen
 
                     intent.putExtra("TIME_TAKEN", timeTaken);
-                    // Pass the time taken to the next screen
+                    // Pass time to next screen
 
                     startActivity(intent);
-                    // Launch CorrectScreen7
-                    finish();
-                } else {
-                    attempts++;
-                    // Increment attempt counter on wrong answer
+                    finish(); // close this activity
+                }
+
+                // If answers are wrong
+                else {
+                    attempts++; // increase fail count
 
                     if (attempts >= 2) {
-                        // If 2 attempts reached, go to the Failure screen
+                        // Too many attempts → fail screen
                         Intent intent = new Intent(FillTheBlanks.this, Failure.class);
                         startActivity(intent);
                         finish();
-                        // Launch the failure screen and close this activity
                     } else {
-                        // If it's the first wrong attempt, show a warning
-                        Toast.makeText(FillTheBlanks.this, "Incorrect! 1 try remaining.", Toast.LENGTH_SHORT).show();
+                        // First mistake → show warning
+                        Toast.makeText(FillTheBlanks.this,
+                                "Incorrect! 1 try remaining.",
+                                Toast.LENGTH_SHORT).show();
                     }
                 }
             }

@@ -19,6 +19,7 @@ public class MusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        // Called once when the service is first created
     }
 
     /**
@@ -28,17 +29,20 @@ public class MusicService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-        
+        // Access app preferences (used to store music settings and last played track)
+
         // 1. If a specific music track is requested, remember it
         if (intent != null && intent.hasExtra("MUSIC_RES_ID")) {
             int requestedMusicId = intent.getIntExtra("MUSIC_RES_ID", R.raw.main_activity_music);
             prefs.edit().putInt("last_music_res_id", requestedMusicId).apply();
+            // Save selected music so it can persist across screens
         }
 
         // 2. Check if music is muted in preferences
         if (prefs.getBoolean("music_muted", false)) {
             stopCurrentMusic();
             return START_STICKY;
+            // Stop music immediately if user has muted it
         }
 
         // 3. Determine which track should be playing now
@@ -53,14 +57,18 @@ public class MusicService extends Service {
         // Handle pause/resume actions
         if (intent != null) {
             String action = intent.getAction();
+
             if ("ACTION_PAUSE".equals(action)) {
                 if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
+                    // Pause playback without destroying MediaPlayer
                 }
                 return START_STICKY;
+
             } else if ("ACTION_RESUME".equals(action)) {
                 if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
                     mediaPlayer.start();
+                    // Resume playback if paused
                 }
                 return START_STICKY;
             }
@@ -69,24 +77,36 @@ public class MusicService extends Service {
         // 4. Only restart if the resource has changed or isn't playing
         if (mediaPlayer == null || currentResId != musicResId) {
             stopCurrentMusic();
+            // Stop and release old music before switching tracks
+
             currentResId = musicResId;
             mediaPlayer = MediaPlayer.create(this, musicResId);
+
             if (mediaPlayer != null) {
                 mediaPlayer.setLooping(true);
                 mediaPlayer.start();
+                // Start new music in loop mode
             }
+
         } else if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
+            // Resume if it was created but not currently playing
         }
 
         return START_STICKY;
+        // Keeps service running even if system kills it
     }
 
     private void stopCurrentMusic() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
+            // Stop playback
+
             mediaPlayer.release();
+            // Free system resources
+
             mediaPlayer = null;
+            // Prevent memory leaks
         }
     }
 
@@ -94,10 +114,12 @@ public class MusicService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stopCurrentMusic();
+        // Ensure music is fully stopped when service is destroyed
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+        // This is a started service, not a bound service
     }
 }

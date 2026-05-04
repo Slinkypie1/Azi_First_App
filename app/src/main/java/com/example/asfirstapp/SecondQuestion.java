@@ -14,61 +14,69 @@ import androidx.core.view.ViewCompat;          // Utilities for view insets and 
 /**
  * SecondQuestion Activity
  * -----------------------
- * Displays the second multiple-choice question of the quiz.
- * Handles clicks on four answer buttons and navigates to either the
- * correct-answer screen or failure screen.
+ * This is a multiple-choice quiz screen (Question 2).
+ * The user selects one of four answers.
+ * One is correct and leads to a success screen,
+ * others lead to a failure screen.
  */
 public class SecondQuestion extends BaseMenuActivity implements View.OnClickListener {
 
-    // UI components
-    private TextView TV2;       // Displays the question text
+    // UI elements
+    private TextView TV2;       // Displays the question text on screen
     private Button BtClick6;    // Answer option 1
-    private Button BtClick7;    // Answer option 2 (CORRECT)
+    private Button BtClick7;    // Answer option 2 (correct answer)
     private Button BtClick8;    // Answer option 3
     private Button BtClick9;    // Answer option 4
 
-    private long startTime;     // Records when the question screen was displayed
+    // Timing variable to measure how fast the user answered
+    private long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Enable modern edge-to-edge fullscreen layout
+        // Enable edge-to-edge layout (content extends behind system bars)
         EdgeToEdge.enable(this);
 
-        // Set the layout XML for this activity
+        // Load layout XML for this screen
         setContentView(R.layout.activity_second_question);
 
-        // Start background music for Level 2 (SecondQuestion screen)
+        // Start background music for this level
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.second_question_music);
         startService(serviceIntent);
 
-        // Record the time the question started
+        // Record when this question started (used for score/time tracking)
         startTime = System.currentTimeMillis();
 
-        // Ensure views are initialized after layout is applied
-        // This prevents findViewById from failing due to view hierarchy not ready
+        // Attach UI initialization after view layout is ready
+        // This ensures findViewById works correctly with full layout hierarchy
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews();   // Connect TextView and Buttons to Java objects
-            return insets; // Return insets unchanged
+
+            // Initialize all buttons and text views
+            initViews();
+
+            // Return system insets unchanged
+            return insets;
         });
     }
 
     /**
-     * Initializes the UI components and sets click listeners
+     * Connects XML UI elements to Java variables
+     * and sets click listeners for all answer buttons
      */
     private void initViews() {
-        // Connect TextView from XML
+
+        // Connect question text view
         TV2 = findViewById(R.id.TV2);
 
-        // Connect Buttons from XML
+        // Connect answer buttons
         BtClick6 = findViewById(R.id.BtClick6);
         BtClick7 = findViewById(R.id.BtClick7);
         BtClick8 = findViewById(R.id.BtClick8);
         BtClick9 = findViewById(R.id.BtClick9);
 
-        // Set this activity as the click listener for all buttons
+        // Set click listener for all buttons
         BtClick6.setOnClickListener(this);
         BtClick7.setOnClickListener(this);
         BtClick8.setOnClickListener(this);
@@ -76,24 +84,30 @@ public class SecondQuestion extends BaseMenuActivity implements View.OnClickList
     }
 
     /**
-     * Handles clicks for all four answer buttons
+     * Handles button clicks for all answer choices
      */
     @Override
     public void onClick(View view) {
-        // Check if the correct answer button (BtClick7) was clicked
-        if(view == BtClick7){
-            // Correct answer clicked
-            long timeTaken = System.currentTimeMillis() - startTime; // Calculate time taken to answer
 
-            // Prepare Intent to navigate to CorrectScreen2
+        // If correct answer is selected
+        if(view == BtClick7){
+
+            // Calculate time taken to answer the question
+            long timeTaken = System.currentTimeMillis() - startTime;
+
+            // Go to success screen
             Intent intent = new Intent(this, CorrectScreen2.class);
-            intent.putExtra("TIME_TAKEN", timeTaken);               // Pass completion time
-            startActivity(intent);                                  // Navigate to success screen
+
+            // Pass time taken to next screen
+            intent.putExtra("TIME_TAKEN", timeTaken);
+
+            // Start success activity
+            startActivity(intent);
 
         } else {
-            // Wrong answer clicked (any other button)
-            Intent intent = new Intent(this, Failure.class);       // Prepare failure screen
-            startActivity(intent);                                  // Navigate to failure/game-over screen
+            // Wrong answer selected → go to failure screen
+            Intent intent = new Intent(this, Failure.class);
+            startActivity(intent);
         }
     }
 }

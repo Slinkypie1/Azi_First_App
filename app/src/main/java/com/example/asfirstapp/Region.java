@@ -4,50 +4,49 @@ package com.example.asfirstapp;
  * Region class
  * -------------
  * Represents a single selectable country/region in the "Find the Country" puzzle.
- * Each region has a name, a drawable representing its outline, and a flag
- * indicating if it is the correct answer.
+ * Each region holds display data (name + image) and whether it is the correct answer.
  */
 public class Region {
 
-    private String countryName;       // Name of the country/region
-    private String outlineDrawableId; // Drawable resource name for the country outline
-    private boolean isCorrect;        // True if this region is the correct answer
+    // Name of the country/region shown to the user (if needed for UI or logic)
+    private String countryName;
+
+    // Name of the drawable resource that represents the country outline image
+    private String outlineDrawableId;
+
+    // Indicates whether this region is the correct answer in the puzzle
+    private boolean isCorrect;
 
     /**
-     * Constructor to create a Region object.
+     * Constructor for creating a Region object.
      *
      * @param countryName       Name of the country
-     * @param outlineDrawableId Name of drawable resource (e.g., "france_outline")
-     * @param isCorrect         True if this is the correct answer
+     * @param outlineDrawableId Drawable resource name (e.g., "france_outline")
+     * @param isCorrect         Whether this region is the correct answer
      */
     public Region(String countryName, String outlineDrawableId, boolean isCorrect) {
-        this.countryName = countryName;               // Store the country name
-        this.outlineDrawableId = outlineDrawableId;   // Store the drawable ID
-        this.isCorrect = isCorrect;                   // Store whether it is correct
+        this.countryName = countryName;
+        this.outlineDrawableId = outlineDrawableId;
+        this.isCorrect = isCorrect;
     }
 
     /**
-     * Get the country name.
-     *
-     * @return Name of the country
+     * Returns the country name.
      */
     public String getCountryName() {
         return countryName;
     }
 
     /**
-     * Get the drawable resource name for the country outline.
-     *
-     * @return Drawable resource ID as a string
+     * Returns the drawable resource name for this region.
+     * This is used to dynamically load the correct image from resources.
      */
     public String getOutlineDrawableId() {
         return outlineDrawableId;
     }
 
     /**
-     * Check if this region is the correct answer.
-     *
-     * @return True if correct, false otherwise
+     * Returns whether this region is the correct answer.
      */
     public boolean isCorrect() {
         return isCorrect;

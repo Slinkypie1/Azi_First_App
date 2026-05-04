@@ -2,13 +2,14 @@ package com.example.asfirstapp;
 // Defines the package this class belongs to
 
 import android.content.Intent;
-// Needed to switch activities
+// Needed to switch activities (screens)
 
 import android.os.Bundle;
 // Needed for activity lifecycle methods like onCreate
 
 import android.widget.TextView;
 // Used to display the current question and feedback
+
 import android.widget.Toast;
 // Needed to show feedback for incorrect attempts
 
@@ -99,75 +100,75 @@ public class FindTheCountry extends BaseMenuActivity {
         // Prepare options to show in RecyclerView
         List<String> optionsForDisplay = new ArrayList<>(Arrays.asList(allCountries));
         optionsForDisplay.remove(answer);
-        // Remove the correct answer from the incorrect options
+        // Remove the correct answer from incorrect options
 
         Collections.shuffle(optionsForDisplay);
         // Shuffle the incorrect options
 
         List<String> finalOptions = new ArrayList<>();
         finalOptions.add(answer);
-        // Add the correct answer first
+        // Add correct answer first
 
         for (int i = 0; i < 5; i++) {
             finalOptions.add(optionsForDisplay.get(i));
-            // Add 5 random incorrect options
+            // Add 5 incorrect options
         }
 
         Collections.shuffle(finalOptions);
-        // Shuffle so the correct answer appears in a random position
+        // Shuffle final options so answer position is random
 
         // Create Region objects for RecyclerView adapter
         List<Region> options = new ArrayList<>();
         for (String country : finalOptions) {
             String outlineDrawableId = "outline_" + country.toLowerCase();
-            // Name of drawable resource for country outline
+            // Drawable name for country outline
 
             boolean isCorrect = country.equals(answer);
-            // True if this is the correct answer
+            // Check if this option is correct
 
             options.add(new Region(country, outlineDrawableId, isCorrect));
         }
 
-        // Set RecyclerView adapter with the options and a click listener
+        // Set RecyclerView adapter with click handling
         recyclerView.setAdapter(new MapAdapter(this, options, isCorrect -> {
             if (isCorrect) {
-                // User clicked the correct country
+                // Correct answer selected
                 correctCount++;
-                // Increment correct answer count
+                // Increase correct counter
 
                 TextView textView = findViewById(R.id.winOrLose);
                 if (textView != null) textView.setText("Correct");
-                // Display positive feedback
+                // Show feedback
 
                 if (correctCount == 5) {
-                    // If 5 correct answers, puzzle is complete
+                    // Puzzle completed
                     long timeTaken = System.currentTimeMillis() - startTime;
 
                     Intent intent = new Intent(this, CorrectScreen8.class);
                     intent.putExtra("TIME_TAKEN", timeTaken);
                     startActivity(intent);
-                    // Go to the next level
+                    // Go to next screen
 
                     finish();
-                    // Close current activity
+                    // Close activity
                 } else {
                     loadPuzzle();
-                    // Load the next country puzzle
+                    // Load next question
                 }
             } else {
-                // User clicked a wrong country
+                // Wrong answer selected
                 wrongCount++;
 
                 if (wrongCount >= 3) {
-                    // 3 strikes and you're out
+                    // Too many wrong answers
                     startActivity(new Intent(this, Failure.class));
                     finish();
                 } else {
-                    // Show how many tries are left
+                    // Show remaining attempts
                     int remaining = 3 - wrongCount;
                     Toast.makeText(this, "Incorrect! " + remaining + " tries remaining.", Toast.LENGTH_SHORT).show();
-                    
-                    // Optional: reload the puzzle to provide a new challenge after a mistake
+
+                    // Reload puzzle after mistake
                     loadPuzzle();
                 }
             }

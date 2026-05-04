@@ -1,75 +1,105 @@
 package com.example.asfirstapp;
 
-import android.content.Context; // Needed to access resources like drawable images
-import android.view.LayoutInflater; // Used to inflate XML layouts into View objects
-import android.view.View; // Base class for all UI components
-import android.view.ViewGroup; // Represents a container for other views (used by RecyclerView)
-import android.widget.ImageView; // UI element to display country outlines
+// Needed to access Android resources such as drawable images
+import android.content.Context;
 
-import androidx.annotation.NonNull; // Ensures method parameters are not null
-import androidx.recyclerview.widget.RecyclerView; // RecyclerView base class
+// Used to convert XML layout files into actual View objects
+import android.view.LayoutInflater;
 
-import java.util.List; // To store the list of Region objects
+// Base class for all UI components in Android
+import android.view.View;
 
-// RecyclerView Adapter class to populate a grid of country options
+// Represents a parent container for multiple views (used in RecyclerView)
+import android.view.ViewGroup;
+
+// UI element used to display country outline images
+import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+// Ensures method parameters and return values are not null
+
+import androidx.recyclerview.widget.RecyclerView;
+// Base class for creating lists/grids using RecyclerView
+
+import java.util.List;
+// Used to store a list of Region objects
+
+// RecyclerView Adapter that displays selectable country outlines in a grid
 public class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
 
-    // Interface to handle clicks on country outlines
+    // Interface used to communicate click events back to the activity
     public interface OnRegionClickListener {
-        void onRegionClick(boolean isCorrect); // Sends true if the clicked country is correct
+        void onRegionClick(boolean isCorrect);
+        // Sends whether the selected country is the correct answer
     }
 
-    private final List<Region> items; // The list of Region objects to display in RecyclerView
-    private final OnRegionClickListener listener; // Listener for click events
+    private final List<Region> items;
+    // List of all countries (Region objects) shown in the grid
 
-    // Adapter constructor
+    private final OnRegionClickListener listener;
+    // Listener that handles when a user clicks on a country
+
+    // Constructor: receives data and click listener
     public MapAdapter(Context ctx, List<Region> items, OnRegionClickListener listener) {
-        this.items = items; // Store the list of countries
-        this.listener = listener; // Store the click listener
+        this.items = items;
+        // Store list of regions
+
+        this.listener = listener;
+        // Store click handler
     }
 
-    // ViewHolder class holds references to views for each RecyclerView item
+    // ViewHolder holds references to the UI elements for each grid item
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageView; // ImageView for displaying the country outline
+        ImageView imageView;
+        // Image that shows the country outline
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Connect ImageView reference to XML layout element
+
             imageView = itemView.findViewById(R.id.regionOutline);
+            // Connect ImageView from XML layout
         }
     }
 
-    // Inflate the layout for each item in RecyclerView
+    // Creates a new ViewHolder when needed
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.map_item, parent, false); // Inflate map_item.xml
-        return new ViewHolder(v); // Return a new ViewHolder for the item
+                .inflate(R.layout.map_item, parent, false);
+        // Inflate the XML layout for each grid item
+
+        return new ViewHolder(v);
+        // Return new ViewHolder instance
     }
 
-    // Bind data to each ViewHolder
+    // Binds data (country images + click behavior) to each item
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Region region = items.get(position); // Get the Region object at this position
-        Context context = holder.itemView.getContext(); // Get context to access resources
 
-        // Dynamically get the drawable resource ID using the name stored in Region
+        Region region = items.get(position);
+        // Get the Region object for this position
+
+        Context context = holder.itemView.getContext();
+        // Get context for accessing resources
+
         int drawableId = context.getResources()
                 .getIdentifier(region.getOutlineDrawableId(), "drawable", context.getPackageName());
+        // Convert string name into drawable resource ID
 
-        // Set the ImageView resource to display the country's outline
         holder.imageView.setImageResource(drawableId);
+        // Set the country outline image
 
-        // Set a click listener for the ImageView
         holder.imageView.setOnClickListener(v -> {
-            // Call the listener callback with true/false based on whether the country is correct
             listener.onRegionClick(region.isCorrect());
+            // Notify activity whether the clicked country is correct
         });
     }
 
     @Override
     public int getItemCount() {
-        return items.size(); // Return total number of countries in the list
+        return items.size();
+        // Return total number of countries in the grid
     }
 }

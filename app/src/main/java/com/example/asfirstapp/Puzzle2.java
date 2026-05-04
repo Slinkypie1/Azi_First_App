@@ -24,26 +24,26 @@ import androidx.activity.EdgeToEdge;
  */
 public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
 
-    // Sensor-related objects
+    // Sensor-related objects used for compass detection
     private SensorManager sensorManager;    // Manages device sensors
-    private Sensor rotationSensor;          // Rotation vector sensor (compass)
-    private TextView hint;                  // Displays the current riddle
-    private TextView directionText;         // Shows current detected compass direction
+    private Sensor rotationSensor;          // Rotation vector sensor (used as compass)
+    private TextView hint;                  // Displays the current riddle text
+    private TextView directionText;         // Shows current detected direction
 
-    // Puzzle state
-    private boolean puzzleCompleted = false; // Prevent multiple transitions
-    private String lastDirection = "";       // Last detected compass direction
-    private long lastUpdateTime = 0;         // Timestamp of last direction change
-    private int currentStep = 0;             // Tracks which riddle step the user is on
-    private long startTime;                  // Tracks when puzzle started
+    // Puzzle state tracking
+    private boolean puzzleCompleted = false; // Prevents multiple navigation triggers
+    private String lastDirection = "";       // Stores last detected direction
+    private long lastUpdateTime = 0;         // Time of last valid direction update
+    private int currentStep = 0;             // Tracks progress through riddles
+    private long startTime;                  // Records puzzle start time
 
-    private static final long SENSOR_UPDATE_THRESHOLD = 500; // Minimum ms between sensor updates
-    private long lastSensorUpdate = 0; // Timestamp of last sensor reading
+    private static final long SENSOR_UPDATE_THRESHOLD = 500; // Limits sensor update frequency
+    private long lastSensorUpdate = 0; // Last time sensor data was processed
 
     private Handler handler = new Handler(Looper.getMainLooper()); // Main thread handler
-    private Runnable failureRunnable; // Timeout task
+    private Runnable failureRunnable; // Runnable that triggers failure screen
 
-    // Array of riddles for each step
+    // Riddle list for each step of the puzzle
     private final String[] riddles = {
             // Step 0: East
             "I rise each day, yet I am not the sun.\nTravelers seek me when their journey’s begun.\nOn a compass, I take my place,\nOpposite where the sun sets with grace.\nWhat am I?",
@@ -57,45 +57,48 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Enable modern edge-to-edge layout
+        // Enable edge-to-edge display
         EdgeToEdge.enable(this);
 
-        setContentView(R.layout.activity_puzzle2); // Load layout
+        // Load layout for Puzzle2 screen
+        setContentView(R.layout.activity_puzzle2);
 
-        // Start background music for Puzzle 2
+        // Start background music for this puzzle
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.puzzle2_music);
         startService(serviceIntent);
 
-        startTime = System.currentTimeMillis(); // Record start time
+        // Record start time for scoring
+        startTime = System.currentTimeMillis();
 
-        // Link UI components
+        // Link UI elements
         hint = findViewById(R.id.hint);
         directionText = findViewById(R.id.directionText);
 
-        hint.setText(riddles[currentStep]); // Show the first riddle
+        // Display first riddle
+        hint.setText(riddles[currentStep]);
 
-        // Initialize sensor manager and rotation vector sensor
+        // Initialize sensor system
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
+        // Exit if device has no compass sensor
         if (rotationSensor == null) {
-            // Exit if no rotation sensor (compass) is available
             finish();
         }
 
-        // Initialize the failure timeout runnable
+        // Failure timer logic (20 seconds timeout)
         failureRunnable = new Runnable() {
             @Override
             public void run() {
                 if (!puzzleCompleted) {
                     puzzleCompleted = true;
                     Log.d("Puzzle2", "20 seconds up! Navigating to Failure.");
-                    
-                    // Stop listening to sensors
+
+                    // Stop sensor updates
                     sensorManager.unregisterListener(Puzzle2.this);
 
-                    // Navigate to Failure activity
+                    // Navigate to failure screen
                     Intent intent = new Intent(Puzzle2.this, Failure.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -108,16 +111,17 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Start listening to compass sensor updates
         if (rotationSensor != null) {
-            // Start receiving sensor updates
             sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_UI);
         }
 
-        // Check game mode
+        // Load game mode (casual or timed)
         String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .getString("game_mode", "casual");
 
-        // Start the failure timer ONLY in Timed Mode
+        // Start failure timer only in timed mode
         if (mode.equals("timed") && !puzzleCompleted) {
             handler.postDelayed(failureRunnable, 20000);
         }
@@ -126,39 +130,42 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
     @Override
     public void onPause() {
         super.onPause();
+
+        // Stop sensor updates when activity is not visible
         if (rotationSensor != null) {
-            // Stop sensor updates to save battery
             sensorManager.unregisterListener(this);
         }
-        // Cancel the timeout if the activity is paused
+
+        // Cancel failure timer to avoid leaks
         handler.removeCallbacks(failureRunnable);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // Ignore if puzzle already completed or wrong sensor
+
+        // Ignore updates if puzzle is complete or wrong sensor type
         if (puzzleCompleted || event.sensor.getType() != Sensor.TYPE_ROTATION_VECTOR) return;
 
         long currentTime = System.currentTimeMillis();
-        // Throttle updates to SENSOR_UPDATE_THRESHOLD to avoid jitter
+
+        // Prevent too frequent updates
         if (currentTime - lastSensorUpdate < SENSOR_UPDATE_THRESHOLD) return;
         lastSensorUpdate = currentTime;
 
         float[] rotationMatrix = new float[9];
         float[] orientation = new float[3];
 
-        // Convert rotation vector to rotation matrix
+        // Convert rotation vector into usable orientation values
         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
-        // Convert rotation matrix to azimuth (compass angle), pitch, roll
         SensorManager.getOrientation(rotationMatrix, orientation);
 
-        int azimuth = (int) Math.toDegrees(orientation[0]); // Azimuth in degrees
-        azimuth = (azimuth + 360) % 360; // Normalize to 0–359°
+        int azimuth = (int) Math.toDegrees(orientation[0]);
+        azimuth = (azimuth + 360) % 360; // Normalize angle
 
-        // Convert azimuth to a cardinal direction
+        // Convert angle into direction string
         String currentDirection = getDirection(azimuth);
 
-        // Update lastDirection only if direction changed
+        // Track direction changes
         if (!currentDirection.equals(lastDirection)) {
             lastDirection = currentDirection;
             lastUpdateTime = currentTime;
@@ -167,17 +174,18 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
         // Update UI with current direction
         directionText.setText("Current Direction: " + currentDirection);
 
-        // Check if facing correct direction for this step for more than 1 second
+        // Check if correct direction is held long enough
         if (currentDirection.equals(getDirectionForStep(currentStep))
                 && (currentTime - lastUpdateTime > 1000)) {
-            currentStep++; // Move to next puzzle step
 
+            currentStep++;
+
+            // If all steps completed → success
             if (currentStep == riddles.length) {
-                // All steps complete: puzzle solved
                 puzzleCompleted = true;
-                sensorManager.unregisterListener(this); // Stop listening
+                sensorManager.unregisterListener(this);
 
-                // Cancel the failure timer since the user succeeded
+                // Cancel failure timer
                 handler.removeCallbacks(failureRunnable);
 
                 long timeTaken = System.currentTimeMillis() - startTime;
@@ -187,9 +195,9 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
                 intent.putExtra("TIME_TAKEN", timeTaken);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                finish(); // Close this activity
+                finish();
             } else {
-                // Show next riddle
+                // Load next riddle
                 hint.setText(riddles[currentStep]);
             }
         }
@@ -197,15 +205,11 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Required override, not used here
+        // Not used in this puzzle
     }
 
     /**
-     * Convert azimuth angle to cardinal direction.
-     * 0–44 & 315–359 = North
-     * 45–134 = East
-     * 135–224 = South
-     * 225–314 = West
+     * Converts compass angle into a cardinal direction.
      */
     private String getDirection(int azimuth) {
         if (azimuth >= 45 && azimuth < 135) return "East";
@@ -215,14 +219,14 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
     }
 
     /**
-     * Returns expected direction for a given puzzle step.
+     * Returns expected direction for each puzzle step.
      */
     private String getDirectionForStep(int step) {
         switch (step) {
             case 0: return "East";
             case 1: return "West";
             case 2: return "North";
-            default: return "North"; // Fallback
+            default: return "North";
         }
     }
 }

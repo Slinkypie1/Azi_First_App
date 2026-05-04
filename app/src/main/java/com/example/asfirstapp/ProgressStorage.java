@@ -1,6 +1,6 @@
 package com.example.asfirstapp;
 
-import android.content.Context;
+import android.content.Context; // Needed for SharedPreferences, system services, etc.
 import android.content.SharedPreferences;  // For local storage
 import android.os.Handler;
 import android.os.Looper;
@@ -20,13 +20,13 @@ public class ProgressStorage {
 
     // ----- Constants -----
     private static final String PREF_NAME = "game_progress"; // SharedPreferences file name
-    private static final String KEY_HIGHEST_LEVEL = "highest_unlocked_level"; // Key for highest level
-    private static final String KEY_GAME_START_TIME = "game_start_time"; // Key for game start time
-    private static final String KEY_PAUSED_TIME = "paused_time"; // Key for accumulated paused time
-    private static final String KEY_ACHIEVEMENTS = "earned_achievements"; // Key for achievements string set
-    private static final String TAG = "ProgressStorage"; // Tag for logging
+    private static final String KEY_HIGHEST_LEVEL = "highest_unlocked_level"; // Stores highest level reached
+    private static final String KEY_GAME_START_TIME = "game_start_time"; // Stores when game started
+    private static final String KEY_PAUSED_TIME = "paused_time"; // Tracks total paused duration
+    private static final String KEY_ACHIEVEMENTS = "earned_achievements"; // Stores unlocked achievements
+    private static final String TAG = "ProgressStorage"; // Log tag
 
-    private static boolean didHitWallThisRun = false; // Flag for Perfectionist achievement
+    private static boolean didHitWallThisRun = false; // Tracks if player hit a wall (for achievement logic)
 
     // Achievement constants
     public static final String ACHIEV_SPEED_DEMON = "speed_demon";
@@ -36,33 +36,33 @@ public class ProgressStorage {
     public static final String ACHIEV_TOP_10 = "top_10";
 
     /**
-     * Resets the wall-hit flag for a new perfectionist attempt.
+     * Resets wall-hit tracking for a new run
      */
     public static void resetPerfectionistFlag() {
         didHitWallThisRun = false;
     }
 
     /**
-     * Marks that a wall was hit during the current run.
+     * Marks that a wall was hit in current run
      */
     public static void recordWallHit() {
         didHitWallThisRun = true;
     }
 
     /**
-     * Checks if the player has hit any walls during the current run.
+     * Returns whether player hit a wall this run
      */
     public static boolean wasWallHit() {
         return didHitWallThisRun;
     }
 
-    // Helper to get SharedPreferences instance
+    // Gets SharedPreferences instance
     private static SharedPreferences getPrefs(Context context) {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
     /**
-     * Gets the unique document ID for Firestore based on the user's email.
+     * Builds Firestore document ID using saved email
      */
     private static String getDocumentId(Context context) {
         SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
@@ -72,21 +72,21 @@ public class ProgressStorage {
     }
 
     /**
-     * Awards an achievement to the user.
+     * Adds a new achievement if not already earned
      */
     public static void awardAchievement(Context context, String achievementId) {
         Set<String> earned = new HashSet<>(getPrefs(context).getStringSet(KEY_ACHIEVEMENTS, new HashSet<>()));
-        
+
         if (!earned.contains(achievementId)) {
             earned.add(achievementId);
             getPrefs(context).edit().putStringSet(KEY_ACHIEVEMENTS, earned).apply();
-            
-            // Sync to Firebase
+
+            // Sync updated achievements to Firebase
             syncAchievementsToFirebase(context, new ArrayList<>(earned));
-            
+
             Log.d(TAG, "Achievement Unlocked: " + achievementId);
 
-            // Show confirmation toast
+            // Show popup notification on main thread
             new Handler(Looper.getMainLooper()).post(() -> {
                 String name = achievementId.replace("_", " ").toUpperCase();
                 Toast.makeText(context, "🏆 Achievement Unlocked: " + name, Toast.LENGTH_LONG).show();
@@ -95,12 +95,15 @@ public class ProgressStorage {
     }
 
     /**
-     * Returns the set of earned achievement IDs.
+     * Returns locally stored achievements
      */
     public static Set<String> getEarnedAchievements(Context context) {
         return getPrefs(context).getStringSet(KEY_ACHIEVEMENTS, new HashSet<>());
     }
 
+    /**
+     * Sync achievements list to Firebase
+     */
     private static void syncAchievementsToFirebase(Context context, List<String> achievements) {
         String documentId = getDocumentId(context);
 
@@ -115,37 +118,32 @@ public class ProgressStorage {
     }
 
     /**
-     * Returns the highest unlocked level stored locally.
-     * Defaults to 1 if no progress has been saved yet.
+     * Get highest unlocked level (local)
      */
     public static int getHighestUnlockedLevel(Context context) {
         return getPrefs(context).getInt(KEY_HIGHEST_LEVEL, 1);
     }
 
     /**
-     * Updates only the local progress.
-     * Used during login to prevent double-syncing with Firebase.
+     * Save level locally only (no Firebase sync)
      */
     public static void setHighestUnlockedLevelOffline(Context context, int level) {
         getPrefs(context)
                 .edit()
-                .putInt(KEY_HIGHEST_LEVEL, level) // Save new level
-                .apply(); // Apply changes asynchronously
+                .putInt(KEY_HIGHEST_LEVEL, level)
+                .apply();
     }
 
     /**
-     * Updates the local progress AND syncs it to Firebase for cloud persistence.
+     * Save level locally AND sync to Firebase
      */
     public static void setHighestUnlockedLevel(Context context, int level) {
-        // Update local progress first
         setHighestUnlockedLevelOffline(context, level);
-
-        // Then sync to Firebase
         syncToFirebase(context, level);
     }
 
     /**
-     * Updates the local achievements from a list.
+     * Save achievements locally
      */
     public static void setAchievementsOffline(Context context, List<String> achievements) {
         if (achievements == null) return;
@@ -153,22 +151,21 @@ public class ProgressStorage {
     }
 
     /**
-     * Sets the game start time.
+     * Store game start time
      */
     public static void setGameStartTime(Context context, long startTime) {
         getPrefs(context).edit().putLong(KEY_GAME_START_TIME, startTime).apply();
     }
 
     /**
-     * Gets the game start time. Returns 0 if not set.
+     * Get game start time
      */
     public static long getGameStartTime(Context context) {
         return getPrefs(context).getLong(KEY_GAME_START_TIME, 0);
     }
 
     /**
-     * Adds time to the total paused duration.
-     * This time will be subtracted from the final total score.
+     * Add paused time to total pause duration
      */
     public static void addPausedTime(Context context, long durationMillis) {
         long currentPaused = getPrefs(context).getLong(KEY_PAUSED_TIME, 0);
@@ -176,14 +173,14 @@ public class ProgressStorage {
     }
 
     /**
-     * Gets the total accumulated paused time.
+     * Get total paused time
      */
     public static long getTotalPausedTime(Context context) {
         return getPrefs(context).getLong(KEY_PAUSED_TIME, 0);
     }
 
     /**
-     * Resets both start time and paused time for a new game.
+     * Reset timer for new game
      */
     public static void resetGameTimer(Context context) {
         getPrefs(context).edit()
@@ -193,7 +190,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Sends the current progress to Firebase for the user identified by deviceId + last_name.
+     * Sync level progress to Firebase
      */
     private static void syncToFirebase(Context context, int level) {
         String documentId = getDocumentId(context);
@@ -202,14 +199,14 @@ public class ProgressStorage {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
 
             db.collection("users").document(documentId)
-                    .update("unlockedLevels", level) // Update the field in Firestore
+                    .update("unlockedLevels", level)
                     .addOnSuccessListener(aVoid -> Log.d(TAG, "Firebase progress updated"))
                     .addOnFailureListener(e -> Log.e(TAG, "Error updating firebase progress", e));
         }
     }
 
     /**
-     * Syncs the appearance (bg_color) to Firebase.
+     * Sync appearance setting to Firebase
      */
     public static void syncAppearanceToFirebase(Context context, String bgColor) {
         String documentId = getDocumentId(context);
@@ -225,7 +222,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Syncs the game mode to Firebase.
+     * Sync game mode to Firebase
      */
     public static void syncGameModeToFirebase(Context context, String gameMode) {
         String documentId = getDocumentId(context);
@@ -241,7 +238,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Syncs the music state (muted/unmuted) to Firebase.
+     * Sync music mute state to Firebase
      */
     public static void syncMusicToFirebase(Context context, boolean isMuted) {
         String documentId = getDocumentId(context);
@@ -257,20 +254,20 @@ public class ProgressStorage {
     }
 
     /**
-     * Saves level completion time to Firebase if it's the player's best time.
+     * Save level completion time (leaderboard logic)
      */
     public static void saveLevelCompletion(Context context, int level, long timeTakenMillis) {
-        // Achievement: Speed Demon (under 5 seconds)
+
+        // Speed Demon achievement check
         if (timeTakenMillis < 5000) {
             awardAchievement(context, ACHIEV_SPEED_DEMON);
         }
 
         SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        
-        // If in casual mode, skip saving to the leaderboard
+
         String mode = appPrefs.getString("game_mode", "casual");
         if (mode.equals("casual")) {
-            return;
+            return; // skip leaderboard in casual mode
         }
 
         String savedName = appPrefs.getString("last_name", "Anonymous");
@@ -278,9 +275,11 @@ public class ProgressStorage {
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        
-        // Use email for unique leaderboard entry if available, otherwise fallback to deviceId+name
-        String identifier = !savedEmail.isEmpty() ? savedEmail.toLowerCase().replace(".", "_") : (deviceId + "_" + savedName);
+
+        String identifier = !savedEmail.isEmpty()
+                ? savedEmail.toLowerCase().replace(".", "_")
+                : (deviceId + "_" + savedName);
+
         String entryId = identifier + "_level" + level;
 
         db.collection("leaderboard").document(entryId).get()
@@ -288,48 +287,48 @@ public class ProgressStorage {
                     if (documentSnapshot.exists()) {
                         Long existingTime = documentSnapshot.getLong("timeTakenMillis");
                         if (existingTime != null && timeTakenMillis < existingTime) {
-                            // New time is better (lower), update the entry
                             updateLeaderboardEntry(db, entryId, level, savedName, timeTakenMillis, deviceId);
-                        } else {
-                            Log.d(TAG, "New time (" + timeTakenMillis + ") is not better than existing best (" + existingTime + ")");
                         }
                     } else {
-                        // No entry exists yet, create it
                         updateLeaderboardEntry(db, entryId, level, savedName, timeTakenMillis, deviceId);
                     }
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Error checking leaderboard for best score", e));
+                .addOnFailureListener(e -> Log.e(TAG, "Error checking leaderboard", e));
     }
 
     /**
-     * Helper to write a leaderboard entry to Firestore.
+     * Write leaderboard entry
      */
     private static void updateLeaderboardEntry(FirebaseFirestore db, String entryId, int level, String name, long time, String deviceId) {
         Map<String, Object> completion = new HashMap<>();
-        completion.put("level", level);                       // Level number
-        completion.put("userName", name);                     // Player name
-        completion.put("timeTakenMillis", time);             // Completion time in ms
-        completion.put("timestamp", FieldValue.serverTimestamp()); // Server time
-        completion.put("deviceId", deviceId);                // Player device ID
+        completion.put("level", level);
+        completion.put("userName", name);
+        completion.put("timeTakenMillis", time);
+        completion.put("timestamp", FieldValue.serverTimestamp());
+        completion.put("deviceId", deviceId);
 
         db.collection("leaderboard").document(entryId)
                 .set(completion)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Leaderboard entry updated/created for level " + level))
-                .addOnFailureListener(e -> Log.e(TAG, "Error writing leaderboard entry", e));
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Leaderboard entry updated/created"))
+                .addOnFailureListener(e -> Log.e(TAG, "Error writing leaderboard", e));
     }
 
     /**
-     * Saves total game completion time to Firebase if it's the player's best total time.
+     * Save total game completion time
      */
     public static void saveGameCompletion(Context context, long totalTimeMillis) {
         SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+
         String savedName = appPrefs.getString("last_name", "Anonymous");
         String savedEmail = appPrefs.getString("last_email", "");
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        
-        String identifier = !savedEmail.isEmpty() ? savedEmail.toLowerCase().replace(".", "_") : (deviceId + "_" + savedName);
+
+        String identifier = !savedEmail.isEmpty()
+                ? savedEmail.toLowerCase().replace(".", "_")
+                : (deviceId + "_" + savedName);
+
         String entryId = identifier + "_total";
 
         db.collection("game_leaderboard").document(entryId).get()
@@ -346,6 +345,9 @@ public class ProgressStorage {
                 .addOnFailureListener(e -> Log.e(TAG, "Error checking game leaderboard", e));
     }
 
+    /**
+     * Update total leaderboard entry
+     */
     private static void updateGameLeaderboardEntry(FirebaseFirestore db, String entryId, String name, long time, String deviceId) {
         Map<String, Object> entry = new HashMap<>();
         entry.put("userName", name);
@@ -355,27 +357,29 @@ public class ProgressStorage {
 
         db.collection("game_leaderboard").document(entryId)
                 .set(entry)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Game leaderboard entry updated"))
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Game leaderboard updated"))
                 .addOnFailureListener(e -> Log.e(TAG, "Error updating game leaderboard", e));
     }
 
     /**
-     * Interface for leaderboard results.
+     * Leaderboard callback interface
      */
     public interface LeaderboardCallback {
-        void onLeaderboardLoaded(List<Map<String, Object>> entries); // Success
-        void onError(Exception e);                                   // Failure
+        void onLeaderboardLoaded(List<Map<String, Object>> entries);
+        void onError(Exception e);
     }
 
     /**
-     * Fetches top 10 completions for the entire game.
+     * Get top 10 total game leaderboard
      */
     public static void getGameLeaderboard(Context context, LeaderboardCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
         db.collection("game_leaderboard")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Map<String, Object>> results = new ArrayList<>();
+
                     for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
                         results.add(doc.getData());
                     }
@@ -392,8 +396,8 @@ public class ProgressStorage {
                         results = results.subList(0, 10);
                     }
 
-                    // Achievement: Top 10
                     String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
                     for (Map<String, Object> entry : results) {
                         if (deviceId.equals(entry.get("deviceId"))) {
                             awardAchievement(context, ACHIEV_TOP_10);
@@ -407,21 +411,22 @@ public class ProgressStorage {
     }
 
     /**
-     * Fetches top 10 completions for a specific level.
-     * Modified to sort locally to avoid Firestore index requirements.
+     * Get top 10 per-level leaderboard
      */
     public static void getLeaderboard(Context context, int level, LeaderboardCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
         db.collection("leaderboard")
-                .whereEqualTo("level", level) // Filter by level
+                .whereEqualTo("level", level)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+
                     List<Map<String, Object>> results = new ArrayList<>();
+
                     for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
-                        results.add(doc.getData()); // Add each document's data
+                        results.add(doc.getData());
                     }
 
-                    // Sort locally by timeTakenMillis ascending (best times first)
                     Collections.sort(results, (o1, o2) -> {
                         Long t1 = (Long) o1.get("timeTakenMillis");
                         Long t2 = (Long) o2.get("timeTakenMillis");
@@ -430,13 +435,12 @@ public class ProgressStorage {
                         return t1.compareTo(t2);
                     });
 
-                    // Limit to top 10 entries
                     if (results.size() > 10) {
                         results = results.subList(0, 10);
                     }
 
-                    // Achievement: Top 10
                     String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
                     for (Map<String, Object> entry : results) {
                         if (deviceId.equals(entry.get("deviceId"))) {
                             awardAchievement(context, ACHIEV_TOP_10);
@@ -444,7 +448,7 @@ public class ProgressStorage {
                         }
                     }
 
-                    callback.onLeaderboardLoaded(results); // Return results
+                    callback.onLeaderboardLoaded(results);
                 })
                 .addOnFailureListener(callback::onError);
     }

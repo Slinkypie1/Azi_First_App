@@ -1,88 +1,66 @@
-package com.example.asfirstapp;
-// Declares the package where this class is stored
+package com.example.asfirstapp; // Package where this class belongs
 
-import android.content.Intent;
-// Allows this activity to start another activity (screen)
+import android.content.Intent; // Used to navigate between activities (screens)
+import android.os.Bundle; // Holds saved state data for activity lifecycle
+import android.view.View; // Base class for all UI components
+import android.widget.Button; // Button UI component
+import android.widget.TextView; // Displays text on screen
 
-import android.os.Bundle;
-// Holds saved state data when the activity is recreated
+import androidx.activity.EdgeToEdge; // Enables edge-to-edge fullscreen layout
+import androidx.core.view.ViewCompat; // Provides backward-compatible view utilities
 
-import android.view.View;
-// Base class for all UI components
+import java.util.List; // List structure for leaderboard entries
+import java.util.Map; // Key-value structure for leaderboard data
 
-import android.widget.Button;
-// Button UI element
-
-import android.widget.TextView;
-// UI element used to display text
-
-import androidx.activity.EdgeToEdge;
-// Enables edge-to-edge screen layout support
-
-import androidx.core.view.ViewCompat;
-// Provides compatibility helpers for Views
-
-import java.util.List;
-// Used to store multiple leaderboard entries
-
-import java.util.Map;
-// Used to store key-value pairs for leaderboard data
-
-// Activity shown when the user completes Level 9 successfully
+// Screen shown when the user completes Level 9 successfully
 public class CorrectScreen9 extends BaseMenuActivity implements View.OnClickListener {
 
-    Button BtClick22;
-    // Button that moves the user after finishing Level 9
+    Button BtClick22; // Button that proceeds after finishing Level 9
+    TextView leaderboardText; // Displays leaderboard results
+    long timeTaken; // Stores completion time for Level 9
 
-    TextView leaderboardText;
-    // TextView that displays the leaderboard
-
-    long timeTaken;
-    // Stores how long the user took to complete Level 9
-
-    // Called automatically when this activity is created
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate(savedInstanceState);
-        // Calls setup logic from BaseMenuActivity
+        super.onCreate(savedInstanceState); // Call base setup logic
+        EdgeToEdge.enable(this); // Enable full-screen edge-to-edge UI
 
-        EdgeToEdge.enable(this);
-        // Enables full-screen layout behavior
+        setContentView(R.layout.activity_correct_screen9); // Load XML layout
 
-        setContentView(R.layout.activity_correct_screen9);
-        // Loads the XML layout for this screen
-
-        // Start background music for Correct Screens
+        // Start background music for correct screens
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.correct_screens_music);
         startService(serviceIntent);
 
+        // Get completion time from previous screen (default = 0)
         timeTaken = getIntent().getLongExtra("TIME_TAKEN", 0);
-        // Retrieves the completion time sent from the previous activity
 
+        // Apply system insets and initialize UI
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews();
-            // Marks Level 9 as completed and unlocks the next level if applicable
-            unlockNextLevel(9);
-            // Saves the player's score and loads the leaderboard
-            saveAndLoadLeaderboard();
-            return insets;
+
+            initViews(); // Initialize buttons and text views
+
+            unlockNextLevel(9); // Unlock next level if applicable
+
+            saveAndLoadLeaderboard(); // Save progress + load leaderboard
+
+            return insets; // Return unchanged layout insets
         });
     }
 
-    // Saves the level completion time and loads leaderboard data
+    // Saves completion time and loads leaderboard for Level 9
     private void saveAndLoadLeaderboard() {
-        // Check game mode
+
+        // Get current game mode (casual or timed)
         String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .getString("game_mode", "casual");
 
-        // Save completion (handles achievements even in casual mode)
+        // Save completion time (used for progress + achievements)
         if (timeTaken > 0) {
             ProgressStorage.saveLevelCompletion(this, 9, timeTaken);
         }
 
-        // If in casual mode, hide the leaderboard
+        // Hide leaderboard in casual mode
         if (mode.equals("casual")) {
             if (leaderboardText != null) {
                 leaderboardText.setVisibility(View.GONE);
@@ -90,90 +68,76 @@ public class CorrectScreen9 extends BaseMenuActivity implements View.OnClickList
             return;
         }
 
-        // Requests leaderboard data for Level 9
+        // Fetch leaderboard data for Level 9
         ProgressStorage.getLeaderboard(this, 9, new ProgressStorage.LeaderboardCallback() {
 
             @Override
             public void onLeaderboardLoaded(List<Map<String, Object>> entries) {
-                // Called when leaderboard data is successfully loaded
 
                 StringBuilder sb = new StringBuilder("--- LEADERBOARD ---\n");
-                // Builds the leaderboard text efficiently
+                int rank = 1; // ranking counter
 
-                int rank = 1;
-                // Keeps track of ranking order
-
+                // Loop through leaderboard entries
                 for (Map<String, Object> entry : entries) {
-                    // Loops through each leaderboard entry
 
-                    String name = (String) entry.get("userName");
-                    // Extracts the player's name
+                    String name = (String) entry.get("userName"); // player name
+                    long time = (long) entry.get("timeTakenMillis"); // completion time
 
-                    long time = (long) entry.get("timeTakenMillis");
-                    // Extracts the completion time in milliseconds
-
+                    // Format leaderboard line
                     sb.append(rank).append(". ").append(name)
                             .append(": ").append(time / 1000.0).append("s\n");
-                    // Adds formatted leaderboard entry
 
-                    rank++;
-                    // Move to the next rank
+                    rank++; // next rank
                 }
 
-                leaderboardText.setText(sb.toString());
-                // Displays the leaderboard on the screen
+                leaderboardText.setText(sb.toString()); // display leaderboard
             }
 
             @Override
             public void onError(Exception e) {
-                // Called if leaderboard loading fails
+                // If leaderboard fails
                 leaderboardText.setText("Leaderboard unavailable");
             }
         });
     }
 
-    // Finds UI elements and assigns click listeners
+    // Initializes UI components
     private void initViews() {
 
-        BtClick22 = findViewById(R.id.BtClick22);
-        // Links the button from XML to Java
+        BtClick22 = findViewById(R.id.BtClick22); // connect button from XML
+        BtClick22.setOnClickListener(this); // set click listener
 
-        BtClick22.setOnClickListener(this);
-        // Sets this activity to handle button clicks
-
-        leaderboardText = findViewById(R.id.leaderboardText);
-        // Links the TextView from XML to Java
+        leaderboardText = findViewById(R.id.leaderboardText); // connect text view
     }
 
-    // Unlocks the next level only if this is the highest unlocked one
+    // Unlocks next level if this is the highest unlocked level
     private void unlockNextLevel(int currentLevel) {
 
         if (currentLevel == ProgressStorage.getHighestUnlockedLevel(this)) {
-            // Checks if the user just completed the furthest level
-
             ProgressStorage.setHighestUnlockedLevel(this, currentLevel + 1);
-            // Unlocks the next level (if one exists)
         }
     }
 
-    // Called when the button is clicked
+    // Handles button click (final navigation logic)
     @Override
     public void onClick(View view) {
+
         // Check game mode
         String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .getString("game_mode", "casual");
 
         Intent intent;
+
+        // If timed mode → show final score screen
         if (mode.equals("timed")) {
-            // Timed mode goes to Final Score to see total time
             intent = new Intent(this, FinalScore.class);
-        } else {
-            // Casual mode goes to a simpler finish screen
+        }
+        // If casual mode → show casual finish screen
+        else {
             intent = new Intent(this, CasualFinish.class);
         }
 
-        startActivity(intent);
-        finish();
+        startActivity(intent); // start next screen
+        finish(); // close current activity
     }
 }
-

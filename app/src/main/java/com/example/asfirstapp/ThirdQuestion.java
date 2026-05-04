@@ -43,54 +43,58 @@ public class ThirdQuestion extends BaseMenuActivity implements View.OnClickListe
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.third_question_music);
         startService(serviceIntent);
 
-        // Record start time for timing purposes
+        // Record start time for timing how long user takes to answer
         startTime = System.currentTimeMillis();
 
-        // Ensure views are initialized after layout is applied
+        // Attach window inset listener to ensure UI is properly initialized after layout is drawn
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews();   // Initialize TextView and Buttons
-            return insets; // Return insets unchanged
+            initViews();   // Initialize UI components
+            return insets; // Keep system insets unchanged
         });
     }
 
     /**
-     * Initialize UI components and attach click listeners
+     * Initializes UI components and sets click listeners for all buttons
      */
     private void initViews() {
-        // Connect TextView from layout XML
+        // Link TextView from XML layout
         TV3 = findViewById(R.id.TV3);
 
-        // Connect buttons from layout XML
+        // Link answer buttons from XML layout
         BtClick11 = findViewById(R.id.BtClick11);
         BtClick12 = findViewById(R.id.BtClick12);
         BtClick13 = findViewById(R.id.BtClick13); // Correct answer
         BtClick14 = findViewById(R.id.BtClick14);
 
-        // Set this activity as the click listener for all buttons
+        // Set click listener for all buttons
         BtClick11.setOnClickListener(this);
         BtClick12.setOnClickListener(this);
-        BtClick13.setOnClickListener(this); // Correct answer
+        BtClick13.setOnClickListener(this);
         BtClick14.setOnClickListener(this);
     }
 
     /**
-     * Handles clicks for all four answer buttons
+     * Handles button click events for all answer options
      */
     @Override
     public void onClick(View view) {
         if (view == BtClick13) {
             // Correct answer selected
-            long timeTaken = System.currentTimeMillis() - startTime; // Calculate time taken
 
-            // Prepare intent to navigate to the correct answer screen
+            // Calculate time taken to answer question
+            long timeTaken = System.currentTimeMillis() - startTime;
+
+            // Navigate to success screen and pass time
             Intent intent = new Intent(this, CorrectScreen3.class);
-            intent.putExtra("TIME_TAKEN", timeTaken);               // Pass completion time
-            startActivity(intent);                                  // Navigate to success screen
+            intent.putExtra("TIME_TAKEN", timeTaken);
+            startActivity(intent);
 
         } else {
-            // Wrong answer selected (any other button)
-            Intent intent = new Intent(this, Failure.class);        // Prepare failure screen
-            startActivity(intent);                                  // Navigate to failure/game-over screen
+            // Wrong answer selected
+
+            // Navigate to failure screen
+            Intent intent = new Intent(this, Failure.class);
+            startActivity(intent);
         }
     }
 }

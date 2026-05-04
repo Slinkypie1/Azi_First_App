@@ -19,65 +19,80 @@ import androidx.core.app.NotificationCompat;  // Support library for building no
 public class NotificationReceiver extends BroadcastReceiver {
 
     private static final String TAG = "NotificationReceiver";
-    // Tag for logging
+    // Tag for logging debug messages
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "NotificationReceiver triggered.");
-        // Called when the broadcast is received; log for debugging
+        // Called when the broadcast is received; used for debugging
 
         // Check if app is running (foreground) using MyApp class
         if (MyApp.isAppRunning(context)) {
             Log.d(TAG, "App is running, skipping notification.");
-            // If app is open, do not notify
+            // If app is already open, we do not show a notification
             return;
         }
 
         Log.d(TAG, "App is closed, sending notification.");
-        // App is not open, so we send a notification
+        // App is not open, so we proceed to send a notification
 
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        // Get the system notification manager
+        // Gets system service responsible for notifications
 
         if (notificationManager != null) {
 
-            // For Android 8.0+ (Oreo), notification channels are required
+            // Create notification channel (required for Android 8+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
                 NotificationChannel channel = new NotificationChannel(
-                        "slinkypie",                 // Unique ID for this channel
-                        "Notifications",             // Human-readable name
-                        NotificationManager.IMPORTANCE_DEFAULT // Importance level
+                        "slinkypie",                 // Unique channel ID
+                        "Notifications",             // User-visible channel name
+                        NotificationManager.IMPORTANCE_DEFAULT // Standard importance level
                 );
+
                 notificationManager.createNotificationChannel(channel);
-                // Register the channel with the system
+                // Register channel with system
             }
 
-            // Create an intent that opens MainActivity when user taps the notification
+            // Intent that opens MainActivity when notification is tapped
             Intent repeatingIntent = new Intent(context, MainActivity.class);
             repeatingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            // Bring activity to front instead of creating a new one
+            // Prevents duplicate activity stack entries
 
-            // Wrap the intent in a PendingIntent
+            // Wrap intent in PendingIntent so notification can trigger it later
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     context,
-                    0, // Request code (unique if you have multiple notifications)
+                    0, // Request code (used if multiple notifications exist)
                     repeatingIntent,
-                    PendingIntent.FLAG_IMMUTABLE // Makes PendingIntent secure
+                    PendingIntent.FLAG_IMMUTABLE // Required for security on newer Android versions
             );
 
             // Build the notification
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "slinkypie")
-                    .setSmallIcon(R.drawable.app_icon) // Icon shown in status bar
-                    .setContentTitle("SlinkyPie's Quiz") // Notification title
-                    .setContentText("Come and play me!") // Notification body
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT) // Normal priority
-                    .setAutoCancel(true) // Notification disappears when clicked
-                    .setContentIntent(pendingIntent); // Launches MainActivity on click
+            NotificationCompat.Builder builder =
+                    new NotificationCompat.Builder(context, "slinkypie")
+                            .setSmallIcon(R.drawable.app_icon)
+                            // Icon shown in status bar
 
-            // Show the notification with a fixed ID
+                            .setContentTitle("SlinkyPie's Quiz")
+                            // Notification title
+
+                            .setContentText("Come and play me!")
+                            // Notification message
+
+                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                            // Normal priority notification
+
+                            .setAutoCancel(true)
+                            // Removes notification when tapped
+
+                            .setContentIntent(pendingIntent);
+            // Opens app when clicked
+
+            // Display the notification
             notificationManager.notify(100, builder.build());
-            Log.d(TAG, "Notification sent."); // Log that the notification was displayed
+            Log.d(TAG, "Notification sent.");
+            // Log confirmation
         }
     }
 }

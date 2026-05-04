@@ -331,7 +331,7 @@ public class MazeGridView extends View {
         if (isNavigating) return;
         isNavigating = true;
         gameStarted = false;
-        
+
         // Record wall hit for Perfectionist achievement
         ProgressStorage.recordWallHit();
 
