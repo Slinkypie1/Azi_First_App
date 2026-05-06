@@ -50,7 +50,7 @@ public class CorrectScreen7 extends BaseMenuActivity implements View.OnClickList
     private void saveAndLoadLeaderboard() {
 
         // Get current game mode (casual or timed)
-        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
         // Save level completion time (also used for achievements tracking)

@@ -28,7 +28,7 @@ public class MusicService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        SharedPreferences prefs = ProgressStorage.getAppPrefs(this);
         // Access app preferences (used to store music settings and last played track)
 
         // 1. If a specific music track is requested, remember it

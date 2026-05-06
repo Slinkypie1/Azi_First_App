@@ -65,7 +65,7 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
     private void showInstructions() {
 
         // Check current game mode from shared preferences
-        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
         if (mode.equals("timed")) {

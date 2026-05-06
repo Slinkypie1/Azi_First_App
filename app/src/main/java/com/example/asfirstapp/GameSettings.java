@@ -69,8 +69,8 @@ public class GameSettings extends BaseMenuActivity {
             return insets;
         });
 
-        sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE);
-        // Opens local storage for app preferences
+        sharedPreferences = ProgressStorage.getAppPrefs(this);
+        // Opens local storage for current user preferences
 
         rgGameMode = findViewById(R.id.rgGameMode);
         // Connects radio group from XML

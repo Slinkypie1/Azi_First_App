@@ -52,7 +52,7 @@ public class CorrectScreen9 extends BaseMenuActivity implements View.OnClickList
     private void saveAndLoadLeaderboard() {
 
         // Get current game mode (casual or timed)
-        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
         // Save completion time (used for progress + achievements)
@@ -123,7 +123,7 @@ public class CorrectScreen9 extends BaseMenuActivity implements View.OnClickList
     public void onClick(View view) {
 
         // Check game mode
-        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
         Intent intent;

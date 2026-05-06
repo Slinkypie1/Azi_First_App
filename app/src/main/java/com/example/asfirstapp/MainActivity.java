@@ -98,6 +98,9 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
     EditText etEmail;
     // Input field for user email.
 
+    EditText etPassword;
+    // Input field for user password.
+
     private static final int PERMISSION_REQUEST_CODE = 100;
     // Request code used when asking for notification permission.
 
@@ -121,34 +124,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         mAuth = FirebaseAuth.getInstance();
         // Initializes Firebase authentication.
 
-        // Check if a player is already logged in
-        SharedPreferences appPrefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-        // Access local stored preferences.
-
-        String savedName = appPrefs.getString("last_name", "");
-        // Retrieve saved user name if exists.
-
-        String savedEmail = appPrefs.getString("last_email", "");
-        // Retrieve saved email if exists.
-
-        if (!savedName.isEmpty() && !savedEmail.isEmpty()) {
-            // If user data exists, try silent login.
-
-            mAuth.signInWithEmailAndPassword("azriel.zev@gmail.com", "A'$Sc80ol@9p")
-                    .addOnCompleteListener(this, task -> {
-                        if (task.isSuccessful()) {
-                            handleLogin(savedName, savedEmail);
-                            // Proceed with loaded user.
-                        } else {
-                            setupLoginUI();
-                            // Fallback to login screen.
-                        }
-                    });
-            return;
-        }
-
         setupLoginUI();
-        // Default path: show login UI.
     }
 
     /**
@@ -158,19 +134,9 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         setContentView(R.layout.activity_main);
         // Loads main layout UI.
 
-        // Sign in if not already signed in (path for first-time users)
-        if (mAuth.getCurrentUser() == null) {
-            mAuth.signInWithEmailAndPassword("azriel.zev@gmail.com", "A'$Sc80ol@9p")
-                    .addOnCompleteListener(this, task -> {
-                        if (task.isSuccessful()) {
-                            Log.d("FIREBASE_AUTH", "Logged in successfully");
-                        }
-                    });
-        }
-
         // Initialize default game mode to casual if not already set
-        if (!getSharedPreferences("app_prefs", MODE_PRIVATE).contains("game_mode")) {
-            getSharedPreferences("app_prefs", MODE_PRIVATE)
+        if (!ProgressStorage.getAppPrefs(this).contains("game_mode")) {
+            ProgressStorage.getAppPrefs(this)
                     .edit()
                     .putString("game_mode", "casual")
                     .apply();
@@ -326,6 +292,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
 
         ET = findViewById(R.id.ET);
         etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
     }
 
     // Handle button click
@@ -333,6 +300,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
     public void onClick(View view) {
         String inputText = ET.getText().toString().trim();
         String inputEmail = etEmail.getText().toString().trim();
+        String inputPassword = etPassword.getText().toString().trim();
 
         if (inputText.isEmpty()) {
             Toast.makeText(this, "Please enter a name", Toast.LENGTH_SHORT).show();
@@ -344,26 +312,66 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
             return;
         }
 
-        getSharedPreferences("app_prefs", MODE_PRIVATE)
-                .edit()
-                .putString("last_name", inputText)
-                .putString("last_email", inputEmail)
-                .apply();
+        if (inputPassword.length() < 6) {
+            Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        handleLogin(inputText, inputEmail);
+        handleAuth(inputText, inputEmail, inputPassword);
+    }
+
+    private void handleAuth(String name, String email, String password) {
+        // Try to sign in
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInWithEmail:success");
+                        handleLogin(name, email);
+                    } else {
+                        // If sign in fails, try to create a new account
+                        Log.w(TAG, "signInWithEmail:failure", task.getException());
+                        createNewUser(name, email, password);
+                    }
+                });
+    }
+
+    private void createNewUser(String name, String email, String password) {
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful() && mAuth.getCurrentUser() != null) {
+                        Log.d(TAG, "createUserWithEmail:success");
+                        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                        String documentId = mAuth.getCurrentUser().getUid(); // Use UID instead of email
+                        saveNewUser(name, email, deviceId, documentId);
+                    } else {
+                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        String error = task.getException() != null ? task.getException().getMessage() : "Unknown error";
+                        Toast.makeText(MainActivity.this, "Authentication failed: " + error,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     // Load or create user
     private void handleLogin(String name, String email) {
-        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        String documentId = email.toLowerCase().replace(".", "_");
-        // Use email as document ID.
+        if (mAuth.getCurrentUser() == null) return;
+        String documentId = mAuth.getCurrentUser().getUid(); // Use UID
 
         db.collection("users").document(documentId).get()
                 .addOnSuccessListener(documentSnapshot -> {
 
                     if (documentSnapshot.exists()) {
+                        // Update local preferences with data from Firestore
+                        String fetchedName = documentSnapshot.getString("name");
+                        if (fetchedName == null) fetchedName = name;
+
+                        // Global prefs for login form
+                        getSharedPreferences("app_prefs", MODE_PRIVATE).edit()
+                                .putString("last_name", fetchedName)
+                                .putString("last_email", email)
+                                .apply();
+
                         Long unlockedLevels = documentSnapshot.getLong("unlockedLevels");
 
                         if (unlockedLevels != null) {
@@ -380,16 +388,19 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                         String gameMode = documentSnapshot.getString("game_mode");
                         Boolean isMuted = documentSnapshot.getBoolean("music_muted");
 
-                        SharedPreferences.Editor editor = getSharedPreferences("app_prefs", MODE_PRIVATE).edit();
+                        // User-specific prefs for settings
+                        SharedPreferences.Editor userEditor = ProgressStorage.getAppPrefs(MainActivity.this).edit();
+                        userEditor.putString("last_name", fetchedName);
 
-                        if (bgColor != null) editor.putString("bg_color", bgColor);
-                        if (gameMode != null) editor.putString("game_mode", gameMode);
-                        if (isMuted != null) editor.putBoolean("music_muted", isMuted);
+                        if (bgColor != null) userEditor.putString("bg_color", bgColor);
+                        if (gameMode != null) userEditor.putString("game_mode", gameMode);
+                        if (isMuted != null) userEditor.putBoolean("music_muted", isMuted);
 
-                        editor.apply();
+                        userEditor.apply();
 
-                        proceedToSecond(name);
+                        proceedToSecond(fetchedName);
                     } else {
+                        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
                         saveNewUser(name, email, deviceId, documentId);
                     }
                 })
@@ -408,6 +419,20 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         user.put("game_mode", "casual");
         user.put("music_muted", false);
         user.put("achievements", new ArrayList<String>());
+
+        // Global prefs for login form
+        getSharedPreferences("app_prefs", MODE_PRIVATE).edit()
+                .putString("last_name", name)
+                .putString("last_email", email)
+                .apply();
+
+        // User-specific prefs with defaults
+        ProgressStorage.getAppPrefs(MainActivity.this).edit()
+                .putString("last_name", name)
+                .putString("bg_color", "white")
+                .putString("game_mode", "casual")
+                .putBoolean("music_muted", false)
+                .apply();
 
         db.collection("users").document(documentId)
                 .set(user)

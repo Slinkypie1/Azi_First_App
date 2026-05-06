@@ -118,7 +118,7 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
         }
 
         // Load game mode (casual or timed)
-        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
         // Start failure timer only in timed mode

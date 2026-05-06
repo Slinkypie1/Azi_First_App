@@ -108,7 +108,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
 
         if (musicItem != null) {
             // Check saved mute state
-            boolean isMuted = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            boolean isMuted = ProgressStorage.getAppPrefs(this)
                     .getBoolean("music_muted", false);
 
             // Update icon depending on state
@@ -126,7 +126,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         // Get highest unlocked level
         int highest = ProgressStorage.getHighestUnlockedLevel(this);
 
-        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        SharedPreferences prefs = ProgressStorage.getAppPrefs(this);
         String mode = prefs.getString("game_mode", "casual");
 
         boolean isTimedMode = mode.equals("timed"); // Check if timed mode
@@ -188,7 +188,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         // Music toggle
         if (id == R.id.music_toggle) {
 
-            SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+            SharedPreferences prefs = ProgressStorage.getAppPrefs(this);
             boolean isMuted = prefs.getBoolean("music_muted", false);
             boolean newMuted = !isMuted;
 
@@ -284,7 +284,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
     // Applies theme colors
     private void applyAppearance() {
 
-        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        SharedPreferences prefs = ProgressStorage.getAppPrefs(this);
         String bgColor = prefs.getString("bg_color", "white");
 
         int backgroundColor = bgColor.equals("black") ? Color.BLACK : Color.WHITE;

@@ -56,19 +56,28 @@ public class ProgressStorage {
         return didHitWallThisRun;
     }
 
-    // Gets SharedPreferences instance
+    // Gets SharedPreferences instance for game progress (user-specific)
     private static SharedPreferences getPrefs(Context context) {
-        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        String uid = getDocumentId(context);
+        String prefName = (uid != null) ? (PREF_NAME + "_" + uid) : PREF_NAME;
+        return context.getSharedPreferences(prefName, Context.MODE_PRIVATE);
+    }
+
+    // Gets SharedPreferences instance for app settings (user-specific)
+    public static SharedPreferences getAppPrefs(Context context) {
+        String uid = getDocumentId(context);
+        String prefName = (uid != null) ? ("app_prefs_" + uid) : "app_prefs";
+        return context.getSharedPreferences(prefName, Context.MODE_PRIVATE);
     }
 
     /**
-     * Builds Firestore document ID using saved email
+     * Builds Firestore document ID using Firebase User UID
      */
-    private static String getDocumentId(Context context) {
-        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String email = appPrefs.getString("last_email", "");
-        if (email.isEmpty()) return null;
-        return email.toLowerCase().replace(".", "_");
+    public static String getDocumentId(Context context) {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+            return com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+        return null;
     }
 
     /**
@@ -263,7 +272,7 @@ public class ProgressStorage {
             awardAchievement(context, ACHIEV_SPEED_DEMON);
         }
 
-        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        SharedPreferences appPrefs = getAppPrefs(context);
 
         String mode = appPrefs.getString("game_mode", "casual");
         if (mode.equals("casual")) {
@@ -271,41 +280,40 @@ public class ProgressStorage {
         }
 
         String savedName = appPrefs.getString("last_name", "Anonymous");
-        String savedEmail = appPrefs.getString("last_email", "");
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String uid = getDocumentId(context);
+
+        if (uid == null) {
+            Log.e(TAG, "Cannot save level completion: User not logged in");
+            return; // Must be logged in to save to leaderboard
+        }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        String identifier = !savedEmail.isEmpty()
-                ? savedEmail.toLowerCase().replace(".", "_")
-                : (deviceId + "_" + savedName);
-
-        String entryId = identifier + "_level" + level;
+        String entryId = uid + "_level" + level;
 
         db.collection("leaderboard").document(entryId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         Long existingTime = documentSnapshot.getLong("timeTakenMillis");
                         if (existingTime != null && timeTakenMillis < existingTime) {
-                            updateLeaderboardEntry(db, entryId, level, savedName, timeTakenMillis, deviceId);
+                            updateLeaderboardEntry(db, entryId, level, savedName, timeTakenMillis, uid);
                         }
                     } else {
-                        updateLeaderboardEntry(db, entryId, level, savedName, timeTakenMillis, deviceId);
+                        updateLeaderboardEntry(db, entryId, level, savedName, timeTakenMillis, uid);
                     }
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Error checking leaderboard", e));
+                .addOnFailureListener(e -> Log.e(TAG, "Error checking level leaderboard for " + entryId, e));
     }
 
     /**
      * Write leaderboard entry
      */
-    private static void updateLeaderboardEntry(FirebaseFirestore db, String entryId, int level, String name, long time, String deviceId) {
+    private static void updateLeaderboardEntry(FirebaseFirestore db, String entryId, int level, String name, long time, String uid) {
         Map<String, Object> completion = new HashMap<>();
         completion.put("level", level);
         completion.put("userName", name);
         completion.put("timeTakenMillis", time);
         completion.put("timestamp", FieldValue.serverTimestamp());
-        completion.put("deviceId", deviceId);
+        completion.put("uid", uid);
 
         db.collection("leaderboard").document(entryId)
                 .set(completion)
@@ -317,43 +325,41 @@ public class ProgressStorage {
      * Save total game completion time
      */
     public static void saveGameCompletion(Context context, long totalTimeMillis) {
-        SharedPreferences appPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        SharedPreferences appPrefs = getAppPrefs(context);
 
         String savedName = appPrefs.getString("last_name", "Anonymous");
-        String savedEmail = appPrefs.getString("last_email", "");
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String uid = getDocumentId(context);
+
+        if (uid == null) {
+            Log.e(TAG, "Cannot save game completion: User not logged in");
+            return;
+        }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        String identifier = !savedEmail.isEmpty()
-                ? savedEmail.toLowerCase().replace(".", "_")
-                : (deviceId + "_" + savedName);
-
-        String entryId = identifier + "_total";
-
-        db.collection("game_leaderboard").document(entryId).get()
+        db.collection("game_leaderboard").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         Long existingTime = documentSnapshot.getLong("totalTimeMillis");
                         if (existingTime != null && totalTimeMillis < existingTime) {
-                            updateGameLeaderboardEntry(db, entryId, savedName, totalTimeMillis, deviceId);
+                            updateGameLeaderboardEntry(db, uid, savedName, totalTimeMillis, uid);
                         }
                     } else {
-                        updateGameLeaderboardEntry(db, entryId, savedName, totalTimeMillis, deviceId);
+                        updateGameLeaderboardEntry(db, uid, savedName, totalTimeMillis, uid);
                     }
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Error checking game leaderboard", e));
+                .addOnFailureListener(e -> Log.e(TAG, "Error checking game leaderboard for UID: " + uid, e));
     }
 
     /**
      * Update total leaderboard entry
      */
-    private static void updateGameLeaderboardEntry(FirebaseFirestore db, String entryId, String name, long time, String deviceId) {
+    private static void updateGameLeaderboardEntry(FirebaseFirestore db, String entryId, String name, long time, String uid) {
         Map<String, Object> entry = new HashMap<>();
         entry.put("userName", name);
         entry.put("totalTimeMillis", time);
         entry.put("timestamp", FieldValue.serverTimestamp());
-        entry.put("deviceId", deviceId);
+        entry.put("uid", uid);
 
         db.collection("game_leaderboard").document(entryId)
                 .set(entry)
@@ -396,12 +402,14 @@ public class ProgressStorage {
                         results = results.subList(0, 10);
                     }
 
-                    String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    String uid = getDocumentId(context);
 
-                    for (Map<String, Object> entry : results) {
-                        if (deviceId.equals(entry.get("deviceId"))) {
-                            awardAchievement(context, ACHIEV_TOP_10);
-                            break;
+                    if (uid != null) {
+                        for (Map<String, Object> entry : results) {
+                            if (uid.equals(entry.get("uid"))) {
+                                awardAchievement(context, ACHIEV_TOP_10);
+                                break;
+                            }
                         }
                     }
 
@@ -439,12 +447,14 @@ public class ProgressStorage {
                         results = results.subList(0, 10);
                     }
 
-                    String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    String uid = getDocumentId(context);
 
-                    for (Map<String, Object> entry : results) {
-                        if (deviceId.equals(entry.get("deviceId"))) {
-                            awardAchievement(context, ACHIEV_TOP_10);
-                            break;
+                    if (uid != null) {
+                        for (Map<String, Object> entry : results) {
+                            if (uid.equals(entry.get("uid"))) {
+                                awardAchievement(context, ACHIEV_TOP_10);
+                                break;
+                            }
                         }
                     }
 

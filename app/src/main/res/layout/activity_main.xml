@@ -48,13 +48,24 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/etPassword"
+                android:hint="password"
+                android:textColorHint="#FF0000"
+                android:textSize="30sp"
+                android:inputType="textPassword"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                />
             <Button
                 android:id="@+id/BtClick"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="24dp"
-                android:text="after writing click here"
+                android:text="Login / Sign Up"
                 android:textSize="30sp"/>
         </LinearLayout>
     </LinearLayout>

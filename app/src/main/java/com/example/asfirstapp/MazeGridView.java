@@ -211,7 +211,7 @@ public class MazeGridView extends View {
 
     private void drawMaze(Canvas canvas) {
         // Get the current background color setting to decide wall color
-        String bgColor = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        String bgColor = ProgressStorage.getAppPrefs(context)
                 .getString("bg_color", "white");
         int wallColor = bgColor.equals("black") ? Color.WHITE : Color.BLACK;
 
@@ -239,7 +239,7 @@ public class MazeGridView extends View {
 
     private void drawCountdown(Canvas canvas) {
         // Ensure countdown text is visible on black background
-        String bgColor = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        String bgColor = ProgressStorage.getAppPrefs(context)
                 .getString("bg_color", "white");
         int textColor = bgColor.equals("black") ? Color.YELLOW : Color.BLUE;
 

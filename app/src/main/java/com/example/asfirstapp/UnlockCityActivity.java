@@ -163,7 +163,7 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
     private void showInstructions() {
 
         // Check game mode (casual or timed)
-        String mode = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
         if (mode.equals("timed")) {

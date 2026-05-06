@@ -54,7 +54,7 @@ public class CasualFinish extends BaseMenuActivity {
         btnTryTimedMode.setOnClickListener(v -> {
 
             // Save game mode as "timed" in local storage
-            getSharedPreferences("app_prefs", MODE_PRIVATE)
+            ProgressStorage.getAppPrefs(this)
                     .edit()
                     .putString("game_mode", "timed")
                     .apply();

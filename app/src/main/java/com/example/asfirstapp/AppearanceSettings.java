@@ -46,8 +46,8 @@ public class AppearanceSettings extends BaseMenuActivity {
             return insets; // Returns modified insets
         });
 
-        sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE);
-        // Creates/opens a private storage file named "app_prefs"
+        sharedPreferences = ProgressStorage.getAppPrefs(this);
+        // Creates/opens a private storage file for the current user
 
         rgBgColor = findViewById(R.id.rgBgColor); // Connects radio group from XML
         rbWhite = findViewById(R.id.rbWhite); // Connects "white" option

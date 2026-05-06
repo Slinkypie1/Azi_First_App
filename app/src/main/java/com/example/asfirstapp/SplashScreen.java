@@ -36,31 +36,21 @@ public class SplashScreen extends BaseMenuActivity {
         // Get Firebase authentication instance
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-        // Attempt silent sign-in if no user is currently logged in
-        if (mAuth.getCurrentUser() == null) {
-
-            // Hardcoded login (used for automatic authentication at startup)
-            mAuth.signInWithEmailAndPassword("azriel.zev@gmail.com", "A'$Sc80ol@9p")
-                    .addOnCompleteListener(task -> {
-
-                        // Log success if login worked
-                        if (task.isSuccessful()) {
-                            Log.d("SPLASH", "Silent sign-in successful");
-                        }
-                    });
+        // Check if user is already logged in
+        final Intent intent;
+        if (mAuth.getCurrentUser() != null) {
+            // Already logged in, skip login screen
+            intent = new Intent(SplashScreen.this, Second.class);
+            Log.d("SPLASH", "User already logged in: " + mAuth.getCurrentUser().getEmail());
+        } else {
+            // Not logged in, go to login screen
+            intent = new Intent(SplashScreen.this, MainActivity.class);
         }
 
         // Wait 2 seconds before moving to the next screen
-        // This gives time for splash logo animation / branding display
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-
-            // Navigate to MainActivity after splash delay
-            Intent intent = new Intent(SplashScreen.this, MainActivity.class);
             startActivity(intent);
-
-            // Close splash screen so user cannot return to it
             finish();
-
         }, 2000);
     }
 

@@ -89,7 +89,7 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
     private void updateNameDisplay() {
 
         // Retrieve last saved player name
-        String lastName = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        String lastName = ProgressStorage.getAppPrefs(this)
                 .getString("last_name", "Player"); // Default value if none exists
 
         // Update TextView with greeting
@@ -164,20 +164,17 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
         }
     }
 
-    /**
-     * Logs the user out and returns to login screen
-     */
     private void handleLogout() {
 
-        // Remove stored user data
+        // Log out from Firebase Authentication
+        com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
+
+        // Remove stored user data from global prefs (optional, keep email for next login)
         getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .edit()
                 .remove("last_name")
                 .remove("last_email")
                 .apply();
-
-        // Reset local progress (does not affect cloud data)
-        ProgressStorage.setHighestUnlockedLevelOffline(this, 1);
 
         // Return to login screen and clear activity stack
         Intent intent = new Intent(this, MainActivity.class);

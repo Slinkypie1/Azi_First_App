@@ -57,7 +57,7 @@ public class FinalScore extends BaseMenuActivity {
             ProgressStorage.setHighestUnlockedLevel(FinalScore.this, 1);
 
             // Go back to main menu
-            Intent intent = new Intent(FinalScore.this, MainActivity.class);
+            Intent intent = new Intent(FinalScore.this, Second.class);
 
             // Clear back stack so user cannot return here
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
