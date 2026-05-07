@@ -1,52 +1,52 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // החבילה אליה שייכת המחלקה הזו
 
-// Imports necessary Android classes for a service and audio playback
-import android.app.Service;       // Base class for Android services
-import android.content.Intent;    // Needed to start/stop service via Intents
-import android.content.SharedPreferences;
-import android.media.MediaPlayer; // Used to play audio files
-import android.os.IBinder;        // Used for bound services (not used here)
+// ייבוא מחלקות אנדרואיד נחוצות עבור שירות (Service) והשמעת אודיו
+import android.app.Service;       // מחלקת הבסיס לשירותי אנדרואיד
+import android.content.Intent;    // דרוש להפעלת/עצירת השירות באמצעות Intents
+import android.content.SharedPreferences; // לניהול העדפות משתמש
+import android.media.MediaPlayer; // משמש להשמעת קבצי אודיו
+import android.os.IBinder;        // משמש לשירותים קשורים (לא בשימוש כאן)
 
 /**
- * MusicService is a background service that plays looping music
- * throughout the app. It can play different tracks based on the intent passed.
+ * MusicService הוא שירות רקע שמשמיע מוזיקה בלולאה
+ * לאורך כל האפליקציה. הוא יכול להשמיע רצועות שונות בהתבסס על ה-intent שנשלח.
  */
 public class MusicService extends Service {
 
-    private MediaPlayer mediaPlayer; // MediaPlayer instance to handle audio
-    private int currentResId = -1;    // Currently playing resource ID
+    private MediaPlayer mediaPlayer; // מופע של MediaPlayer לטיפול באודיו
+    private int currentResId = -1;    // מזהה המשאב (Resource ID) שמתנגן כעת
 
     @Override
     public void onCreate() {
         super.onCreate();
-        // Called once when the service is first created
+        // נקרא פעם אחת כאשר השירות נוצר לראשונה
     }
 
     /**
-     * Called whenever startService() is invoked.
-     * Checks if a specific music resource was requested or if a pause/resume action is needed.
+     * נקרא בכל פעם שמתבצעת קריאה ל-startService().
+     * בודק אם התבקש משאב מוזיקה ספציפי או אם יש צורך בפעולת השהיה/חידוש.
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         SharedPreferences prefs = ProgressStorage.getAppPrefs(this);
-        // Access app preferences (used to store music settings and last played track)
+        // גישה להעדפות האפליקציה (משמש לאחסון הגדרות מוזיקה והרצועה האחרונה שהושמעה)
 
-        // 1. If a specific music track is requested, remember it
+        // 1. אם התבקשה רצועת מוזיקה ספציפית, זכור אותה
         if (intent != null && intent.hasExtra("MUSIC_RES_ID")) {
             int requestedMusicId = intent.getIntExtra("MUSIC_RES_ID", R.raw.main_activity_music);
             prefs.edit().putInt("last_music_res_id", requestedMusicId).apply();
-            // Save selected music so it can persist across screens
+            // שמירת המוזיקה שנבחרה כך שתמשיך בין מסכים
         }
 
-        // 2. Check if music is muted in preferences
+        // 2. בדיקה אם המוזיקה מושתקת בהעדפות
         if (prefs.getBoolean("music_muted", false)) {
             stopCurrentMusic();
             return START_STICKY;
-            // Stop music immediately if user has muted it
+            // עצירת המוזיקה מיד אם המשתמש השתיק אותה
         }
 
-        // 3. Determine which track should be playing now
-        // We use the ID from the intent if available, otherwise fallback to saved/default
+        // 3. קביעה איזו רצועה צריכה להתנגן עכשיו
+        // אנו משתמשים ב-ID מה-intent אם הוא קיים, אחרת חוזרים לשמור/ברירת מחדל
         int musicResId;
         if (intent != null && intent.hasExtra("MUSIC_RES_ID")) {
             musicResId = intent.getIntExtra("MUSIC_RES_ID", R.raw.main_activity_music);
@@ -54,30 +54,30 @@ public class MusicService extends Service {
             musicResId = prefs.getInt("last_music_res_id", R.raw.main_activity_music);
         }
 
-        // Handle pause/resume actions
+        // טיפול בפעולות השהיה (Pause) וחידוש (Resume)
         if (intent != null) {
             String action = intent.getAction();
 
             if ("ACTION_PAUSE".equals(action)) {
                 if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
-                    // Pause playback without destroying MediaPlayer
+                    // השהיית ההשמעה מבלי להרוס את ה-MediaPlayer
                 }
                 return START_STICKY;
 
             } else if ("ACTION_RESUME".equals(action)) {
                 if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
                     mediaPlayer.start();
-                    // Resume playback if paused
+                    // חידוש ההשמעה אם הייתה מושהית
                 }
                 return START_STICKY;
             }
         }
 
-        // 4. Only restart if the resource has changed or isn't playing
+        // 4. הפעלה מחדש רק אם המשאב השתנה או שאינו מתנגן
         if (mediaPlayer == null || currentResId != musicResId) {
             stopCurrentMusic();
-            // Stop and release old music before switching tracks
+            // עצירה ושחרור מוזיקה ישנה לפני החלפת רצועות
 
             currentResId = musicResId;
             mediaPlayer = MediaPlayer.create(this, musicResId);
@@ -85,28 +85,28 @@ public class MusicService extends Service {
             if (mediaPlayer != null) {
                 mediaPlayer.setLooping(true);
                 mediaPlayer.start();
-                // Start new music in loop mode
+                // התחלת מוזיקה חדשה במצב לולאה
             }
 
         } else if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
-            // Resume if it was created but not currently playing
+            // חידוש אם הוא נוצר אך אינו מתנגן כעת
         }
 
         return START_STICKY;
-        // Keeps service running even if system kills it
+        // שומר על השירות פועל גם אם המערכת סוגרת אותו
     }
 
     private void stopCurrentMusic() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
-            // Stop playback
+            // עצירת ההשמעה
 
             mediaPlayer.release();
-            // Free system resources
+            // שחרור משאבי מערכת
 
             mediaPlayer = null;
-            // Prevent memory leaks
+            // מניעת דליפות זיכרון
         }
     }
 
@@ -114,12 +114,12 @@ public class MusicService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stopCurrentMusic();
-        // Ensure music is fully stopped when service is destroyed
+        // וידוא שהמוזיקה נעצרת לחלוטין כאשר השירות מושמד
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-        // This is a started service, not a bound service
+        // זהו שירות מסוג started service, לא bound service
     }
 }

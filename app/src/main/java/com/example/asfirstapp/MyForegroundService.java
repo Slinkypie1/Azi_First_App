@@ -1,55 +1,55 @@
-package com.example.asfirstapp; // Package declaration
+package com.example.asfirstapp; // הצהרת חבילה
 
-// Imports needed for service, notifications, and Android version checks
-import android.app.NotificationChannel;     // For creating notification channels (Android 8+)
-import android.app.NotificationManager;     // To register notification channels
-import android.app.Service;                 // Base class for all services
-import android.content.Intent;              // Used to start the service or pass data
-import android.os.Build;                    // To check the Android version
-import android.os.IBinder;                  // Required for bound services
-import androidx.annotation.Nullable;        // For nullable annotations
-import androidx.core.app.NotificationCompat; // For building notifications
+// ייבוא נחוץ עבור שירות, התראות ובדיקות גרסת אנדרואיד
+import android.app.NotificationChannel;     // ליצירת ערוצי התראה (אנדרואיד 8+)
+import android.app.NotificationManager;     // לרישום ערוצי התראה
+import android.app.Service;                 // מחלקת בסיס לכל השירותים
+import android.content.Intent;              // משמש להפעלת השירות או העברת נתונים
+import android.os.Build;                    // לבדיקת גרסת האנדרואיד
+import android.os.IBinder;                  // נדרש עבור שירותים קשורים (bound services)
+import androidx.annotation.Nullable;        // עבור הערות (annotations) של ערכים שיכולים להיות null
+import androidx.core.app.NotificationCompat; // לבניית התראות
 
 /**
- * MyForegroundService keeps the app alive in the foreground.
- * Foreground services must display a persistent notification.
+ * MyForegroundService שומר על האפליקציה פעילה בקדמה.
+ * שירותי קדמה חייבים להציג התראה קבועה.
  */
 public class MyForegroundService extends Service {
 
     private static final String CHANNEL_ID = "ForegroundServiceChannel";
-    // Unique ID for the notification channel
+    // מזהה ייחודי עבור ערוץ ההתראות
 
     @Override
     public void onCreate() {
         super.onCreate();
-        // Called when the service is first created (once per lifecycle)
+        // נקרא כאשר השירות נוצר לראשונה (פעם אחת בכל מחזור חיים)
 
         createNotificationChannel();
-        // Ensure the notification channel exists for Android 8.0+
+        // וידוא שקיים ערוץ התראות עבור אנדרואיד 8.0 ומעלה
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // Build the notification that the user sees while the service runs
+        // בניית ההתראה שהמשתמש רואה בזמן שהשירות רץ
 
         NotificationCompat.Builder notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("App is running")
-                // Notification title
+                // כותרת ההתראה
 
                 .setContentText("This app is staying active in the foreground.")
-                // Notification description text
+                // טקסט תיאור ההתראה
 
                 .setSmallIcon(R.drawable.app_icon)
-                // Small icon shown in the status bar
+                // אייקון קטן המוצג בשורת המצב
 
                 .setPriority(NotificationCompat.PRIORITY_LOW);
-        // Low priority reduces interruption (no sound/alert)
+        // עדיפות נמוכה מפחיתה הפרעות (ללא צליל/התראה קופצת)
 
         startForeground(1, notification.build());
-        // Promotes service to foreground so system keeps it alive
+        // מקדם את השירות לקדמה כך שהמערכת תשמור עליו פעיל
 
         return START_STICKY;
-        // If system kills service, it will try to recreate it
+        // אם המערכת סוגרת את השירות, היא תנסה ליצור אותו מחדש
     }
 
     @Override
@@ -57,35 +57,35 @@ public class MyForegroundService extends Service {
         super.onDestroy();
 
         stopForeground(true);
-        // Removes the foreground notification and stops foreground mode
+        // הסרת התראת הקדמה והפסקת מצב הקדמה
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-        // This service is not bound to any activity
+        // שירות זה אינו קשור לאף אקטיביטי
     }
 
     /**
-     * Creates a notification channel for Android 8.0+.
-     * Required to show notifications in foreground services.
+     * יוצר ערוץ התראות עבור אנדרואיד 8.0 ומעלה.
+     * נדרש כדי להציג התראות בשירותי קדמה.
      */
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             NotificationChannel serviceChannel = new NotificationChannel(
-                    CHANNEL_ID, // Unique channel ID
-                    "Foreground Service Channel", // User-visible channel name
-                    NotificationManager.IMPORTANCE_LOW // Low importance (silent)
+                    CHANNEL_ID, // מזהה ערוץ ייחודי
+                    "Foreground Service Channel", // שם הערוץ הגלוי למשתמש
+                    NotificationManager.IMPORTANCE_LOW // חשיבות נמוכה (שקט)
             );
 
             NotificationManager manager = getSystemService(NotificationManager.class);
-            // Access system notification manager
+            // גישה למנהל ההתראות של המערכת
 
             if (manager != null) {
                 manager.createNotificationChannel(serviceChannel);
-                // Register channel with system
+                // רישום הערוץ במערכת
             }
         }
     }

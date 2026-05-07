@@ -1,58 +1,59 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // הגדרת החבילה אליה שייכת המחלקה הזו
 
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.widget.VideoView;
+import android.content.Intent; // משמש למעבר בין אקטיביטיז (מסכים)
+import android.net.Uri; // משמש לטיפול בכתובות URI של משאבים
+import android.os.Bundle; // מחזיק נתוני מצב שמורים עבור מחזור החיים של האקטיביטי
+import android.widget.VideoView; // רכיב ממשק משתמש להצגת והפעלת וידאו
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.EdgeToEdge; // מאפשר פריסת מסך מלא מקצה לקצה
+import androidx.appcompat.app.AppCompatActivity; // מחלקת בסיס לאקטיביטיז עם תמיכה ב-AppCompat
 
 /**
  * VideoSplashScreen
  * ------------------
- * First screen shown when the app launches.
- * Plays a full-screen video and then automatically navigates
- * to the next splash screen.
+ * המסך הראשון שמוצג כשהאפליקציה עולה.
+ * מפעיל וידאו במסך מלא ולאחר מכן עובר אוטומטית
+ * למסך הפתיחה הבא.
  */
 public class VideoSplashScreen extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה ללוגיקת ההגדרה של ההורה
 
-        // Enable edge-to-edge fullscreen layout
+        // הפעלת פריסת מסך מלא (קצה לקצה)
         EdgeToEdge.enable(this);
 
-        // Set layout containing the VideoView
+        // הגדרת קובץ ה-XML של הפריסה המכיל את ה-VideoView
         setContentView(R.layout.activity_video_splash);
 
-        // Reference to VideoView in layout
+        // קישור לרכיב ה-VideoView שנמצא בפריסה
         VideoView videoView = findViewById(R.id.videoView);
 
-        // Build URI pointing to video stored in res/raw
+        // בניית כתובת URI המצביעה על הוידאו המאוחסן בתיקיית res/raw
         String path = "android.resource://" + getPackageName() + "/" + R.raw.slinkypie1_launch;
-        videoView.setVideoURI(Uri.parse(path));
+        videoView.setVideoURI(Uri.parse(path)); // הגדרת הוידאו לנגן
 
-        // When video finishes, go to next screen
+        // כאשר הוידאו מסתיים, מעבר למסך הבא
         videoView.setOnCompletionListener(mp -> navigateToNext());
 
-        // If video fails to play, still continue to next screen
+        // אם הוידאו נכשל בהפעלה, עדיין נמשיך למסך הבא
         videoView.setOnErrorListener((mp, what, extra) -> {
-            navigateToNext();
-            return true;
+            navigateToNext(); // קריאה לפונקציית הניווט
+            return true; // ציון שהשגיאה טופלה
         });
 
-        // Start video playback
+        // התחלת הפעלת הוידאו
         videoView.start();
     }
 
     /**
-     * Navigates from video splash screen to the main splash screen.
+     * מנווט ממסך וידאו הפתיחה אל מסך הפתיחה הראשי.
      */
     private void navigateToNext() {
+        // יצירת אינטנט למעבר למסך SplashScreen
         Intent intent = new Intent(VideoSplashScreen.this, SplashScreen.class);
-        startActivity(intent);
-        finish(); // Close this activity so user cannot return to it
+        startActivity(intent); // הפעלת האקטיביטי הבאה
+        finish(); // סגירת האקטיביטי הנוכחית כדי שהמשתמש לא יוכל לחזור אליה
     }
 }

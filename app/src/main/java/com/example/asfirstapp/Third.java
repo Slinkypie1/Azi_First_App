@@ -1,81 +1,81 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // הגדרת החבילה אליה שייכת המחלקה הזו
 
-// Imports for activity management, UI, and modern layouts
-import android.content.Intent;           // Used to navigate between screens
-import android.os.Bundle;                // Stores activity state
-import android.view.View;                // Base class for UI elements and click handling
-import android.widget.Button;            // Represents clickable buttons
-import android.widget.TextView;          // Displays text
+// ייבוא עבור ניהול אקטיביטי, ממשק משתמש ופריסות מודרניות
+import android.content.Intent;           // משמש לניווט בין מסכים
+import android.os.Bundle;                // מאחסן את מצב האקטיביטי
+import android.view.View;                // מחלקת בסיס לרכיבי ממשק משתמש וטיפול בלחיצות
+import android.widget.Button;            // מייצג כפתורים לחיצים
+import android.widget.TextView;          // מציג טקסט
 
-import androidx.activity.EdgeToEdge;           // Enables modern edge-to-edge fullscreen layouts
-import androidx.appcompat.app.AppCompatActivity; // Base class for backward-compatible activities
-import androidx.core.view.ViewCompat;          // Utilities for view insets and padding
+import androidx.activity.EdgeToEdge;           // מאפשר פריסות מסך מלא מודרניות
+import androidx.appcompat.app.AppCompatActivity; // מחלקת בסיס לאקטיביטיז עם תאימות לאחור
+import androidx.core.view.ViewCompat;          // כלי עזר עבור שולי תצוגה וריפוח
 
 /**
- * Third Activity
+ * אקטיביטי Third
  * --------------
- * This is a multiple-choice quiz screen (Question 3).
- * The user selects one of four possible answers.
- * One answer is correct and leads to a success screen,
- * while all others lead to a failure screen.
+ * זהו מסך חידון רב-ברירה (שאלה 1).
+ * המשתמש בוחר אחת מתוך ארבע תשובות אפשריות.
+ * תשובה אחת נכונה ומובילה למסך הצלחה,
+ * בעוד שכל האחרות מובילות למסך כישלון.
  */
 public class Third extends BaseMenuActivity implements View.OnClickListener {
 
-    // UI components
-    private TextView TV1;       // Displays the question text
-    private Button BtClick2;    // Answer option 1
-    private Button BtClick3;    // Answer option 2 (correct answer)
-    private Button BtClick4;    // Answer option 3
-    private Button BtClick5;    // Answer option 4
+    // רכיבי ממשק משתמש
+    private TextView TV1;       // מציג את טקסט השאלה
+    private Button BtClick2;    // אפשרות תשובה 1
+    private Button BtClick3;    // אפשרות תשובה 2 (התשובה הנכונה)
+    private Button BtClick4;    // אפשרות תשובה 3
+    private Button BtClick5;    // אפשרות תשובה 4
 
-    // Timer used to track how long the user takes to answer
+    // טיימר המשמש למעקב אחר הזמן שלקח למשתמש לענות
     private long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה לשיטת ההורה
 
-        // Enable modern full-screen edge-to-edge layout
+        // הפעלת פריסת מסך מלא מודרנית (קצה לקצה)
         EdgeToEdge.enable(this);
 
-        // Set the layout XML file for this screen
+        // הגדרת קובץ ה-XML של הפריסה עבור מסך זה
         setContentView(R.layout.activity_third);
 
-        // Start background music for this level/screen
+        // הפעלת מוזיקת רקע עבור שלב/מסך זה
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.third_music);
         startService(serviceIntent);
 
-        // Record the time when this question screen is shown
+        // תיעוד הזמן שבו מסך השאלה הוצג
         startTime = System.currentTimeMillis();
 
-        // Attach UI initialization after layout is fully applied
-        // Ensures all views exist before findViewById is called
+        // חיבור אתחול ממשק המשתמש לאחר החלת הפריסה במלואה
+        // מבטיח שכל התצוגות קיימות לפני הקריאה ל-findViewById
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main2), (v, insets) -> {
 
-            // Initialize all buttons and text views
+            // אתחול כל הכפתורים ותצוגות הטקסט
             initViews();
 
-            // Return system window insets unchanged
+            // החזרת שולי המערכת ללא שינוי
             return insets;
         });
     }
 
     /**
-     * Links XML UI elements to Java variables and sets click listeners
+     * מחבר רכיבי ממשק משתמש מה-XML למשתני ה-Java ומגדיר מאזיני לחיצה
      */
     private void initViews() {
 
-        // Connect question text view
+        // קישור תצוגת טקסט השאלה
         TV1 = findViewById(R.id.TV1);
 
-        // Connect answer buttons
+        // קישור כפתורי התשובות
         BtClick2 = findViewById(R.id.BtClick2);
-        BtClick3 = findViewById(R.id.BtClick3); // Correct answer
+        BtClick3 = findViewById(R.id.BtClick3); // התשובה הנכונה
         BtClick4 = findViewById(R.id.BtClick4);
         BtClick5 = findViewById(R.id.BtClick5);
 
-        // Set click listener for all buttons
+        // הגדרת מאזין לחיצה עבור כל הכפתורים
         BtClick2.setOnClickListener(this);
         BtClick3.setOnClickListener(this);
         BtClick4.setOnClickListener(this);
@@ -83,29 +83,29 @@ public class Third extends BaseMenuActivity implements View.OnClickListener {
     }
 
     /**
-     * Handles user button clicks for all answer choices
+     * מטפל בלחיצות משתמש עבור כל אפשרויות התשובה
      */
     @Override
     public void onClick(View view) {
 
-        // If correct answer is selected
+        // אם נבחרה התשובה הנכונה
         if (view == BtClick3) {
 
-            // Calculate time taken to answer correctly
+            // חישוב הזמן שלקח לענות נכונה
             long timeTaken = System.currentTimeMillis() - startTime;
 
-            // Navigate to success screen
+            // ניווט למסך ההצלחה
             Intent intent = new Intent(this, CorrectScreen1.class);
 
-            // Pass time taken to next activity
+            // העברת הזמן שלקח לאקטיביטי הבאה
             intent.putExtra("TIME_TAKEN", timeTaken);
 
-            // Start success activity
+            // הפעלת אקטיביטי ההצלחה
             startActivity(intent);
 
         } else {
 
-            // Wrong answer selected → go to failure screen
+            // נבחרה תשובה שגויה ← מעבר למסך כישלון
             Intent intent = new Intent(this, Failure.class);
             startActivity(intent);
         }

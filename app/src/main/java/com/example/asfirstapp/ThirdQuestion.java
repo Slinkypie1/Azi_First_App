@@ -1,72 +1,72 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // הגדרת החבילה אליה שייכת המחלקה הזו
 
-// Imports for activity management, UI, and modern layouts
-import android.content.Intent;           // Navigate between screens
-import android.os.Bundle;                // Stores activity state
-import android.view.View;                // Base class for UI elements
-import android.widget.Button;            // Represents clickable buttons
-import android.widget.TextView;          // Displays text
+// ייבוא עבור ניהול אקטיביטי, ממשק משתמש ופריסות מודרניות
+import android.content.Intent;           // ניווט בין מסכים
+import android.os.Bundle;                // מאחסן את מצב האקטיביטי
+import android.view.View;                // מחלקת בסיס לרכיבי ממשק משתמש
+import android.widget.Button;            // מייצג כפתורים לחיצים
+import android.widget.TextView;          // מציג טקסט
 
-import androidx.activity.EdgeToEdge;           // Enables edge-to-edge fullscreen layout
-import androidx.appcompat.app.AppCompatActivity; // Base class for backward-compatible activities
-import androidx.core.view.ViewCompat;          // Utilities for view insets
+import androidx.activity.EdgeToEdge;           // מאפשר פריסת מסך מלא (קצה לקצה)
+import androidx.appcompat.app.AppCompatActivity; // מחלקת בסיס לאקטיביטיז עם תאימות לאחור
+import androidx.core.view.ViewCompat;          // כלי עזר עבור שולי תצוגה
 
 /**
- * ThirdQuestion Activity
+ * אקטיביטי ThirdQuestion
  * ----------------------
- * Displays the third multiple-choice quiz question with four answer buttons.
- * Handles button clicks to navigate to either the correct answer screen or the failure screen.
+ * מציג את שאלת החידון השלישית (רב-ברירה) עם ארבעה כפתורי תשובה.
+ * מטפל בלחיצות על כפתורים כדי לנווט למסך התשובה הנכונה או למסך הכישלון.
  */
 public class ThirdQuestion extends BaseMenuActivity implements View.OnClickListener {
 
-    // UI components
-    private TextView TV3;       // Displays the question text
-    private Button BtClick11;   // Answer option 1
-    private Button BtClick12;   // Answer option 2
-    private Button BtClick13;   // Answer option 3 (CORRECT)
-    private Button BtClick14;   // Answer option 4
+    // רכיבי ממשק משתמש
+    private TextView TV3;       // מציג את טקסט השאלה
+    private Button BtClick11;   // אפשרות תשובה 1
+    private Button BtClick12;   // אפשרות תשובה 2
+    private Button BtClick13;   // אפשרות תשובה 3 (נכונה)
+    private Button BtClick14;   // אפשרות תשובה 4
 
-    private long startTime;     // Records the time when the question is displayed
+    private long startTime;     // מתעד את הזמן שבו השאלה מוצגת
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה ללוגיקת ההגדרה של ההורה
 
-        // Enable edge-to-edge fullscreen layout
+        // הפעלת פריסת מסך מלא מקצה לקצה
         EdgeToEdge.enable(this);
 
-        // Load layout XML for this activity
+        // טעינת קובץ ה-XML של הפריסה עבור אקטיביטי זו
         setContentView(R.layout.activity_third_question);
 
-        // Start background music for Level 3 (ThirdQuestion screen)
+        // הפעלת מוזיקת רקע עבור שלב 3 (מסך ThirdQuestion)
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.third_question_music);
         startService(serviceIntent);
 
-        // Record start time for timing how long user takes to answer
+        // תיעוד זמן ההתחלה כדי למדוד כמה זמן לוקח למשתמש לענות
         startTime = System.currentTimeMillis();
 
-        // Attach window inset listener to ensure UI is properly initialized after layout is drawn
+        // הגדרת מאזין לשולי החלון כדי להבטיח שממשק המשתמש מאותחל כראוי לאחר ציור הפריסה
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            initViews();   // Initialize UI components
-            return insets; // Keep system insets unchanged
+            initViews();   // אתחול רכיבי ממשק המשתמש
+            return insets; // שמירה על שולי המערכת ללא שינוי
         });
     }
 
     /**
-     * Initializes UI components and sets click listeners for all buttons
+     * מאתחל רכיבי ממשק משתמש ומגדיר מאזיני לחיצה לכל הכפתורים
      */
     private void initViews() {
-        // Link TextView from XML layout
+        // קישור ה-TextView מפריסת ה-XML
         TV3 = findViewById(R.id.TV3);
 
-        // Link answer buttons from XML layout
+        // קישור כפתורי התשובות מפריסת ה-XML
         BtClick11 = findViewById(R.id.BtClick11);
         BtClick12 = findViewById(R.id.BtClick12);
-        BtClick13 = findViewById(R.id.BtClick13); // Correct answer
+        BtClick13 = findViewById(R.id.BtClick13); // התשובה הנכונה
         BtClick14 = findViewById(R.id.BtClick14);
 
-        // Set click listener for all buttons
+        // הגדרת מאזין לחיצה עבור כל הכפתורים
         BtClick11.setOnClickListener(this);
         BtClick12.setOnClickListener(this);
         BtClick13.setOnClickListener(this);
@@ -74,25 +74,25 @@ public class ThirdQuestion extends BaseMenuActivity implements View.OnClickListe
     }
 
     /**
-     * Handles button click events for all answer options
+     * מטפל באירועי לחיצה על כפתורים עבור כל אפשרויות התשובה
      */
     @Override
     public void onClick(View view) {
         if (view == BtClick13) {
-            // Correct answer selected
+            // נבחרה התשובה הנכונה
 
-            // Calculate time taken to answer question
+            // חישוב הזמן שלקח לענות על השאלה
             long timeTaken = System.currentTimeMillis() - startTime;
 
-            // Navigate to success screen and pass time
+            // ניווט למסך ההצלחה והעברת הזמן
             Intent intent = new Intent(this, CorrectScreen3.class);
             intent.putExtra("TIME_TAKEN", timeTaken);
             startActivity(intent);
 
         } else {
-            // Wrong answer selected
+            // נבחרה תשובה שגויה
 
-            // Navigate to failure screen
+            // ניווט למסך כישלון
             Intent intent = new Intent(this, Failure.class);
             startActivity(intent);
         }

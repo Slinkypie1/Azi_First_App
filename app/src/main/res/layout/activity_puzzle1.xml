@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- פריסה עבור פאזל 1 המבוסס על חיישן אור -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,6 +12,7 @@
     android:padding="16dp"
     tools:context=".Puzzle1">
 
+    <!-- הצגת החידה למשתמש -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,7 +20,7 @@
         android:textColor="@color/black"
         android:textSize="18sp" />
 
-
+    <!-- תצוגת טקסט המראה את נתוני חיישן האור (בפאזל זה המשתמש צריך להחשיך את החיישן) -->
     <TextView
         android:id="@+id/lightTextView"
         android:layout_width="wrap_content"

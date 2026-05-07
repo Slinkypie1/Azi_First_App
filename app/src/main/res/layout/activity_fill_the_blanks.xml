@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- פריסה עבור שלב 7 (FillTheBlanks) - משחק השלמת מילים בציטוט -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -10,34 +11,48 @@
     tools:context=".FillTheBlanks"
     android:background="@color/white">
 
+    <!-- הצגת הציטוט עם המילים החסרות -->
     <TextView
         android:id="@+id/quoteText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="18sp"
         android:text="The greatest _____ in living lies not in never _____, but in _____ every time we fall." />
+
+    <!-- תווית עבור המילה החסרה הראשונה -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="choices for first blank:"
         android:textColor="@color/black"
         android:textSize="16sp"/>
+
+    <!-- בחירת המילה עבור המקום הראשון -->
     <Spinner android:id="@+id/spinner1" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+
+    <!-- תווית עבור המילה החסרה השנייה -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="choices for second blank:"
         android:textColor="@color/black"
         android:textSize="16sp"/>
+
+    <!-- בחירת המילה עבור המקום השני -->
     <Spinner android:id="@+id/spinner2" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+
+    <!-- תווית עבור המילה החסרה השלישית -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="choices for third blank:"
         android:textColor="@color/black"
         android:textSize="16sp"/>
+
+    <!-- בחירת המילה עבור המקום השלישי -->
     <Spinner android:id="@+id/spinner3" android:layout_width="wrap_content" android:layout_height="wrap_content" />
 
+    <!-- כפתור לבדיקת התשובות -->
     <Button
         android:id="@+id/submitButton"
         android:layout_width="wrap_content"

@@ -1,115 +1,115 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // הגדרת החבילה אליה שייכת המחלקה הזו
 
-import android.content.Intent; // Used if you want to navigate to another activity
-import android.os.Bundle;     // Holds activity state information
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;     // Base class for all UI widgets
-import android.widget.Button; // Button UI element
-import android.widget.EditText; // Editable text input
-import android.widget.TextView; // Text display
+import android.content.Intent; // משמש למעבר בין אקטיביטיז (מסכים)
+import android.os.Bundle;     // מחזיק נתוני מצב שמורים עבור מחזור החיים של האקטיביטי
+import android.view.Menu;     // מייצג את תפריט האפשרויות
+import android.view.MenuItem; // מייצג פריט בודד בתוך התפריט
+import android.view.View;     // מחלקת הבסיס לכל רכיבי ממשק המשתמש
+import android.widget.Button; // רכיב כפתור בממשק המשתמש
+import android.widget.EditText; // שדה להזנת טקסט (לא בשימוש פעיל כאן)
+import android.widget.TextView; // רכיב להצגת טקסט
 
-import androidx.activity.EdgeToEdge; // Enables edge-to-edge layout support
-import androidx.core.view.ViewCompat; // For applying window insets
+import androidx.activity.EdgeToEdge; // מאפשר תמיכה בפריסת מסך מלא מקצה לקצה
+import androidx.core.view.ViewCompat; // מספק כלי עזר לתאימות עבור תצוגות (Views)
 
 /**
- * Second Activity
+ * אקטיביטי Second
  * ----------------
- * This is the main hub screen after login.
- * It shows a welcome message, allows the user to start the game,
- * open settings, or switch user accounts.
+ * זהו מסך הבית הראשי (הלובי) לאחר ההתחברות.
+ * הוא מציג הודעת ברוך הבא, מאפשר למשתמש להתחיל את המשחק,
+ * לפתוח הגדרות, או להחליף חשבון משתמש.
  */
 public class Second extends BaseMenuActivity implements View.OnClickListener {
 
-    // UI elements
-    private TextView TV;          // Displays welcome message to the player
-    private EditText ET;          // Input field for player name (currently optional)
-    private Button BtClick1;      // Button to start Level 1
-    private Button BtSettings;    // Button to open settings screen
-    private Button btnSwitchUser; // Button to log out and switch user
+    // רכיבי ממשק משתמש
+    private TextView TV;          // מציג הודעת ברוך הבא לשחקן
+    private EditText ET;          // שדה קלט לשם השחקן (אופציונלי כרגע)
+    private Button BtClick1;      // כפתור להתחלת שלב 1
+    private Button BtSettings;    // כפתור לפתיחת מסך הגדרות המשחק
+    private Button btnSwitchUser; // כפתור להתנתקות והחלפת משתמש
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה ללוגיקת ההגדרה של ההורה
 
-        // Enable modern edge-to-edge layout (content extends behind system bars)
+        // הפעלת פריסת מסך מלא מודרנית (התוכן נמשך אל מאחורי סרגלי המערכת)
         EdgeToEdge.enable(this);
 
-        // Set the layout XML for this activity
+        // הגדרת קובץ ה-XML של הפריסה עבור אקטיביטי זו
         setContentView(R.layout.activity_second);
 
-        // Start background music for this screen
+        // הפעלת מוזיקת רקע עבור מסך זה
         Intent serviceIntent = new Intent(this, MusicService.class);
 
-        // Pass which music track should be played
+        // העברת מזהה רצועת המוזיקה שיש להשמיע
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.second_music);
 
-        // Start the music service
+        // הפעלת שירות המוזיקה
         startService(serviceIntent);
 
-        // Initialize all UI components and listeners
+        // אתחול כל רכיבי ממשק המשתמש והמאזינים
         initViews();
 
-        // Apply window insets (safe area handling for system bars)
+        // טיפול בשולי חלון (התאמה לשטחים בטוחים של סרגלי מערכת)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main1), (v, insets) -> insets);
     }
 
     @Override
     protected void onResume() {
-        super.onResume();
+        super.onResume(); // המשך מחזור החיים
 
-        // Refresh welcome text every time the activity comes back into view
+        // רענון טקסט ברוך הבא בכל פעם שהאקטיביטי חוזרת לתצוגה
         updateNameDisplay();
     }
 
     /**
-     * Initializes UI components and sets click listeners
+     * מאתחל רכיבי ממשק משתמש ומגדיר מאזינים ללחיצה
      */
     private void initViews() {
 
-        // Link XML views to Java variables
+        // קישור התצוגות מה-XML למשתני ה-Java
         TV = findViewById(R.id.TV);
         ET = findViewById(R.id.ET);
         BtClick1 = findViewById(R.id.BtClick1);
         BtSettings = findViewById(R.id.BtSettings);
         btnSwitchUser = findViewById(R.id.btnSwitchUser);
 
-        // Show stored player name in welcome text
+        // הצגת שם השחקן השמור בטקסט ברוך הבא
         updateNameDisplay();
 
-        // Set click listeners for all buttons
+        // הגדרת מאזיני לחיצה עבור כל הכפתורים
         BtClick1.setOnClickListener(this);
         BtSettings.setOnClickListener(this);
         btnSwitchUser.setOnClickListener(this);
     }
 
     /**
-     * Updates welcome text using saved player name from SharedPreferences
+     * מעדכן את טקסט ברוך הבא באמצעות שם השחקן השמור ב-SharedPreferences
      */
     private void updateNameDisplay() {
 
-        // Retrieve last saved player name
+        // שליפת שם השחקן האחרון שנשמר
         String lastName = ProgressStorage.getAppPrefs(this)
-                .getString("last_name", "Player"); // Default value if none exists
+                .getString("last_name", "Player"); // ערך ברירת מחדל אם לא קיים
 
-        // Update TextView with greeting
+        // עדכון ה-TextView עם הברכה
         TV.setText("Ready " + lastName + "?");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        // Add Achievements button to top menu
+        // הוספת כפתור הישגים לתפריט העליון
         MenuItem trophyItem = menu.add(Menu.NONE, 1002, 0, "Achievements");
         trophyItem.setIcon(R.drawable.achievements);
         trophyItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        // Add Settings button to top menu
+        // הוספת כפתור הגדרות לתפריט העליון
         MenuItem settingsItem = menu.add(Menu.NONE, 1001, 1, "Settings");
         settingsItem.setIcon(R.drawable.light_dark_mode);
         settingsItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        // Load base menu items from parent class (Home, Level Select, etc.)
+        // טעינת פריטי תפריט הבסיס ממחלקת האב (בית, בחירת שלבים וכו')
         super.onCreateOptionsMenu(menu);
 
         return true;
@@ -118,47 +118,47 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        // Open Appearance Settings screen
+        // פתיחת מסך הגדרות מראה
         if (item.getItemId() == 1001) {
             Intent intent = new Intent(this, AppearanceSettings.class);
             startActivity(intent);
             return true;
         }
 
-        // Open Trophy Room (Achievements screen)
+        // פתיחת חדר הגביעים (מסך הישגים)
         if (item.getItemId() == 1002) {
             Intent intent = new Intent(this, TrophyRoom.class);
             startActivity(intent);
             return true;
         }
 
-        // Let BaseMenuActivity handle other menu actions
+        // אפשור ל-BaseMenuActivity לטפל בשאר פעולות התפריט
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onClick(View view) {
 
-        // Start game when main button is pressed
+        // התחלת המשחק כאשר הכפתור הראשי נלחץ
         if (view.getId() == R.id.BtClick1) {
 
-            // Record game start time for tracking total playtime
+            // תיעוד זמן תחילת המשחק למעקב אחר זמן משחק כולל
             ProgressStorage.setGameStartTime(this, System.currentTimeMillis());
 
-            // Reset "perfect run" tracking flag
+            // איפוס דגל המעקב אחר "ריצה מושלמת"
             ProgressStorage.resetPerfectionistFlag();
 
-            // Start Level 1
+            // התחלת שלב 1
             startLevel(1);
 
         }
-        // Open game settings screen
+        // פתיחת מסך הגדרות משחק
         else if (view.getId() == R.id.BtSettings) {
             Intent intent = new Intent(this, GameSettings.class);
             startActivity(intent);
 
         }
-        // Switch user / log out
+        // החלפת משתמש / התנתקות
         else if (view.getId() == R.id.btnSwitchUser) {
             handleLogout();
         }
@@ -166,17 +166,17 @@ public class Second extends BaseMenuActivity implements View.OnClickListener {
 
     private void handleLogout() {
 
-        // Log out from Firebase Authentication
+        // התנתקות מאימות Firebase
         com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
 
-        // Remove stored user data from global prefs (optional, keep email for next login)
+        // הסרת נתוני משתמש שמורים מהעדפות גלובליות (אופציונלי, שומר את המייל להתחברות הבאה)
         getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .edit()
                 .remove("last_name")
                 .remove("last_email")
                 .apply();
 
-        // Return to login screen and clear activity stack
+        // חזרה למסך הכניסה וניקוי מחסנית האקטיביטיז
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 

@@ -1,6 +1,6 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // הגדרת החבילה אליה שייכת המחלקה הזו
 
-// Imports for Android UI, maps, location, and navigation
+// ייבוא עבור ממשק משתמש של אנדרואיד, מפות, מיקום וניווט
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -25,74 +25,74 @@ import java.util.List;
 /**
  * UnlockCityActivity
  * ------------------
- * Map-based puzzle where the player "unlocks" cities by guessing their location.
- * The player moves the map to the correct position and submits a guess.
- * After a set number of correct guesses, the player advances to the success screen.
- * The player has 3 hearts; losing all results in failure.
+ * פאזל מבוסס מפה שבו השחקן "פותח" ערים על ידי ניחוש המיקום שלהן.
+ * השחקן מזיז את המפה למיקום הנכון ומגיש ניחוש.
+ * לאחר מספר מוגדר של ניחושים נכונים, השחקן מתקדם למסך ההצלחה.
+ * לשחקן יש 3 לבבות; איבוד כולם מוביל לכישלון.
  */
 public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;           // Google Map instance used for gameplay
-    private TextView clueText;        // Displays the clue for the current city
-    private TextView heartsText;      // Displays remaining hearts
-    private Button submitGuessBtn;    // Button to submit user's map guess
+    private GoogleMap mMap;           // מופע של מפת גוגל המשמש למשחק
+    private TextView clueText;        // מציג את הרמז עבור העיר הנוכחית
+    private TextView heartsText;      // מציג את מספר הלבבות שנותרו
+    private Button submitGuessBtn;    // כפתור להגשת ניחוש המפה של המשתמש
 
-    private List<City> cityList = new ArrayList<>();   // Master list of all available cities
-    private List<City> shuffledCities;                // Randomized list used during gameplay
-    private int currentIndex = 0;                     // Tracks position in shuffled list
-    private City currentCity;                         // The current city the player must guess
+    private List<City> cityList = new ArrayList<>();   // רשימה ראשית של כל הערים הזמינות
+    private List<City> shuffledCities;                // רשימה מעורבבת המשמשת במהלך המשחק
+    private int currentIndex = 0;                     // עוקב אחר המיקום ברשימה המעורבבת
+    private City currentCity;                         // העיר הנוכחית שהשחקן צריך לנחש
 
-    private int correctGuessCount = 0;               // Number of correctly guessed cities
-    private int hearts = 3;                          // Player lives
-    private static final int TOTAL_CORRECT_TO_FINISH = 6; // Required correct guesses to win
-    private static final float ALLOWED_RADIUS_METERS = 500_000; // Acceptable error radius (500 km)
+    private int correctGuessCount = 0;               // מספר הערים שנוחשו נכונה
+    private int hearts = 3;                          // חיי השחקן
+    private static final int TOTAL_CORRECT_TO_FINISH = 6; // מספר ניחושים נכונים נדרש לניצחון
+    private static final float ALLOWED_RADIUS_METERS = 500_000; // רדיוס שגיאה מקובל (500 ק"מ)
 
-    private long startTime;                           // Tracks level start time
-    private long pauseStartTime;                      // Tracks when instruction dialog was shown
+    private long startTime;                           // עוקב אחר זמן תחילת השלב
+    private long pauseStartTime;                      // עוקב אחר מתי הוצג דיאלוג ההוראות
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה לשיטת ההורה
 
-        // Load activity layout
+        // טעינת פריסת האקטיביטי
         setContentView(R.layout.activity_unlock_city);
 
-        // Start background music for Unlock City level
+        // הפעלת מוזיקת רקע עבור שלב "Unlock City"
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.unlock_city_music);
         startService(serviceIntent);
 
-        // Link UI components to layout views
+        // קישור רכיבי ממשק משתמש לתצוגות בפריסה
         clueText = findViewById(R.id.clueText);
         heartsText = findViewById(R.id.heartsText);
         submitGuessBtn = findViewById(R.id.submitGuessBtn);
-        submitGuessBtn.setEnabled(false); // Disabled until instructions are acknowledged
+        submitGuessBtn.setEnabled(false); // מושבת עד לאישור ההוראות
 
-        // Show instructions before gameplay starts
+        // הצגת הוראות לפני תחילת המשחק
         showInstructions();
 
-        // Initialize hearts UI display
+        // אתחול תצוגת ממשק המשתמש של הלבבות
         updateHeartsUI();
 
-        // Load and prepare city data
+        // טעינה והכנה של נתוני הערים
         setupCities();
         shuffleCities();
 
-        // Initialize Google Maps fragment asynchronously
+        // אתחול רכיב מפות גוגל בצורה אסינכרונית
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         if (mapFragment != null) {
-            mapFragment.getMapAsync(this); // Triggers onMapReady when loaded
+            mapFragment.getMapAsync(this); // מפעיל את onMapReady כשהמפה נטענת
         }
 
-        // Handle guess submission button click
+        // טיפול בלחיצה על כפתור הגשת הניחוש
         submitGuessBtn.setOnClickListener(v -> {
-            if (mMap == null || currentCity == null) return; // Safety check
+            if (mMap == null || currentCity == null) return; // בדיקת בטיחות
 
-            // Use map center as the player's guess location
+            // שימוש במרכז המפה כמיקום הניחוש של השחקן
             LatLng guess = mMap.getCameraPosition().target;
 
-            // Calculate distance between guess and actual city location
+            // חישוב המרחק בין הניחוש למיקום העיר בפועל
             float[] distanceResult = new float[1];
             Location.distanceBetween(
                     guess.latitude, guess.longitude,
@@ -100,40 +100,40 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
                     distanceResult);
 
             if (distanceResult[0] <= ALLOWED_RADIUS_METERS) {
-                // Correct guess
+                // ניחוש נכון
                 correctGuessCount++;
                 Toast.makeText(this,
                         "✅ Correct! You unlocked " + currentCity.name + "!",
                         Toast.LENGTH_LONG).show();
 
                 if (correctGuessCount >= TOTAL_CORRECT_TO_FINISH) {
-                    // Award achievement for completion
+                    // הענקת הישג עבור סיום
                     ProgressStorage.awardAchievement(this, ProgressStorage.ACHIEV_WORLD_TRAVELER);
 
-                    // Finish level and go to success screen
+                    // סיום השלב ומעבר למסך הצלחה
                     long timeTaken = System.currentTimeMillis() - startTime;
                     Intent intent = new Intent(this, CorrectScreen9.class);
                     intent.putExtra("TIME_TAKEN", timeTaken);
                     startActivity(intent);
                     finish();
                 } else {
-                    // Load next city
+                    // טעינת העיר הבאה
                     pickRandomCity();
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 2));
                 }
             } else {
-                // Incorrect guess → lose a heart
+                // ניחוש שגוי ← איבוד לב
                 hearts--;
                 updateHeartsUI();
 
                 if (hearts <= 0) {
-                    // Game over condition
+                    // מצב סיום משחק (הפסד)
                     Toast.makeText(this, "❌ No hearts left!", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(this, Failure.class);
                     startActivity(intent);
                     finish();
                 } else {
-                    // Allow retry
+                    // אפשור ניסיון חוזר
                     Toast.makeText(this, "❌ Incorrect! " + hearts + " hearts left.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -141,12 +141,12 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
     }
 
     /**
-     * Updates heart display UI using emoji representation.
+     * מעדכן את תצוגת הלבבות באמצעות אימוג'י.
      */
     private void updateHeartsUI() {
         StringBuilder sb = new StringBuilder();
 
-        // Build heart string based on remaining lives
+        // בניית מחרוזת לבבות לפי החיים שנותרו
         for (int i = 0; i < hearts; i++) {
             sb.append("❤️");
         }
@@ -157,17 +157,17 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
     }
 
     /**
-     * Shows instructions before gameplay begins.
-     * Timer and interaction are enabled only after confirmation.
+     * מציג הוראות לפני תחילת המשחק.
+     * הטיימר והאינטראקציה מופעלים רק לאחר אישור.
      */
     private void showInstructions() {
 
-        // Check game mode (casual or timed)
+        // בדיקת מצב המשחק (רגיל או מתוזמן)
         String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
         if (mode.equals("timed")) {
-            // Skip instructions in timed mode
+            // דילוג על הוראות במצב מתוזמן
             startTime = System.currentTimeMillis();
             submitGuessBtn.setEnabled(true);
             return;
@@ -175,7 +175,7 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
 
         pauseStartTime = System.currentTimeMillis();
 
-        // Show instruction dialog
+        // הצגת דיאלוג הוראות
         new AlertDialog.Builder(this)
                 .setTitle("Level 9: Unlock the Cities")
                 .setMessage("A clue will appear for a famous city.\n\n" +
@@ -188,11 +188,11 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        // Track paused time (for scoring accuracy)
+                        // מעקב אחר זמן השהיה (עבור דיוק בניקוד)
                         long pausedDuration = System.currentTimeMillis() - pauseStartTime;
                         ProgressStorage.addPausedTime(UnlockCityActivity.this, pausedDuration);
 
-                        // Start gameplay timer
+                        // התחלת טיימר המשחק
                         startTime = System.currentTimeMillis();
                         submitGuessBtn.setEnabled(true);
                     }
@@ -201,7 +201,7 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
     }
 
     /**
-     * Initializes all cities used in the game.
+     * מאתחל את כל הערים המשמשות במשחק.
      */
     private void setupCities() {
         cityList.add(new City("Paris", new LatLng(48.8566, 2.3522), "This city is home to the Eiffel Tower."));
@@ -219,7 +219,7 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
     }
 
     /**
-     * Randomizes city order for gameplay.
+     * מערבב את סדר הערים עבור המשחק.
      */
     private void shuffleCities() {
         shuffledCities = new ArrayList<>(cityList);
@@ -228,7 +228,7 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
     }
 
     /**
-     * Selects the next city and updates clue text.
+     * בוחר את העיר הבאה ומעדכן את טקסט הרמז.
      */
     private void pickRandomCity() {
         if (shuffledCities == null || shuffledCities.isEmpty()) {
@@ -245,7 +245,7 @@ public class UnlockCityActivity extends BaseMenuActivity implements OnMapReadyCa
     }
 
     /**
-     * Called when Google Maps is ready.
+     * נקרא כאשר מפת גוגל מוכנה לשימוש.
      */
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {

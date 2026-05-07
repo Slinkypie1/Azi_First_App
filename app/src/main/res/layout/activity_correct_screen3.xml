@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- פריסה עבור מסך המעבר לאחר תשובה נכונה בשלב 3 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,43 +9,48 @@
     android:background="@color/white"
     tools:context=".CorrectScreen3">
 
+    <!-- תמונת רקע עבור מסך "תשובה נכונה" של שלב 3 -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/correct_screen3"
         android:scaleType="fitCenter" />
 
+    <!-- מיכל לסידור התוכן בצורה אנכית מעל הרקע -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp">
 
-    <TextView
-        android:id="@+id/leaderboardText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:background="#80000000"
-        android:padding="16dp"
-        android:text="Loading Leaderboard..."
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <!-- תצוגת טקסט המציגה את טבלת המובילים עבור שלב זה -->
+        <TextView
+            android:id="@+id/leaderboardText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:background="#80000000"
+            android:padding="16dp"
+            android:text="Loading Leaderboard..."
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical" />
+        <!-- מרווח גמיש לדחיפת הכפתור לתחתית -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical" />
 
-    <Button
-        android:id="@+id/BtClick16"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Great Work I believe in you!\n keep going!"
-        android:textSize="25sp" />
+        <!-- כפתור לאישור ומעבר לשלב הבא -->
+        <Button
+            android:id="@+id/BtClick16"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Great Work I believe in you!\n keep going!"
+            android:textSize="25sp" />
 
     </LinearLayout>
 </FrameLayout>

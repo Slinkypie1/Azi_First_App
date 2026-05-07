@@ -1,98 +1,98 @@
-package com.example.asfirstapp; // Package declaration
+package com.example.asfirstapp; // הצהרת חבילה
 
-// Imports needed for notifications and broadcast handling
-import android.app.NotificationChannel;       // For creating notification channels (Android 8+)
-import android.app.NotificationManager;       // To manage and display notifications
-import android.app.PendingIntent;             // Wraps intents to trigger later from notifications
-import android.content.BroadcastReceiver;     // Receives broadcast events from system/app
-import android.content.Context;               // Provides context for system services
-import android.content.Intent;                // Used to specify which activity to open
-import android.os.Build;                      // To check Android version
-import android.util.Log;                      // For logging debug messages
+// ייבוא נחוץ עבור התראות וטיפול בשידורים (broadcasts)
+import android.app.NotificationChannel;       // ליצירת ערוצי התראה (אנדרואיד 8+)
+import android.app.NotificationManager;       // לניהול והצגת התראות
+import android.app.PendingIntent;             // עוטף אינטנטים להפעלה מאוחרת מהתראות
+import android.content.BroadcastReceiver;     // מקבל אירועי שידור מהמערכת/אפליקציה
+import android.content.Context;               // מספק הקשר (Context) עבור שירותי מערכת
+import android.content.Intent;                // משמש להגדרת האקטיביטי שתיפתח
+import android.os.Build;                      // לבדיקת גרסת אנדרואיד
+import android.util.Log;                      // לרישום הודעות ניפוי שגיאות (debug)
 
-import androidx.core.app.NotificationCompat;  // Support library for building notifications
+import androidx.core.app.NotificationCompat;  // ספריית תמיכה לבניית התראות
 
 /**
- * NotificationReceiver handles scheduled notifications.
- * Triggered by AlarmManager, it sends a notification if the app is not in the foreground.
+ * NotificationReceiver מטפל בהתראות מתוזמנות.
+ * מופעל על ידי AlarmManager, הוא שולח התראה אם האפליקציה אינה בקדמה.
  */
 public class NotificationReceiver extends BroadcastReceiver {
 
     private static final String TAG = "NotificationReceiver";
-    // Tag for logging debug messages
+    // תגית לרישום הודעות ניפוי שגיאות
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "NotificationReceiver triggered.");
-        // Called when the broadcast is received; used for debugging
+        // נקרא כאשר השידור מתקבל; משמש לניפוי שגיאות
 
-        // Check if app is running (foreground) using MyApp class
+        // בדיקה אם האפליקציה רצה (בקדמה) באמצעות מחלקת MyApp
         if (MyApp.isAppRunning(context)) {
             Log.d(TAG, "App is running, skipping notification.");
-            // If app is already open, we do not show a notification
+            // אם האפליקציה כבר פתוחה, לא נציג התראה
             return;
         }
 
         Log.d(TAG, "App is closed, sending notification.");
-        // App is not open, so we proceed to send a notification
+        // האפליקציה אינה פתוחה, לכן נמשיך לשליחת התראה
 
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        // Gets system service responsible for notifications
+        // מקבל את שירות המערכת האחראי על התראות
 
         if (notificationManager != null) {
 
-            // Create notification channel (required for Android 8+)
+            // יצירת ערוץ התראות (נדרש עבור אנדרואיד 8 ומעלה)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
                 NotificationChannel channel = new NotificationChannel(
-                        "slinkypie",                 // Unique channel ID
-                        "Notifications",             // User-visible channel name
-                        NotificationManager.IMPORTANCE_DEFAULT // Standard importance level
+                        "slinkypie",                 // מזהה ערוץ ייחודי
+                        "Notifications",             // שם ערוץ גלוי למשתמש
+                        NotificationManager.IMPORTANCE_DEFAULT // רמת חשיבות סטנדרטית
                 );
 
                 notificationManager.createNotificationChannel(channel);
-                // Register channel with system
+                // רישום הערוץ במערכת
             }
 
-            // Intent that opens MainActivity when notification is tapped
+            // אינטנט שפותח את MainActivity כאשר לוחצים על ההתראה
             Intent repeatingIntent = new Intent(context, MainActivity.class);
             repeatingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            // Prevents duplicate activity stack entries
+            // מונע כפילויות במחסנית האקטיביטיז
 
-            // Wrap intent in PendingIntent so notification can trigger it later
+            // עטיפת האינטנט ב-PendingIntent כך שההתראה תוכל להפעיל אותו מאוחר יותר
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     context,
-                    0, // Request code (used if multiple notifications exist)
+                    0, // קוד בקשה (משמש אם קיימות מספר התראות)
                     repeatingIntent,
-                    PendingIntent.FLAG_IMMUTABLE // Required for security on newer Android versions
+                    PendingIntent.FLAG_IMMUTABLE // נדרש עבור אבטחה בגרסאות אנדרואיד חדשות
             );
 
-            // Build the notification
+            // בניית ההתראה
             NotificationCompat.Builder builder =
                     new NotificationCompat.Builder(context, "slinkypie")
                             .setSmallIcon(R.drawable.app_icon)
-                            // Icon shown in status bar
+                            // אייקון המוצג בשורת המצב
 
                             .setContentTitle("SlinkyPie's Quiz")
-                            // Notification title
+                            // כותרת ההתראה
 
                             .setContentText("Come and play me!")
-                            // Notification message
+                            // הודעת ההתראה
 
                             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                            // Normal priority notification
+                            // התראה בעדיפות רגילה
 
                             .setAutoCancel(true)
-                            // Removes notification when tapped
+                            // מסיר את ההתראה כאשר לוחצים עליה
 
                             .setContentIntent(pendingIntent);
-            // Opens app when clicked
+            // פותח את האפליקציה בעת לחיצה
 
-            // Display the notification
+            // הצגת ההתראה
             notificationManager.notify(100, builder.build());
             Log.d(TAG, "Notification sent.");
-            // Log confirmation
+            // רישום אישור שליחה
         }
     }
 }

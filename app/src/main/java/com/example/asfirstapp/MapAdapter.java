@@ -1,105 +1,105 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // החבילה אליה שייכת המחלקה הזו
 
-// Needed to access Android resources such as drawable images
+// דרוש כדי לגשת למשאבי אנדרואיד כגון תמונות (drawables)
 import android.content.Context;
 
-// Used to convert XML layout files into actual View objects
+// משמש להפיכת קבצי פריסה של XML לאובייקטי View בפועל
 import android.view.LayoutInflater;
 
-// Base class for all UI components in Android
+// מחלקת בסיס לכל רכיבי ממשק המשתמש באנדרואיד
 import android.view.View;
 
-// Represents a parent container for multiple views (used in RecyclerView)
+// מייצג מיכל הורה עבור מספר תצוגות (בשימוש ב-RecyclerView)
 import android.view.ViewGroup;
 
-// UI element used to display country outline images
+// רכיב ממשק משתמש המשמש להצגת תמונות של קווי מתאר של מדינות
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
-// Ensures method parameters and return values are not null
+// מבטיח שפרמטרי שיטה וערכי החזרה אינם null
 
 import androidx.recyclerview.widget.RecyclerView;
-// Base class for creating lists/grids using RecyclerView
+// מחלקת בסיס ליצירת רשימות/רשתות באמצעות RecyclerView
 
 import java.util.List;
-// Used to store a list of Region objects
+// משמש לאחסון רשימה של אובייקטי Region
 
-// RecyclerView Adapter that displays selectable country outlines in a grid
+// מתאם (Adapter) ל-RecyclerView המציג קווי מתאר של מדינות לבחירה ברשת
 public class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
 
-    // Interface used to communicate click events back to the activity
+    // ממשק המשמש להעברת אירועי לחיצה חזרה לאקטיביטי
     public interface OnRegionClickListener {
         void onRegionClick(boolean isCorrect);
-        // Sends whether the selected country is the correct answer
+        // שולח האם המדינה שנבחרה היא התשובה הנכונה
     }
 
     private final List<Region> items;
-    // List of all countries (Region objects) shown in the grid
+    // רשימה של כל המדינות (אובייקטי Region) המוצגות ברשת
 
     private final OnRegionClickListener listener;
-    // Listener that handles when a user clicks on a country
+    // מאזין המטפל במקרים שבהם משתמש לוחץ על מדינה
 
-    // Constructor: receives data and click listener
+    // בנאי: מקבל נתונים ומאזין ללחיצות
     public MapAdapter(Context ctx, List<Region> items, OnRegionClickListener listener) {
         this.items = items;
-        // Store list of regions
+        // שמירת רשימת האזורים
 
         this.listener = listener;
-        // Store click handler
+        // שמירת המטפל בלחיצות
     }
 
-    // ViewHolder holds references to the UI elements for each grid item
+    // ViewHolder מחזיק הפניות לרכיבי ממשק המשתמש עבור כל פריט ברשת
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
-        // Image that shows the country outline
+        // תמונה המציגה את קווי המתאר של המדינה
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imageView = itemView.findViewById(R.id.regionOutline);
-            // Connect ImageView from XML layout
+            // קישור ה-ImageView מקובץ הפריסה של ה-XML
         }
     }
 
-    // Creates a new ViewHolder when needed
+    // יוצר ViewHolder חדש בעת הצורך
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.map_item, parent, false);
-        // Inflate the XML layout for each grid item
+        // "ניפוח" פריסת ה-XML עבור כל פריט ברשת
 
         return new ViewHolder(v);
-        // Return new ViewHolder instance
+        // החזרת מופע חדש של ViewHolder
     }
 
-    // Binds data (country images + click behavior) to each item
+    // מחבר נתונים (תמונות מדינה + התנהגות לחיצה) לכל פריט
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         Region region = items.get(position);
-        // Get the Region object for this position
+        // קבלת אובייקט ה-Region עבור המיקום הזה
 
         Context context = holder.itemView.getContext();
-        // Get context for accessing resources
+        // קבלת הקשר (Context) לצורך גישה למשאבים
 
         int drawableId = context.getResources()
                 .getIdentifier(region.getOutlineDrawableId(), "drawable", context.getPackageName());
-        // Convert string name into drawable resource ID
+        // המרת שם המחרוזת למזהה משאב תמונה (drawable)
 
         holder.imageView.setImageResource(drawableId);
-        // Set the country outline image
+        // הגדרת תמונת קווי המתאר של המדינה
 
         holder.imageView.setOnClickListener(v -> {
             listener.onRegionClick(region.isCorrect());
-            // Notify activity whether the clicked country is correct
+            // הודעה לאקטיביטי האם המדינה שנלחצה נכונה
         });
     }
 
     @Override
     public int getItemCount() {
         return items.size();
-        // Return total number of countries in the grid
+        // החזרת המספר הכולל של מדינות ברשת
     }
 }

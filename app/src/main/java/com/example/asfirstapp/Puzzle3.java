@@ -1,6 +1,6 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // החבילה אליה שייכת המחלקה הזו
 
-// Imports for sensors, context, and activity management
+// ייבוא עבור חיישנים, הקשר (Context) וניהול אקטיביטי
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,68 +16,68 @@ import androidx.appcompat.app.AppCompatActivity;
 /**
  * Puzzle3 Activity
  * ----------------
- * Maze puzzle controlled by tilting the device.
- * The ball moves inside a custom MazeGridView according to accelerometer readings.
+ * פאזל מבוך הנשלט על ידי הטיית המכשיר.
+ * הכדור נע בתוך MazeGridView מותאם אישית בהתאם לקריאות מד התאוצה (Accelerometer).
  */
 public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
 
-    // Sensor system used to detect device tilt
-    private SensorManager sensorManager;  // Manages all device sensors
-    private Sensor accelerometer;         // Detects device tilt (x/y movement)
+    // מערכת החיישנים המשמשת לזיהוי הטיית המכשיר
+    private SensorManager sensorManager;  // מנהל את כל חיישני המכשיר
+    private Sensor accelerometer;         // מזהה הטיית מכשיר (תנועה בציר X/Y)
 
-    // Custom view that handles drawing maze + ball logic
+    // תצוגה מותאמת אישית המטפלת בלוגיקת ציור המבוך והכדור
     private MazeGridView mazeGridView;
 
-    // Used to measure pause duration before starting game
+    // משמש למדידת משך ההפסקה לפני תחילת המשחק
     private long pauseStartTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה לשיטת ההורה
 
-        // Start background music for Puzzle 3
+        // הפעלת מוזיקת רקע עבור פאזל 3
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.puzzle3_music);
         startService(serviceIntent);
 
-        // Create maze view programmatically
+        // יצירת תצוגת המבוך באופן תכנותי
         mazeGridView = new MazeGridView(this);
 
-        // Set custom view as the entire screen content
+        // הגדרת התצוגה המותאמת אישית כתוכן של כל המסך
         setContentView(mazeGridView);
 
-        // Show instructions dialog before gameplay begins
+        // הצגת דיאלוג הוראות לפני תחילת המשחק
         showInstructions();
 
-        // Get system sensor service
+        // קבלת שירות החיישנים של המערכת
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
         if (sensorManager != null) {
-            // Get accelerometer sensor (used for tilt controls)
+            // קבלת חיישן מד התאוצה (משמש לבקרת הטיה)
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         }
     }
 
     /**
-     * Displays instructions before starting the puzzle.
-     * In timed mode, this is skipped automatically.
+     * מציג הוראות לפני תחילת הפאזל.
+     * במצב מתוזמן, שלב זה מדלג אוטומטית.
      */
     private void showInstructions() {
 
-        // Check current game mode from shared preferences
+        // בדיקת מצב המשחק הנוכחי מהעדפות משותפות
         String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
         if (mode.equals("timed")) {
-            // Skip instructions in timed mode to avoid wasting time
+            // דילוג על הוראות במצב מתוזמן כדי למנוע בזבוז זמן
             mazeGridView.beginGame();
             return;
         }
 
-        // Record when instruction screen started
+        // תיעוד מתי מסך ההוראות התחיל
         pauseStartTime = System.currentTimeMillis();
 
-        // Show popup dialog with instructions
+        // הצגת דיאלוג קופץ עם הוראות
         new AlertDialog.Builder(this)
                 .setTitle("Level 6: Tilt Maze")
                 .setMessage("Tilt your phone to guide the red ball to the green goal!\n\n" +
@@ -87,13 +87,13 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        // Calculate how long player spent on instructions
+                        // חישוב כמה זמן השחקן בילה בקריאת ההוראות
                         long pausedDuration = System.currentTimeMillis() - pauseStartTime;
 
-                        // Save paused time for scoring adjustments
+                        // שמירת זמן ההשהיה לצורך התאמת הניקוד
                         ProgressStorage.addPausedTime(Puzzle3.this, pausedDuration);
 
-                        // Start maze countdown + gameplay
+                        // התחלת ספירה לאחור של המבוך ותחילת המשחק
                         mazeGridView.beginGame();
                     }
                 })
@@ -102,45 +102,45 @@ public class Puzzle3 extends BaseMenuActivity implements SensorEventListener {
 
     @Override
     protected void onResume() {
-        super.onResume();
+        super.onResume(); // המשך מחזור החיים
 
-        // Register accelerometer listener when screen is active
+        // רישום מאזין למד התאוצה כאשר המסך פעיל
         if (accelerometer != null) {
             sensorManager.registerListener(
                     this,
                     accelerometer,
-                    SensorManager.SENSOR_DELAY_GAME // Balanced speed for gameplay
+                    SensorManager.SENSOR_DELAY_GAME // מהירות מאוזנת עבור משחק
             );
         }
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
+        super.onPause(); // השהיית מחזור החיים
 
-        // Stop listening to sensors to save battery and performance
+        // הפסקת האזנה לחיישנים כדי לחסוך בסוללה ובביצועים
         sensorManager.unregisterListener(this);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        // Only respond to accelerometer updates
+        // תגובה רק לעדכוני מד תאוצה
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 
-            // X axis = left/right tilt
+            // ציר X = הטיה שמאלה/ימינה
             float tiltX = event.values[0];
 
-            // Y axis = forward/back tilt
+            // ציר Y = הטיה קדימה/אחורה
             float tiltY = event.values[1];
 
-            // Send movement data to maze view
+            // שליחת נתוני התנועה לתצוגת המבוך
             mazeGridView.updateBall(tiltX, tiltY);
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Not needed for this puzzle
+        // לא נדרש עבור פאזל זה
     }
 }

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- פריסת מסך הכניסה הראשי של האפליקציה -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,12 +10,14 @@
     android:background="@color/white"
     tools:context=".MainActivity">
 
+    <!-- תמונת רקע (חץ) המוצגת במרכז המסך -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/arrow"
         android:scaleType="fitCenter" />
 
+    <!-- מיכל ראשי לסידור רכיבי הקלט בצורה אנכית -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -22,12 +25,15 @@
         android:padding="?attr/actionBarSize"
         android:gravity="center_horizontal">
 
+        <!-- מיכל פנימי המרכז את שדות הטקסט והכפתור -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal">
+
+            <!-- שדה להזנת שם המשתמש -->
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -37,6 +43,8 @@
                 android:textSize="40sp"
                 android:layout_gravity="center_horizontal"
                 />
+
+            <!-- שדה להזנת כתובת אימייל -->
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -48,6 +56,8 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 />
+
+            <!-- שדה להזנת סיסמה (מוסתרת) -->
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -59,6 +69,8 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 />
+
+            <!-- כפתור להתחברות או הרשמה -->
             <Button
                 android:id="@+id/BtClick"
                 android:layout_width="wrap_content"

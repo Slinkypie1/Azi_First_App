@@ -1,28 +1,28 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // החבילה אליה שייכת המחלקה הזו
 
 /**
- * Region class
+ * מחלקת Region
  * -------------
- * Represents a single selectable country/region in the "Find the Country" puzzle.
- * Each region holds display data (name + image) and whether it is the correct answer.
+ * מייצגת מדינה/אזור בודד הניתן לבחירה בפאזל "מצא את המדינה".
+ * כל אזור מחזיק נתוני תצוגה (שם + תמונה) והאם הוא התשובה הנכונה.
  */
 public class Region {
 
-    // Name of the country/region shown to the user (if needed for UI or logic)
+    // שם המדינה/האזור המוצג למשתמש (אם נדרש עבור ממשק המשתמש או הלוגיקה)
     private String countryName;
 
-    // Name of the drawable resource that represents the country outline image
+    // שם משאב התמונה (drawable) המייצג את קווי המתאר של המדינה
     private String outlineDrawableId;
 
-    // Indicates whether this region is the correct answer in the puzzle
+    // מציין האם אזור זה הוא התשובה הנכונה בפאזל
     private boolean isCorrect;
 
     /**
-     * Constructor for creating a Region object.
+     * בנאי ליצירת אובייקט Region.
      *
-     * @param countryName       Name of the country
-     * @param outlineDrawableId Drawable resource name (e.g., "france_outline")
-     * @param isCorrect         Whether this region is the correct answer
+     * @param countryName       שם המדינה
+     * @param outlineDrawableId שם משאב התמונה (למשל, "france_outline")
+     * @param isCorrect         האם אזור זה הוא התשובה הנכונה
      */
     public Region(String countryName, String outlineDrawableId, boolean isCorrect) {
         this.countryName = countryName;
@@ -31,22 +31,22 @@ public class Region {
     }
 
     /**
-     * Returns the country name.
+     * מחזיר את שם המדינה.
      */
     public String getCountryName() {
         return countryName;
     }
 
     /**
-     * Returns the drawable resource name for this region.
-     * This is used to dynamically load the correct image from resources.
+     * מחזיר את שם משאב התמונה עבור אזור זה.
+     * משמש לטעינה דינמית של התמונה הנכונה מהמשאבים.
      */
     public String getOutlineDrawableId() {
         return outlineDrawableId;
     }
 
     /**
-     * Returns whether this region is the correct answer.
+     * מחזיר האם אזור זה הוא התשובה הנכונה.
      */
     public boolean isCorrect() {
         return isCorrect;

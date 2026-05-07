@@ -1,140 +1,140 @@
 package com.example.asfirstapp;
-// Defines the package name of your app (helps organize code and avoid conflicts).
+// מגדיר את שם החבילה של האפליקציה (עוזר בארגון קוד ומניעת התנגשויות).
 
 import android.app.AlarmManager;
-// Used to schedule tasks/notifications at specific times.
+// משמש לתזמון משימות/התראות בזמנים ספציפיים.
 
 import android.app.NotificationChannel;
-// Used to create notification channels (Android 8+).
+// משמש ליצירת ערוצי התראה (אנדרואיד 8 ומעלה).
 
 import android.app.NotificationManager;
-// Manages notifications for the app.
+// מנהל התראות עבור האפליקציה.
 
 import android.app.PendingIntent;
-// Grants permission to another app/component to run code later.
+// מעניק הרשאה לאפליקציה/רכיב אחר להריץ קוד מאוחר יותר.
 
 import android.content.Context;
-// Provides app context (global info about the app).
+// מספק הקשר של האפליקציה (מידע גלובלי על האפליקציה).
 
 import android.content.Intent;
-// Used to start activities/services or send broadcasts.
+// משמש להפעלת אקטיביטיז/שירותים או שליחת שידורים.
 
 import android.content.SharedPreferences;
-// Used to store small persistent key-value data locally.
+// משמש לאחסון נתוני מפתח-ערך קבועים וקטנים באופן מקומי.
 
 import android.content.pm.PackageManager;
-// Used to check app permissions.
+// משמש לבדיקת הרשאות אפליקציה.
 
 import android.os.Build;
-// Provides device OS version info.
+// מספק מידע על גרסת מערכת ההפעלה של המכשיר.
 
 import android.os.Bundle;
-// Holds saved state data for activity recreation.
+// מחזיק נתוני מצב שמורים ליצירה מחדש של האקטיביטי.
 
 import android.os.PowerManager;
-// Manages power/battery features.
+// מנהל תכונות חשמל/סוללה.
 
 import android.provider.Settings;
-// Lets you open system settings screens.
+// מאפשר לפתוח מסכי הגדרות מערכת.
 
 import android.util.Log;
-// For logging debug/error messages.
+// לרישום הודעות ניפוי שגיאות/שגיאות (Log).
 
 import android.view.View;
-// Base class for UI components.
+// מחלקת בסיס לרכיבי ממשק משתמש.
 
 import android.widget.Button;
-// Represents a clickable button.
+// מייצג כפתור לחיץ.
 
 import android.widget.EditText;
-// Represents a text input field.
+// מייצג שדה להזנת טקסט.
 
 import android.widget.Toast;
-// Popup messages for user feedback.
+// הודעות קופצות למשוב למשתמש.
 
 import androidx.annotation.NonNull;
-// Annotation to prevent null values in parameters.
+// הערה למניעת ערכי null בפרמטרים.
 
 import androidx.appcompat.app.AppCompatActivity;
-// Base class for modern activities.
+// מחלקת בסיס לאקטיביטיז מודרניות.
 
 import androidx.core.app.ActivityCompat;
-// Helps request runtime permissions.
+// עוזר לבקש הרשאות בזמן ריצה.
 
 import androidx.core.content.ContextCompat;
-// Helps check if permissions are granted.
+// עוזר לבדוק אם הרשאות הוענקו.
 
 import com.google.android.material.navigation.NavigationView;
-// Material UI navigation component (not directly used here).
+// רכיב ניווט של Material UI (לא בשימוש ישיר כאן).
 
 import com.google.firebase.auth.FirebaseAuth;
-// Firebase Authentication access.
+// גישה לאימות Firebase (Authentication).
 
 import com.google.firebase.firestore.FirebaseFirestore;
-// Firebase Firestore database access.
+// גישה למסד הנתונים Firebase Firestore.
 
 import java.util.ArrayList;
-// Dynamic list implementation.
+// מימוש רשימה דינמית.
 
 import java.util.HashMap;
-// Key-value map implementation.
+// מימוש מפת מפתח-ערך (Map).
 
 import java.util.List;
-// List interface for collections.
+// ממשק רשימה עבור אוספים.
 
 import java.util.Map;
-// Map interface for key-value data.
+// ממשק מפה עבור נתוני מפתח-ערך.
 
 public class MainActivity extends BaseMenuActivity implements View.OnClickListener {
-    // Main entry screen of the app; handles login, setup, and navigation.
-    // Implements click handling for buttons.
+    // מסך הכניסה הראשי של האפליקציה; מטפל בהתחברות, הגדרה וניווט.
+    // מממש טיפול בלחיצות עבור כפתורים.
 
     Button BtCLick;
-    // Button used to proceed after entering user info.
+    // כפתור המשמש להמשך לאחר הזנת פרטי המשתמש.
 
     EditText ET;
-    // Input field for user name.
+    // שדה קלט עבור שם המשתמש.
 
     EditText etEmail;
-    // Input field for user email.
+    // שדה קלט עבור אימייל המשתמש.
 
     EditText etPassword;
-    // Input field for user password.
+    // שדה קלט עבור סיסמת המשתמש.
 
     private static final int PERMISSION_REQUEST_CODE = 100;
-    // Request code used when asking for notification permission.
+    // קוד בקשה המשמש בעת בקשת הרשאת התראה.
 
     private static final String TAG = "MainActivity";
-    // Tag used for logging debug messages.
+    // תגית המשמשת לרישום הודעות ניפוי שגיאות.
 
     private FirebaseFirestore db;
-    // Firestore database instance.
+    // מופע של מסד הנתונים Firestore.
 
     private FirebaseAuth mAuth;
-    // Firebase authentication instance.
+    // מופע של אימות Firebase.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Calls parent setup logic.
+        // קריאה ללוגיקת הגדרת ההורה.
 
         db = FirebaseFirestore.getInstance();
-        // Initializes Firestore database connection.
+        // אתחול החיבור למסד הנתונים Firestore.
 
         mAuth = FirebaseAuth.getInstance();
-        // Initializes Firebase authentication.
+        // אתחול אימות Firebase.
 
         setupLoginUI();
     }
 
     /**
-     * Sets up the standard login screen UI and background services.
+     * מגדיר את ממשק המשתמש הסטנדרטי של מסך הכניסה ושירותי הרקע.
      */
     private void setupLoginUI() {
         setContentView(R.layout.activity_main);
-        // Loads main layout UI.
+        // טעינת ממשק המשתמש של הפריסה הראשית.
 
-        // Initialize default game mode to casual if not already set
+        // אתחול מצב משחק לברירת מחדל "casual" אם עדיין לא הוגדר
         if (!ProgressStorage.getAppPrefs(this).contains("game_mode")) {
             ProgressStorage.getAppPrefs(this)
                     .edit()
@@ -142,18 +142,18 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                     .apply();
         }
 
-        // Start background music service
+        // הפעלת שירות מוזיקת רקע
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.main_activity_music);
         startService(serviceIntent);
 
         initViews();
-        // Initialize UI elements.
+        // אתחול רכיבי ממשק משתמש.
 
         startForegroundService();
-        // Starts persistent foreground service.
+        // הפעלת שירות קדמה קבוע.
 
-        // Check notification permission on Android 13+
+        // בדיקת הרשאת התראה באנדרואיד 13 ומעלה
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -161,40 +161,40 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                 ActivityCompat.requestPermissions(this,
                         new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
                         PERMISSION_REQUEST_CODE);
-                // Request permission if needed.
+                // בקשת הרשאה אם יש צורך.
             } else {
                 setupNotification();
-                // Permission already granted.
+                // ההרשאה כבר הוענקה.
             }
         } else {
             setupNotification();
-            // Older Android versions auto-grant.
+            // גרסאות אנדרואיד ישנות מעניקות הרשאה אוטומטית.
         }
 
         checkBatteryOptimization();
-        // Ensure app is not restricted by battery settings.
+        // לוודא שהאפליקציה אינה מוגבלת על ידי הגדרות סוללה.
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Restart music when activity is visible.
+        // הפעלה מחדש של המוזיקה כאשר האקטיביטי נראית.
 
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.main_activity_music);
         startService(serviceIntent);
     }
 
-    // Setup notifications: channel + schedule daily notification
+    // הגדרת התראות: ערוץ + תזמון התראה יומית
     private void setupNotification() {
         createNotificationChannel();
-        // Create notification channel.
+        // יצירת ערוץ התראות.
 
         scheduleNotification();
-        // Schedule repeating notification.
+        // תזמון התראה חוזרת.
     }
 
-    // Create notification channel (Android 8+)
+    // יצירת ערוץ התראות (אנדרואיד 8 ומעלה)
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
@@ -211,25 +211,25 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
 
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
-                // Register channel with system.
+                // רישום הערוץ במערכת.
             }
         }
     }
 
-    // Start foreground service
+    // הפעלת שירות קדמה
     private void startForegroundService() {
         Intent serviceIntent = new Intent(this, MyForegroundService.class);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent);
-            // Modern Android requirement.
+            // דרישת אנדרואיד מודרנית.
         } else {
             startService(serviceIntent);
-            // Older Android fallback.
+            // תמיכה לאחור בגרסאות אנדרואיד ישנות.
         }
     }
 
-    // Schedule daily notifications using AlarmManager
+    // תזמון התראות יומיות באמצעות AlarmManager
     private void scheduleNotification() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
@@ -239,7 +239,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                 PendingIntent.FLAG_IMMUTABLE);
 
         long triggerTime = System.currentTimeMillis() + AlarmManager.INTERVAL_DAY;
-        // Set first trigger 24h later.
+        // הגדרת ההפעלה הראשונה ל-24 שעות מאוחר יותר.
 
         if (alarmManager != null) {
             alarmManager.setRepeating(
@@ -252,7 +252,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         }
     }
 
-    // Handle permission results
+    // טיפול בתוצאות בקשת הרשאה
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -261,7 +261,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setupNotification();
-                // Permission granted.
+                // ההרשאה הוענקה.
             } else {
                 Toast.makeText(this,
                         "Notification permission is required for this feature.",
@@ -270,7 +270,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         }
     }
 
-    // Check battery optimization settings
+    // בדיקת הגדרות אופטימיזציית סוללה
     private void checkBatteryOptimization() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
@@ -280,12 +280,12 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
 
                 Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
                 startActivity(intent);
-                // Ask user to disable optimization.
+                // בקשה מהמשתמש לבטל אופטימיזציה.
             }
         }
     }
 
-    // Initialize UI elements
+    // אתחול רכיבי ממשק משתמש
     private void initViews() {
         BtCLick = findViewById(R.id.BtClick);
         BtCLick.setOnClickListener(this);
@@ -295,7 +295,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         etPassword = findViewById(R.id.etPassword);
     }
 
-    // Handle button click
+    // טיפול בלחיצה על כפתור
     @Override
     public void onClick(View view) {
         String inputText = ET.getText().toString().trim();
@@ -321,15 +321,15 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
     }
 
     private void handleAuth(String name, String email, String password) {
-        // Try to sign in
+        // ניסיון התחברות
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
+                        // הצלחה בהתחברות, עדכון ממשק המשתמש עם פרטי המשתמש המחובר
                         Log.d(TAG, "signInWithEmail:success");
                         handleLogin(name, email);
                     } else {
-                        // If sign in fails, try to create a new account
+                        // אם ההתחברות נכשלת, ניסיון ליצור חשבון חדש
                         Log.w(TAG, "signInWithEmail:failure", task.getException());
                         createNewUser(name, email, password);
                     }
@@ -342,7 +342,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                     if (task.isSuccessful() && mAuth.getCurrentUser() != null) {
                         Log.d(TAG, "createUserWithEmail:success");
                         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-                        String documentId = mAuth.getCurrentUser().getUid(); // Use UID instead of email
+                        String documentId = mAuth.getCurrentUser().getUid(); // שימוש ב-UID במקום אימייל
                         saveNewUser(name, email, deviceId, documentId);
                     } else {
                         Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -353,20 +353,20 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                 });
     }
 
-    // Load or create user
+    // טעינת או יצירת משתמש
     private void handleLogin(String name, String email) {
         if (mAuth.getCurrentUser() == null) return;
-        String documentId = mAuth.getCurrentUser().getUid(); // Use UID
+        String documentId = mAuth.getCurrentUser().getUid(); // שימוש ב-UID
 
         db.collection("users").document(documentId).get()
                 .addOnSuccessListener(documentSnapshot -> {
 
                     if (documentSnapshot.exists()) {
-                        // Update local preferences with data from Firestore
+                        // עדכון העדפות מקומיות עם נתונים מ-Firestore
                         String fetchedName = documentSnapshot.getString("name");
                         if (fetchedName == null) fetchedName = name;
 
-                        // Global prefs for login form
+                        // העדפות גלובליות עבור טופס ההתחברות
                         getSharedPreferences("app_prefs", MODE_PRIVATE).edit()
                                 .putString("last_name", fetchedName)
                                 .putString("last_email", email)
@@ -388,7 +388,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                         String gameMode = documentSnapshot.getString("game_mode");
                         Boolean isMuted = documentSnapshot.getBoolean("music_muted");
 
-                        // User-specific prefs for settings
+                        // העדפות ספציפיות למשתמש עבור הגדרות
                         SharedPreferences.Editor userEditor = ProgressStorage.getAppPrefs(MainActivity.this).edit();
                         userEditor.putString("last_name", fetchedName);
 
@@ -407,7 +407,7 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                 .addOnFailureListener(e -> proceedToSecond(name));
     }
 
-    // Save new user
+    // שמירת משתמש חדש
     private void saveNewUser(String name, String email, String deviceId, String documentId) {
         Map<String, Object> user = new HashMap<>();
 
@@ -420,13 +420,13 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
         user.put("music_muted", false);
         user.put("achievements", new ArrayList<String>());
 
-        // Global prefs for login form
+        // העדפות גלובליות עבור טופס ההתחברות
         getSharedPreferences("app_prefs", MODE_PRIVATE).edit()
                 .putString("last_name", name)
                 .putString("last_email", email)
                 .apply();
 
-        // User-specific prefs with defaults
+        // העדפות ספציפיות למשתמש עם ברירות מחדל
         ProgressStorage.getAppPrefs(MainActivity.this).edit()
                 .putString("last_name", name)
                 .putString("bg_color", "white")
@@ -443,14 +443,14 @@ public class MainActivity extends BaseMenuActivity implements View.OnClickListen
                 .addOnFailureListener(e -> proceedToSecond(name));
     }
 
-    // Go to next screen
+    // מעבר למסך הבא
     private void proceedToSecond(String name) {
         Intent intent = new Intent(this, Second.class);
         intent.putExtra("name", name);
         startActivity(intent);
     }
 
-    // Stop music when leaving activity
+    // עצירת מוזיקה בעת עזיבת האקטיביטי
     @Override
     protected void onPause() {
         super.onPause();

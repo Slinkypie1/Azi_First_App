@@ -1,34 +1,34 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // החבילה אליה שייכת המחלקה הזו
 
-import android.content.Context; // Needed for SharedPreferences, system services, etc.
-import android.content.SharedPreferences;  // For local storage
-import android.os.Handler;
-import android.os.Looper;
-import android.provider.Settings;          // To get device ID
-import android.util.Log;                   // Logging
-import android.widget.Toast;
+import android.content.Context; // דרוש עבור SharedPreferences, שירותי מערכת וכו'
+import android.content.SharedPreferences;  // עבור אחסון מקומי
+import android.os.Handler; // לניהול פעולות מושהות
+import android.os.Looper; // לניהול לולאת ההודעות של השרשור הראשי
+import android.provider.Settings;          // לקבלת מזהה מכשיר
+import android.util.Log;                   // לרישום ביומן (Log)
+import android.widget.Toast; // להצגת הודעות קופצות
 
-import com.google.firebase.firestore.FieldValue; // For server timestamps
-import com.google.firebase.firestore.FirebaseFirestore; // Firestore database
-import java.util.*; // Collections, Map, List, etc.
+import com.google.firebase.firestore.FieldValue; // עבור חותמות זמן של השרת
+import com.google.firebase.firestore.FirebaseFirestore; // מסד הנתונים Firestore
+import java.util.*; // אוספים, מפות, רשימות וכו'
 
 /**
- * ProgressStorage handles storing and syncing the highest unlocked level for a user.
- * Local progress is stored in SharedPreferences, and can optionally sync to Firebase.
+ * ProgressStorage מטפל באחסון וסנכרון השלב הגבוה ביותר שנפתח עבור משתמש.
+ * התקדמות מקומית נשמרת ב-SharedPreferences, וניתן לסנכרן אותה אופציונלית ל-Firebase.
  */
 public class ProgressStorage {
 
-    // ----- Constants -----
-    private static final String PREF_NAME = "game_progress"; // SharedPreferences file name
-    private static final String KEY_HIGHEST_LEVEL = "highest_unlocked_level"; // Stores highest level reached
-    private static final String KEY_GAME_START_TIME = "game_start_time"; // Stores when game started
-    private static final String KEY_PAUSED_TIME = "paused_time"; // Tracks total paused duration
-    private static final String KEY_ACHIEVEMENTS = "earned_achievements"; // Stores unlocked achievements
-    private static final String TAG = "ProgressStorage"; // Log tag
+    // ----- קבועים -----
+    private static final String PREF_NAME = "game_progress"; // שם קובץ ה-SharedPreferences
+    private static final String KEY_HIGHEST_LEVEL = "highest_unlocked_level"; // שומר את השלב הגבוה ביותר שהושג
+    private static final String KEY_GAME_START_TIME = "game_start_time"; // שומר מתי המשחק התחיל
+    private static final String KEY_PAUSED_TIME = "paused_time"; // עוקב אחר משך זמן ההשהיה הכולל
+    private static final String KEY_ACHIEVEMENTS = "earned_achievements"; // שומר הישגים שנפתחו
+    private static final String TAG = "ProgressStorage"; // תגית לרישום ביומן (Log)
 
-    private static boolean didHitWallThisRun = false; // Tracks if player hit a wall (for achievement logic)
+    private static boolean didHitWallThisRun = false; // עוקב אם השחקן פגע בקיר (עבור לוגיקת הישגים)
 
-    // Achievement constants
+    // קבועי הישגים
     public static final String ACHIEV_SPEED_DEMON = "speed_demon";
     public static final String ACHIEV_PERFECTIONIST = "perfectionist";
     public static final String ACHIEV_WORLD_TRAVELER = "world_traveler";
@@ -36,34 +36,34 @@ public class ProgressStorage {
     public static final String ACHIEV_TOP_10 = "top_10";
 
     /**
-     * Resets wall-hit tracking for a new run
+     * מאפס את המעקב אחר פגיעה בקיר עבור הרצה חדשה
      */
     public static void resetPerfectionistFlag() {
         didHitWallThisRun = false;
     }
 
     /**
-     * Marks that a wall was hit in current run
+     * מציין שבוצעה פגיעה בקיר בהרצה הנוכחית
      */
     public static void recordWallHit() {
         didHitWallThisRun = true;
     }
 
     /**
-     * Returns whether player hit a wall this run
+     * מחזיר האם השחקן פגע בקיר בהרצה זו
      */
     public static boolean wasWallHit() {
         return didHitWallThisRun;
     }
 
-    // Gets SharedPreferences instance for game progress (user-specific)
+    // מקבל מופע של SharedPreferences עבור התקדמות המשחק (ספציפי למשתמש)
     private static SharedPreferences getPrefs(Context context) {
         String uid = getDocumentId(context);
         String prefName = (uid != null) ? (PREF_NAME + "_" + uid) : PREF_NAME;
         return context.getSharedPreferences(prefName, Context.MODE_PRIVATE);
     }
 
-    // Gets SharedPreferences instance for app settings (user-specific)
+    // מקבל מופע של SharedPreferences עבור הגדרות האפליקציה (ספציפי למשתמש)
     public static SharedPreferences getAppPrefs(Context context) {
         String uid = getDocumentId(context);
         String prefName = (uid != null) ? ("app_prefs_" + uid) : "app_prefs";
@@ -71,7 +71,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Builds Firestore document ID using Firebase User UID
+     * בונה מזהה מסמך עבור Firestore באמצעות UID של משתמש Firebase
      */
     public static String getDocumentId(Context context) {
         if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -81,7 +81,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Adds a new achievement if not already earned
+     * מעניק הישג חדש אם הוא עדיין לא הושג
      */
     public static void awardAchievement(Context context, String achievementId) {
         Set<String> earned = new HashSet<>(getPrefs(context).getStringSet(KEY_ACHIEVEMENTS, new HashSet<>()));
@@ -90,12 +90,12 @@ public class ProgressStorage {
             earned.add(achievementId);
             getPrefs(context).edit().putStringSet(KEY_ACHIEVEMENTS, earned).apply();
 
-            // Sync updated achievements to Firebase
+            // סנכרון הישגים מעודכנים ל-Firebase
             syncAchievementsToFirebase(context, new ArrayList<>(earned));
 
             Log.d(TAG, "Achievement Unlocked: " + achievementId);
 
-            // Show popup notification on main thread
+            // הצגת הודעת קופצת בשרשור הראשי
             new Handler(Looper.getMainLooper()).post(() -> {
                 String name = achievementId.replace("_", " ").toUpperCase();
                 Toast.makeText(context, "🏆 Achievement Unlocked: " + name, Toast.LENGTH_LONG).show();
@@ -104,14 +104,14 @@ public class ProgressStorage {
     }
 
     /**
-     * Returns locally stored achievements
+     * מחזיר הישגים המאוחסנים מקומית
      */
     public static Set<String> getEarnedAchievements(Context context) {
         return getPrefs(context).getStringSet(KEY_ACHIEVEMENTS, new HashSet<>());
     }
 
     /**
-     * Sync achievements list to Firebase
+     * מסנכרן את רשימת ההישגים ל-Firebase
      */
     private static void syncAchievementsToFirebase(Context context, List<String> achievements) {
         String documentId = getDocumentId(context);
@@ -127,14 +127,14 @@ public class ProgressStorage {
     }
 
     /**
-     * Get highest unlocked level (local)
+     * מקבל את השלב הגבוה ביותר שנפתח (מקומי)
      */
     public static int getHighestUnlockedLevel(Context context) {
         return getPrefs(context).getInt(KEY_HIGHEST_LEVEL, 1);
     }
 
     /**
-     * Save level locally only (no Firebase sync)
+     * שמירת שלב מקומית בלבד (ללא סנכרון ל-Firebase)
      */
     public static void setHighestUnlockedLevelOffline(Context context, int level) {
         getPrefs(context)
@@ -144,7 +144,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Save level locally AND sync to Firebase
+     * שמירת שלב מקומית וסנכרון ל-Firebase
      */
     public static void setHighestUnlockedLevel(Context context, int level) {
         setHighestUnlockedLevelOffline(context, level);
@@ -152,7 +152,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Save achievements locally
+     * שמירת הישגים מקומית
      */
     public static void setAchievementsOffline(Context context, List<String> achievements) {
         if (achievements == null) return;
@@ -160,21 +160,21 @@ public class ProgressStorage {
     }
 
     /**
-     * Store game start time
+     * אחסון זמן תחילת המשחק
      */
     public static void setGameStartTime(Context context, long startTime) {
         getPrefs(context).edit().putLong(KEY_GAME_START_TIME, startTime).apply();
     }
 
     /**
-     * Get game start time
+     * קבלת זמן תחילת המשחק
      */
     public static long getGameStartTime(Context context) {
         return getPrefs(context).getLong(KEY_GAME_START_TIME, 0);
     }
 
     /**
-     * Add paused time to total pause duration
+     * הוספת זמן השהיה למשך ההשהיה הכולל
      */
     public static void addPausedTime(Context context, long durationMillis) {
         long currentPaused = getPrefs(context).getLong(KEY_PAUSED_TIME, 0);
@@ -182,14 +182,14 @@ public class ProgressStorage {
     }
 
     /**
-     * Get total paused time
+     * קבלת זמן ההשהיה הכולל
      */
     public static long getTotalPausedTime(Context context) {
         return getPrefs(context).getLong(KEY_PAUSED_TIME, 0);
     }
 
     /**
-     * Reset timer for new game
+     * איפוס טיימר למשחק חדש
      */
     public static void resetGameTimer(Context context) {
         getPrefs(context).edit()
@@ -199,7 +199,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Sync level progress to Firebase
+     * סנכרון התקדמות שלבים ל-Firebase
      */
     private static void syncToFirebase(Context context, int level) {
         String documentId = getDocumentId(context);
@@ -215,7 +215,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Sync appearance setting to Firebase
+     * סנכרון הגדרות מראה ל-Firebase
      */
     public static void syncAppearanceToFirebase(Context context, String bgColor) {
         String documentId = getDocumentId(context);
@@ -231,7 +231,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Sync game mode to Firebase
+     * סנכרון מצב משחק ל-Firebase
      */
     public static void syncGameModeToFirebase(Context context, String gameMode) {
         String documentId = getDocumentId(context);
@@ -247,7 +247,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Sync music mute state to Firebase
+     * סנכרון מצב השתקת מוזיקה ל-Firebase
      */
     public static void syncMusicToFirebase(Context context, boolean isMuted) {
         String documentId = getDocumentId(context);
@@ -263,11 +263,11 @@ public class ProgressStorage {
     }
 
     /**
-     * Save level completion time (leaderboard logic)
+     * שמירת זמן סיום שלב (לוגיקת טבלת מובילים)
      */
     public static void saveLevelCompletion(Context context, int level, long timeTakenMillis) {
 
-        // Speed Demon achievement check
+        // בדיקת הישג "Speed Demon"
         if (timeTakenMillis < 5000) {
             awardAchievement(context, ACHIEV_SPEED_DEMON);
         }
@@ -276,7 +276,7 @@ public class ProgressStorage {
 
         String mode = appPrefs.getString("game_mode", "casual");
         if (mode.equals("casual")) {
-            return; // skip leaderboard in casual mode
+            return; // דילוג על טבלת מובילים במצב רגיל
         }
 
         String savedName = appPrefs.getString("last_name", "Anonymous");
@@ -284,7 +284,7 @@ public class ProgressStorage {
 
         if (uid == null) {
             Log.e(TAG, "Cannot save level completion: User not logged in");
-            return; // Must be logged in to save to leaderboard
+            return; // חייב להיות מחובר כדי לשמור לטבלת מובילים
         }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -305,7 +305,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Write leaderboard entry
+     * כתיבת רשומה בטבלת המובילים
      */
     private static void updateLeaderboardEntry(FirebaseFirestore db, String entryId, int level, String name, long time, String uid) {
         Map<String, Object> completion = new HashMap<>();
@@ -322,7 +322,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Save total game completion time
+     * שמירת זמן סיום משחק כולל
      */
     public static void saveGameCompletion(Context context, long totalTimeMillis) {
         SharedPreferences appPrefs = getAppPrefs(context);
@@ -352,7 +352,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Update total leaderboard entry
+     * עדכון רשומה בטבלת המובילים הכללית
      */
     private static void updateGameLeaderboardEntry(FirebaseFirestore db, String entryId, String name, long time, String uid) {
         Map<String, Object> entry = new HashMap<>();
@@ -368,7 +368,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Leaderboard callback interface
+     * ממשק Callback עבור טבלת המובילים
      */
     public interface LeaderboardCallback {
         void onLeaderboardLoaded(List<Map<String, Object>> entries);
@@ -376,7 +376,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Get top 10 total game leaderboard
+     * מקבל את 10 המובילים בטבלת המשחק הכללית
      */
     public static void getGameLeaderboard(Context context, LeaderboardCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -419,7 +419,7 @@ public class ProgressStorage {
     }
 
     /**
-     * Get top 10 per-level leaderboard
+     * מקבל את 10 המובילים בטבלת המובילים לפי שלב
      */
     public static void getLeaderboard(Context context, int level, LeaderboardCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();

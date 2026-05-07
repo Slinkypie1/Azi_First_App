@@ -1,6 +1,6 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // החבילה אליה שייכת המחלקה הזו
 
-// Imports for sensors, UI, and activity management
+// ייבוא עבור חיישנים, ממשק משתמש וניהול אקטיביטי
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -17,77 +17,77 @@ import androidx.activity.EdgeToEdge;
 /**
  * Puzzle2 Activity
  * ----------------
- * Compass-based riddle puzzle:
- * The player must face specific cardinal directions (East, West, North)
- * in order to progress through the steps and reach the success screen.
- * Includes a 20-second timeout that leads to the Failure screen.
+ * פאזל חידה מבוסס מצפן:
+ * השחקן חייב לפנות לכיוונים רוחות שמים ספציפיים (מזרח, מערב, צפון)
+ * כדי להתקדם בשלבים ולהגיע למסך ההצלחה.
+ * כולל טיימר של 20 שניות שמוביל למסך כישלון.
  */
 public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
 
-    // Sensor-related objects used for compass detection
-    private SensorManager sensorManager;    // Manages device sensors
-    private Sensor rotationSensor;          // Rotation vector sensor (used as compass)
-    private TextView hint;                  // Displays the current riddle text
-    private TextView directionText;         // Shows current detected direction
+    // אובייקטים הקשורים לחיישנים המשמשים לזיהוי מצפן
+    private SensorManager sensorManager;    // מנהל את חיישני המכשיר
+    private Sensor rotationSensor;          // חיישן וקטור סיבוב (משמש כמצפן)
+    private TextView hint;                  // מציג את טקסט החידה הנוכחית
+    private TextView directionText;         // מציג את הכיוון שזוהה כעת
 
-    // Puzzle state tracking
-    private boolean puzzleCompleted = false; // Prevents multiple navigation triggers
-    private String lastDirection = "";       // Stores last detected direction
-    private long lastUpdateTime = 0;         // Time of last valid direction update
-    private int currentStep = 0;             // Tracks progress through riddles
-    private long startTime;                  // Records puzzle start time
+    // מעקב אחר מצב הפאזל
+    private boolean puzzleCompleted = false; // מונע הפעלת ניווט מספר פעמים
+    private String lastDirection = "";       // שומר את הכיוון האחרון שזוהה
+    private long lastUpdateTime = 0;         // זמן העדכון האחרון של כיוון תקין
+    private int currentStep = 0;             // עוקב אחר ההתקדמות בחידות
+    private long startTime;                  // מתעד את זמן התחלת הפאזל
 
-    private static final long SENSOR_UPDATE_THRESHOLD = 500; // Limits sensor update frequency
-    private long lastSensorUpdate = 0; // Last time sensor data was processed
+    private static final long SENSOR_UPDATE_THRESHOLD = 500; // מגביל את תדירות עדכון החיישן
+    private long lastSensorUpdate = 0; // הפעם האחרונה שבה עובדו נתוני החיישן
 
-    private Handler handler = new Handler(Looper.getMainLooper()); // Main thread handler
-    private Runnable failureRunnable; // Runnable that triggers failure screen
+    private Handler handler = new Handler(Looper.getMainLooper()); // מטפל (Handler) לשרשור הראשי
+    private Runnable failureRunnable; // פעולה המפעילה את מסך הכישלון
 
-    // Riddle list for each step of the puzzle
+    // רשימת חידות לכל שלב בפאזל
     private final String[] riddles = {
-            // Step 0: East
+            // שלב 0: מזרח
             "I rise each day, yet I am not the sun.\nTravelers seek me when their journey’s begun.\nOn a compass, I take my place,\nOpposite where the sun sets with grace.\nWhat am I?",
-            // Step 1: West
+            // שלב 1: מערב
             "I follow the sun as it ends the day,\nGuiding travelers along their way.\nOn a compass, I take my stand,\nOpposite where the day began.\nWhat am I?",
-            // Step 2: North
+            // שלב 2: צפון
             "I point the way, steady and true,\nThrough icy lands and skies so blue.\nThe compass trusts me, never astray,\nLeading explorers on their way.\nWhat am I?"
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה לשיטת ההורה
 
-        // Enable edge-to-edge display
+        // הפעלת תצוגה מקצה לקצה
         EdgeToEdge.enable(this);
 
-        // Load layout for Puzzle2 screen
+        // טעינת פריסה עבור מסך Puzzle2
         setContentView(R.layout.activity_puzzle2);
 
-        // Start background music for this puzzle
+        // הפעלת מוזיקת רקע עבור פאזל זה
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.puzzle2_music);
         startService(serviceIntent);
 
-        // Record start time for scoring
+        // תיעוד זמן התחלה לצורך ניקוד
         startTime = System.currentTimeMillis();
 
-        // Link UI elements
+        // קישור רכיבי ממשק משתמש
         hint = findViewById(R.id.hint);
         directionText = findViewById(R.id.directionText);
 
-        // Display first riddle
+        // הצגת החידה הראשונה
         hint.setText(riddles[currentStep]);
 
-        // Initialize sensor system
+        // אתחול מערכת החיישנים
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
-        // Exit if device has no compass sensor
+        // יציאה אם למכשיר אין חיישן מצפן
         if (rotationSensor == null) {
             finish();
         }
 
-        // Failure timer logic (20 seconds timeout)
+        // לוגיקת טיימר כישלון (פסק זמן של 20 שניות)
         failureRunnable = new Runnable() {
             @Override
             public void run() {
@@ -95,10 +95,10 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
                     puzzleCompleted = true;
                     Log.d("Puzzle2", "20 seconds up! Navigating to Failure.");
 
-                    // Stop sensor updates
+                    // הפסקת עדכוני חיישנים
                     sensorManager.unregisterListener(Puzzle2.this);
 
-                    // Navigate to failure screen
+                    // ניווט למסך כישלון
                     Intent intent = new Intent(Puzzle2.this, Failure.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -112,16 +112,16 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
     protected void onResume() {
         super.onResume();
 
-        // Start listening to compass sensor updates
+        // התחלת האזנה לעדכוני חיישן מצפן
         if (rotationSensor != null) {
             sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_UI);
         }
 
-        // Load game mode (casual or timed)
+        // טעינת מצב משחק (רגיל או מתוזמן)
         String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
-        // Start failure timer only in timed mode
+        // הפעלת טיימר כישלון רק במצב מתוזמן
         if (mode.equals("timed") && !puzzleCompleted) {
             handler.postDelayed(failureRunnable, 20000);
         }
@@ -131,73 +131,73 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
     public void onPause() {
         super.onPause();
 
-        // Stop sensor updates when activity is not visible
+        // הפסקת עדכוני חיישנים כאשר האקטיביטי אינה גלויה
         if (rotationSensor != null) {
             sensorManager.unregisterListener(this);
         }
 
-        // Cancel failure timer to avoid leaks
+        // ביטול טיימר כישלון למניעת דליפות זיכרון
         handler.removeCallbacks(failureRunnable);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        // Ignore updates if puzzle is complete or wrong sensor type
+        // התעלמות מעדכונים אם הפאזל הושלם או סוג חיישן שגוי
         if (puzzleCompleted || event.sensor.getType() != Sensor.TYPE_ROTATION_VECTOR) return;
 
         long currentTime = System.currentTimeMillis();
 
-        // Prevent too frequent updates
+        // מניעת עדכונים תכופים מדי
         if (currentTime - lastSensorUpdate < SENSOR_UPDATE_THRESHOLD) return;
         lastSensorUpdate = currentTime;
 
         float[] rotationMatrix = new float[9];
         float[] orientation = new float[3];
 
-        // Convert rotation vector into usable orientation values
+        // המרת וקטור סיבוב לערכי כיוון שמישים
         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
         SensorManager.getOrientation(rotationMatrix, orientation);
 
         int azimuth = (int) Math.toDegrees(orientation[0]);
-        azimuth = (azimuth + 360) % 360; // Normalize angle
+        azimuth = (azimuth + 360) % 360; // נרמול הזווית
 
-        // Convert angle into direction string
+        // המרת זווית למחרוזת כיוון
         String currentDirection = getDirection(azimuth);
 
-        // Track direction changes
+        // מעקב אחר שינויי כיוון
         if (!currentDirection.equals(lastDirection)) {
             lastDirection = currentDirection;
             lastUpdateTime = currentTime;
         }
 
-        // Update UI with current direction
+        // עדכון ממשק המשתמש בכיוון הנוכחי
         directionText.setText("Current Direction: " + currentDirection);
 
-        // Check if correct direction is held long enough
+        // בדיקה אם הכיוון הנכון מוחזק מספיק זמן
         if (currentDirection.equals(getDirectionForStep(currentStep))
                 && (currentTime - lastUpdateTime > 1000)) {
 
             currentStep++;
 
-            // If all steps completed → success
+            // אם כל השלבים הושלמו ← הצלחה
             if (currentStep == riddles.length) {
                 puzzleCompleted = true;
                 sensorManager.unregisterListener(this);
 
-                // Cancel failure timer
+                // ביטול טיימר כישלון
                 handler.removeCallbacks(failureRunnable);
 
                 long timeTaken = System.currentTimeMillis() - startTime;
 
-                // Navigate to success screen
+                // ניווט למסך הצלחה
                 Intent intent = new Intent(this, CorrectScreen5.class);
                 intent.putExtra("TIME_TAKEN", timeTaken);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
             } else {
-                // Load next riddle
+                // טעינת החידה הבאה
                 hint.setText(riddles[currentStep]);
             }
         }
@@ -205,11 +205,11 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Not used in this puzzle
+        // לא בשימוש בפאזל זה
     }
 
     /**
-     * Converts compass angle into a cardinal direction.
+     * המרת זווית מצפן לכיוון רוחות שמים.
      */
     private String getDirection(int azimuth) {
         if (azimuth >= 45 && azimuth < 135) return "East";
@@ -219,7 +219,7 @@ public class Puzzle2 extends BaseMenuActivity implements SensorEventListener {
     }
 
     /**
-     * Returns expected direction for each puzzle step.
+     * מחזיר את הכיוון המצופה עבור כל שלב בפאזל.
      */
     private String getDirectionForStep(int step) {
         switch (step) {

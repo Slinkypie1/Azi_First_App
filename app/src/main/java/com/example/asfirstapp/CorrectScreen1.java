@@ -1,65 +1,65 @@
-package com.example.asfirstapp; // Package name for this activity
+package com.example.asfirstapp; // שם החבילה עבור אקטיביטי זו
 
-import android.content.Intent; // Used to navigate between screens
-import android.os.Bundle; // Contains saved state data for activity lifecycle
-import android.view.View; // Base class for all UI elements
-import android.widget.Button; // Button UI element
-import android.widget.TextView; // Displays text on screen
-import android.widget.Toast; // Shows small popup messages (not used here)
+import android.content.Intent; // משמש לניווט בין מסכים
+import android.os.Bundle; // מכיל נתוני מצב שמורים עבור מחזור החיים של האקטיביטי
+import android.view.View; // מחלקת הבסיס לכל רכיבי ממשק המשתמש
+import android.widget.Button; // רכיב כפתור בממשק המשתמש
+import android.widget.TextView; // מציג טקסט על המסך
+import android.widget.Toast; // מציג הודעות קופצות קטנות (לא בשימוש כאן)
 
-import androidx.activity.EdgeToEdge; // Enables edge-to-edge UI layout
-import androidx.core.view.ViewCompat; // Helps handle window insets safely
+import androidx.activity.EdgeToEdge; // מאפשר פריסת ממשק משתמש מקצה לקצה
+import androidx.core.view.ViewCompat; // עוזר לטפל בשולי חלון בצורה בטוחה
 
-import java.util.List; // List data structure for leaderboard entries
-import java.util.Map; // Key-value pairs for leaderboard data
+import java.util.List; // מבנה נתונים של רשימה עבור רשומות טבלת המובילים
+import java.util.Map; // זוגות מפתח-ערך עבור נתוני טבלת המובילים
 
-// Screen shown when the player answers Level 1 correctly
+// מסך המוצג כאשר השחקן עונה נכונה על שלב 1
 public class CorrectScreen1 extends BaseMenuActivity implements View.OnClickListener {
 
-    Button BtClick10; // Button that continues to next question
-    TextView leaderboardText; // Displays leaderboard results
-    long timeTaken; // Stores how long the player took to finish level
+    Button BtClick10; // כפתור שממשיך לשאלה הבאה
+    TextView leaderboardText; // מציג את תוצאות טבלת המובילים
+    long timeTaken; // שומר כמה זמן לקח לשחקן לסיים את השלב
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate(savedInstanceState); // Call parent setup
-        EdgeToEdge.enable(this); // Enable fullscreen edge-to-edge UI
+        super.onCreate(savedInstanceState); // קריאה להגדרת ההורה
+        EdgeToEdge.enable(this); // הפעלת ממשק משתמש במסך מלא מקצה לקצה
 
-        setContentView(R.layout.activity_correct_screen1); // Load layout XML
+        setContentView(R.layout.activity_correct_screen1); // טעינת קובץ ה-XML של הפריסה
 
-        // Start background music for correct answer screen
+        // הפעלת מוזיקת רקע עבור מסך תשובה נכונה
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.correct_screens_music);
         startService(serviceIntent);
 
-        // Get time taken from previous screen (default = 0 if missing)
+        // קבלת הזמן שלקח מהמסך הקודם (ברירת מחדל = 0 אם חסר)
         timeTaken = getIntent().getLongExtra("TIME_TAKEN", 0);
 
-        // Apply safe window insets and initialize UI
+        // החלת שולי חלון בטוחים ואתחול ממשק המשתמש
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
 
-            initViews(); // Setup buttons and text views
-            unlockNextLevel(1); // Unlock next level if needed
-            saveAndLoadLeaderboard(); // Save score + load leaderboard
+            initViews(); // הגדרת כפתורים ותצוגות טקסט
+            unlockNextLevel(1); // פתיחת השלב הבא אם יש צורך
+            saveAndLoadLeaderboard(); // שמירת תוצאה + טעינת טבלת מובילים
 
-            return insets; // Return unchanged insets
+            return insets; // החזרת השוליים ללא שינוי
         });
     }
 
-    // Saves score and loads leaderboard from storage/cloud
+    // שמירת התוצאה וטעינת טבלת המובילים מהאחסון/ענן
     private void saveAndLoadLeaderboard() {
 
-        // Get current game mode (casual or timed)
+        // קבלת מצב המשחק הנוכחי (רגיל או מתוזמן)
         String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
-        // Save level completion time (also triggers achievements logic)
+        // שמירת זמן סיום השלב (מפעיל גם לוגיקת הישגים)
         if (timeTaken > 0) {
             ProgressStorage.saveLevelCompletion(this, 1, timeTaken);
         }
 
-        // If casual mode → hide leaderboard entirely
+        // אם במצב רגיל ← הסתרת טבלת המובילים לחלוטין
         if (mode.equals("casual")) {
             if (leaderboardText != null) {
                 leaderboardText.setVisibility(View.GONE);
@@ -67,40 +67,40 @@ public class CorrectScreen1 extends BaseMenuActivity implements View.OnClickList
             return;
         }
 
-        // Load leaderboard data asynchronously from storage/backend
+        // טעינת נתוני טבלת המובילים בצורה אסינכרונית מהאחסון/שרת
         ProgressStorage.getLeaderboard(this, 1, new ProgressStorage.LeaderboardCallback() {
 
             @Override
             public void onLeaderboardLoaded(List<Map<String, Object>> entries) {
 
-                StringBuilder sb = new StringBuilder("--- LEADERBOARD ---\n");
-                int rank = 1; // ranking counter
+                StringBuilder sb = new StringBuilder("--- LEADERBOARD ---\n"); // כותרת טבלת המובילים
+                int rank = 1; // מונה דירוג
 
-                // Loop through leaderboard entries
+                // לולאה על רשומות טבלת המובילים
                 for (Map<String, Object> entry : entries) {
 
-                    String name = (String) entry.get("userName"); // player name
-                    long time = (long) entry.get("timeTakenMillis"); // completion time
+                    String name = (String) entry.get("userName"); // שם השחקן
+                    long time = (long) entry.get("timeTakenMillis"); // זמן סיום
 
-                    // Format and append entry
+                    // עיצוב והוספת הרשומה
                     sb.append(rank).append(". ").append(name)
                             .append(": ").append(time / 1000.0).append("s\n");
 
-                    rank++; // increase rank
+                    rank++; // העלאת הדירוג
                 }
 
-                leaderboardText.setText(sb.toString()); // show leaderboard
+                leaderboardText.setText(sb.toString()); // הצגת טבלת המובילים
             }
 
             @Override
             public void onError(Exception e) {
-                // If leaderboard fails to load
+                // אם טעינת טבלת המובילים נכשלת
                 leaderboardText.setText("Leaderboard unavailable");
             }
         });
     }
 
-    // Unlocks next level if player completed current highest level
+    // פתיחת השלב הבא אם השחקן סיים את השלב הגבוה ביותר הנוכחי
     private void unlockNextLevel(int currentLevel) {
 
         if (currentLevel == ProgressStorage.getHighestUnlockedLevel(this)) {
@@ -108,22 +108,22 @@ public class CorrectScreen1 extends BaseMenuActivity implements View.OnClickList
         }
     }
 
-    // Finds UI elements and attaches listeners
+    // מוצא רכיבי ממשק משתמש ומחבר מאזינים
     private void initViews() {
 
-        BtClick10 = findViewById(R.id.BtClick10); // connect button from XML
-        BtClick10.setOnClickListener(this); // set click listener
+        BtClick10 = findViewById(R.id.BtClick10); // קישור הכפתור מה-XML
+        BtClick10.setOnClickListener(this); // הגדרת מאזין ללחיצה
 
-        leaderboardText = findViewById(R.id.leaderboardText); // connect text view
+        leaderboardText = findViewById(R.id.leaderboardText); // קישור תצוגת הטקסט
     }
 
-    // Handles button click events
+    // מטפל באירועי לחיצה על כפתורים
     @Override
     public void onClick(View view) {
 
-        // Move to next question screen
+        // מעבר למסך השאלה הבא
         Intent intent = new Intent(this, SecondQuestion.class);
 
-        startActivity(intent); // open next activity
+        startActivity(intent); // פתיחת האקטיביטי הבאה
     }
 }

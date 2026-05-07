@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- פריסה עבור מסך הגדרות המשחק -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,6 +12,7 @@
     android:background="@color/white"
     tools:context=".GameSettings">
 
+    <!-- כותרת המסך -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,6 +22,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="32dp"/>
 
+    <!-- תווית לבחירת מצב משחק -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,11 +31,13 @@
         android:textSize="20sp"
         android:layout_marginBottom="16dp"/>
 
+    <!-- קבוצת כפתורי בחירה (RadioGroup) לבחירת מצב המשחק -->
     <RadioGroup
         android:id="@+id/rgGameMode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- בחירה במצב רגיל (ללא הגבלת זמן) -->
         <RadioButton
             android:id="@+id/rbCasual"
             android:layout_width="wrap_content"
@@ -42,6 +47,7 @@
             android:textSize="18sp"
             android:buttonTint="@color/black"/>
 
+        <!-- בחירה במצב מתוזמן (אתגר עם זמן) -->
         <RadioButton
             android:id="@+id/rbTimed"
             android:layout_width="wrap_content"
@@ -52,6 +58,7 @@
             android:buttonTint="@color/black"/>
     </RadioGroup>
 
+    <!-- כפתור לשמירת ההגדרות וחזרה -->
     <Button
         android:id="@+id/btnSaveSettings"
         android:layout_width="wrap_content"

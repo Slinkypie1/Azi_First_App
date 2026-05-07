@@ -1,39 +1,39 @@
-package com.example.asfirstapp; // App package name
+package com.example.asfirstapp; // שם החבילה של האפליקציה
 
-// ----- Android imports -----
-import android.content.Context;          // Needed to access app resources and start activities
-import android.content.Intent;           // Used to move between screens
-import android.graphics.Canvas;          // Canvas for custom drawing
-import android.graphics.Color;           // Color constants
-import android.graphics.Paint;           // Used for drawing shapes and text
-import android.os.Handler;               // Handles countdown timing
-import android.util.AttributeSet;        // Used when the view is loaded from XML
-import android.view.View;                // Base class for custom views
+// ----- ייבוני אנדרואיד -----
+import android.content.Context;          // דרוש לגישה למשאבי אפליקציה והפעלת אקטיביטיז
+import android.content.Intent;           // משמש למעבר בין מסכים
+import android.graphics.Canvas;          // קנבס לציור מותאם אישית
+import android.graphics.Color;           // קבועי צבע
+import android.graphics.Paint;           // משמש לציור צורות וטקסט
+import android.os.Handler;               // מטפל בתזמון ספירה לאחור
+import android.util.AttributeSet;        // משמש כאשר התצוגה נטענת מ-XML
+import android.view.View;                // מחלקת בסיס לתצוגות מותאמות אישית
 
-import java.util.Random;                 // Used to randomly select a maze
+import java.util.Random;                 // משמש לבחירה אקראית של מבוך
 
 /**
  * MazeGridView
  * -------------
- * A custom View that displays a tilt-controlled maze game.
- * The player tilts the phone to move a red ball through a maze
- * and reach the green goal without touching walls.
+ * תצוגה מותאמת אישית המציגה משחק מבוך הנשלט על ידי הטיית המכשיר.
+ * השחקן מטה את הטלפון כדי להזיז כדור אדום דרך מבוך
+ * ולהגיע ליעד הירוק מבלי לגעת בקירות.
  */
 public class MazeGridView extends View {
 
-    // ----- Constants -----
+    // ----- קבועים -----
 
-    private static final int GRID_SIZE = 11;   // Maze width and height (11x11 grid)
-    private static final int BALL_RADIUS = 12; // Radius of the player ball in pixels
+    private static final int GRID_SIZE = 11;   // רוחב וגובה המבוך (רשת של 11x11)
+    private static final int BALL_RADIUS = 12; // רדיוס כדור השחקן בפיקסלים
 
-    // ----- Maze Library -----
-    // Each maze is an 11x11 grid:
-    // 0 = empty path (ball can move)
-    // 1 = wall (game over if hit)
-    // 2 = goal (level completed)
+    // ----- ספריית מבוכים -----
+    // כל מבוך הוא רשת של 11x11:
+    // 0 = נתיב פנוי (הכדור יכול לזוז)
+    // 1 = קיר (סיום המשחק אם נוגעים)
+    // 2 = יעד (השלמת השלב)
     private final int[][][] MAZE_LIBRARY = {
 
-            // ===== Maze 1 =====
+            // ===== מבוך 1 =====
             {
                     {1,1,1,1,1,1,1,1,1,1,1},
                     {1,0,0,0,0,0,0,0,0,0,1},
@@ -44,11 +44,11 @@ public class MazeGridView extends View {
                     {1,1,1,1,1,1,1,1,0,0,1},
                     {1,0,0,0,0,0,0,0,0,0,1},
                     {1,0,0,1,1,1,1,1,1,1,1},
-                    {1,0,0,0,0,0,0,0,0,2,1}, // Goal tile
+                    {1,0,0,0,0,0,0,0,0,2,1}, // משבצת יעד
                     {1,1,1,1,1,1,1,1,1,1,1}
             },
 
-            // ===== Maze 2 =====
+            // ===== מבוך 2 =====
             {
                     {1,1,1,1,1,1,1,1,1,1,1},
                     {1,0,1,0,0,0,0,0,0,0,1},
@@ -59,11 +59,11 @@ public class MazeGridView extends View {
                     {1,0,0,0,0,0,1,0,0,0,1},
                     {1,0,1,1,1,1,1,1,1,0,1},
                     {1,0,0,0,0,0,0,0,1,0,1},
-                    {1,1,1,1,1,1,1,0,0,2,1}, // Goal
+                    {1,1,1,1,1,1,1,0,0,2,1}, // יעד
                     {1,1,1,1,1,1,1,1,1,1,1}
             },
 
-            // ===== Maze 3 =====
+            // ===== מבוך 3 =====
             {
                     {1,1,1,1,1,1,1,1,1,1,1},
                     {1,0,1,0,0,0,1,0,0,0,1},
@@ -74,11 +74,11 @@ public class MazeGridView extends View {
                     {1,0,1,0,1,0,1,0,1,0,1},
                     {1,0,1,0,1,0,1,0,1,0,1},
                     {1,0,0,0,1,0,0,0,1,0,1},
-                    {1,0,0,0,1,0,0,0,1,2,1}, // Goal
+                    {1,0,0,0,1,0,0,0,1,2,1}, // יעד
                     {1,1,1,1,1,1,1,1,1,1,1}
             },
 
-            // ===== Maze 4 =====
+            // ===== מבוך 4 =====
             {
                     {1,1,1,1,1,1,1,1,1,1,1},
                     {1,0,0,1,1,1,1,1,1,1,1},
@@ -89,18 +89,18 @@ public class MazeGridView extends View {
                     {1,1,0,1,1,1,1,1,1,1,1},
                     {1,1,0,0,0,0,0,0,0,1,1},
                     {1,1,1,1,1,1,1,1,0,1,1},
-                    {1,1,1,1,1,1,1,1,2,1,1}, // Goal
+                    {1,1,1,1,1,1,1,1,2,1,1}, // יעד
                     {1,1,1,1,1,1,1,1,1,1,1}
             },
 
-            // ===== Maze 5 =====
+            // ===== מבוך 5 =====
             {
                     {1,1,1,1,1,1,1,1,1,1,1},
                     {1,0,0,0,0,0,0,0,0,0,1},
                     {1,1,1,1,1,1,1,1,1,0,1},
                     {1,0,0,0,0,0,0,0,1,0,1},
                     {1,0,1,1,1,1,1,0,1,0,1},
-                    {1,0,1,1,1,2,1,0,1,0,1}, // Goal inside maze
+                    {1,0,1,1,1,2,1,0,1,0,1}, // יעד בתוך המבוך
                     {1,0,1,1,1,0,1,0,1,0,1},
                     {1,0,0,0,0,0,1,0,0,0,1},
                     {1,1,1,1,1,1,1,1,1,1,1},
@@ -108,7 +108,7 @@ public class MazeGridView extends View {
                     {1,1,1,1,1,1,1,1,1,1,1}
             },
 
-            // ===== Maze 6 =====
+            // ===== מבוך 6 =====
             {
                     {1,1,1,1,1,1,1,1,1,1,1},
                     {1,0,1,0,0,0,1,0,0,0,1},
@@ -119,72 +119,72 @@ public class MazeGridView extends View {
                     {1,0,1,1,1,0,1,0,1,0,1},
                     {1,0,1,0,0,0,1,0,1,0,1},
                     {1,0,1,1,1,1,1,0,1,0,1},
-                    {1,0,0,0,0,0,0,0,1,2,1}, // Goal
+                    {1,0,0,0,0,0,0,0,1,2,1}, // יעד
                     {1,1,1,1,1,1,1,1,1,1,1}
             }
     };
 
-    // ----- Game Variables -----
+    // ----- משתני משחק -----
 
-    private int[][] maze;           // Currently active maze
-    private float ballX, ballY;     // Ball position in pixels
-    private float cellSize;         // Size of each maze cell
-    private float offsetX, offsetY; // Offset to center maze on screen
-    private Paint paint;            // Paint used for drawing
-    private boolean gameStarted = false; // Prevents movement before countdown
-    private boolean isNavigating = false; // Prevents multiple screen triggers
-    private int countdown = 3;     // Countdown timer in seconds
-    private Handler handler = new Handler(); // Handles countdown updates
-    private Context context;        // Context for navigation
-    private long startTime;         // Time when the game starts
+    private int[][] maze;           // המבוך הפעיל כעת
+    private float ballX, ballY;     // מיקום הכדור בפיקסלים
+    private float cellSize;         // גודל כל משבצת במבוך
+    private float offsetX, offsetY; // היסט למרכוז המבוך במסך
+    private Paint paint;            // אובייקט Paint המשמש לציור
+    private boolean gameStarted = false; // מונע תנועה לפני הספירה לאחור
+    private boolean isNavigating = false; // מונע הפעלה כפולה של מעבר מסכים
+    private int countdown = 3;     // טיימר ספירה לאחור בשניות
+    private Handler handler = new Handler(); // מטפל בעדכוני ספירה לאחור
+    private Context context;        // הקשר לצורך ניווט
+    private long startTime;         // זמן תחילת המשחק
 
-    // ----- Constructors -----
+    // ----- בנאים -----
 
     public MazeGridView(Context context) {
         super(context);
         this.context = context;
-        init(); // Initialize game setup
+        init(); // אתחול הגדרות המשחק
     }
 
     public MazeGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
-        init(); // Initialize game setup
+        init(); // אתחול הגדרות המשחק
     }
 
-    // ----- Initialization -----
+    // ----- אתחול -----
 
     private void init() {
-        paint = new Paint();              // Create Paint object
-        paint.setAntiAlias(true);         // Smooth drawing
+        paint = new Paint();              // יצירת אובייקט Paint
+        paint.setAntiAlias(true);         // ציור חלק
 
-        // Choose a random maze from the library
+        // בחירת מבוך אקראי מהספרייה
         Random random = new Random();
         maze = MAZE_LIBRARY[random.nextInt(MAZE_LIBRARY.length)];
     }
 
     /**
-     * Public method to start the countdown and then the game.
-     * This allows the activity to show an explanation before the timer begins.
+     * שיטה ציבורית להתחלת הספירה לאחור ואז המשחק.
+     * מאפשרת לאקטיביטי להציג הסבר לפני שהטיימר מתחיל.
      */
     public void beginGame() {
         startCountdown();
     }
 
-    // ----- Size Handling -----
+    // ----- טיפול בגודל -----
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        // Calculate cell size so maze fits screen
+        // חישוב גודל משבצת כך שהמבוך יתאים למסך
         cellSize = Math.min(w / (float) GRID_SIZE, h / (float) GRID_SIZE);
 
-        // Center maze on screen
+        // מרכוז המבוך במסך
         offsetX = (w - cellSize * GRID_SIZE) / 2;
         offsetY = (h - cellSize * GRID_SIZE) / 2;
 
-        // Place ball on the first available path tile
+        // מיקום הכדור במשבצת הפנויה הראשונה
         for (int r = 0; r < GRID_SIZE; r++) {
             for (int c = 0; c < GRID_SIZE; c++) {
                 if (maze[r][c] == 0) {
@@ -196,30 +196,30 @@ public class MazeGridView extends View {
         }
     }
 
-    // ----- Drawing -----
+    // ----- ציור -----
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawMaze(canvas); // Draw maze walls and goal
-        drawBall(canvas); // Draw the red ball
+        drawMaze(canvas); // ציור קירות המבוך והיעד
+        drawBall(canvas); // ציור הכדור האדום
 
         if (!gameStarted && !isNavigating && countdown > 0) {
-            drawCountdown(canvas); // Show countdown before game starts
+            drawCountdown(canvas); // הצגת ספירה לאחור לפני תחילת המשחק
         }
     }
 
     private void drawMaze(Canvas canvas) {
-        // Get the current background color setting to decide wall color
+        // קבלת הגדרת צבע הרקע הנוכחית כדי להחליט על צבע הקיר
         String bgColor = ProgressStorage.getAppPrefs(context)
                 .getString("bg_color", "white");
         int wallColor = bgColor.equals("black") ? Color.WHITE : Color.BLACK;
 
         for (int r = 0; r < GRID_SIZE; r++) {
             for (int c = 0; c < GRID_SIZE; c++) {
-                if (maze[r][c] == 1) paint.setColor(wallColor); // Wall
-                else if (maze[r][c] == 2) paint.setColor(Color.GREEN); // Goal
-                else continue; // Path (not drawn)
+                if (maze[r][c] == 1) paint.setColor(wallColor); // קיר
+                else if (maze[r][c] == 2) paint.setColor(Color.GREEN); // יעד
+                else continue; // נתיב (לא מצויר)
 
                 canvas.drawRect(
                         offsetX + c * cellSize,
@@ -238,7 +238,7 @@ public class MazeGridView extends View {
     }
 
     private void drawCountdown(Canvas canvas) {
-        // Ensure countdown text is visible on black background
+        // לוודא שטקסט הספירה לאחור נראה על רקע שחור
         String bgColor = ProgressStorage.getAppPrefs(context)
                 .getString("bg_color", "white");
         int textColor = bgColor.equals("black") ? Color.YELLOW : Color.BLUE;
@@ -252,7 +252,7 @@ public class MazeGridView extends View {
                 paint);
     }
 
-    // ----- Countdown Logic -----
+    // ----- לוגיקת ספירה לאחור -----
 
     private void startCountdown() {
         handler.postDelayed(new Runnable() {
@@ -260,7 +260,7 @@ public class MazeGridView extends View {
             public void run() {
                 if (countdown > 0) {
                     countdown--;
-                    invalidate();
+                    invalidate(); // ציור מחדש של התצוגה
                     handler.postDelayed(this, 1000);
                 } else {
                     gameStarted = true;
@@ -271,22 +271,22 @@ public class MazeGridView extends View {
         }, 1000);
     }
 
-    // ----- Ball Movement -----
+    // ----- תנועת הכדור -----
 
     public void updateBall(float tiltX, float tiltY) {
-        if (!gameStarted || isNavigating) return; // Ignore movement during countdown or navigation
+        if (!gameStarted || isNavigating) return; // התעלמות מתנועה בזמן ספירה לאחור או ניווט
 
-        float speed = cellSize / 200; // Movement speed
+        float speed = cellSize / 200; // מהירות תנועה
         float newX = ballX - tiltX * speed;
         float newY = ballY + tiltY * speed;
 
-        // Bounding box of the ball for collision detection
+        // תיבת התחימה של הכדור לזיהוי התנגשות
         float left = newX - BALL_RADIUS;
         float right = newX + BALL_RADIUS;
         float top = newY - BALL_RADIUS;
         float bottom = newY + BALL_RADIUS;
 
-        // Check all four corners of the ball's bounding box
+        // בדיקת כל ארבעת הפינות של תיבת התחימה של הכדור
         int[][] corners = {
                 {(int) ((left - offsetX) / cellSize), (int) ((top - offsetY) / cellSize)},
                 {(int) ((right - offsetX) / cellSize), (int) ((top - offsetY) / cellSize)},
@@ -310,7 +310,7 @@ public class MazeGridView extends View {
                     hitGoal = true;
                 }
             } else {
-                canMove = false; // Out of bounds
+                canMove = false; // מחוץ לגבולות
             }
         }
 
@@ -324,7 +324,7 @@ public class MazeGridView extends View {
             navigateToFailureScreen();
         }
 
-        invalidate();
+        invalidate(); // עדכון התצוגה
     }
 
     private void navigateToFailureScreen() {
@@ -332,7 +332,7 @@ public class MazeGridView extends View {
         isNavigating = true;
         gameStarted = false;
 
-        // Record wall hit for Perfectionist achievement
+        // תיעוד פגיעה בקיר עבור הישג פרפקציוניסט
         ProgressStorage.recordWallHit();
 
         context.startActivity(new Intent(context, Failure.class));

@@ -1,61 +1,61 @@
-package com.example.asfirstapp; // Defines the package this class belongs to
+package com.example.asfirstapp; // מגדיר את החבילה אליה שייכת המחלקה הזו
 
-import android.content.Intent; // Used to navigate between activities
-import android.os.Bundle;      // Stores activity state information
-import android.view.Menu;      // Represents the options menu
-import android.view.MenuInflater; // Converts XML menu into Java objects
-import android.view.MenuItem;  // Represents a single item in the menu
-import android.view.View;      // Base class for UI components
-import android.view.ViewGroup; // Container for multiple views
-import android.widget.RadioButton; // Radio button UI element
-import android.widget.TextView; // Text display UI element
-import android.graphics.Color;  // Used for color values
-import android.content.SharedPreferences; // Stores simple key-value data
-import android.widget.FrameLayout; // Layout container
+import android.content.Intent; // משמש לניווט בין אקטיביטיז
+import android.os.Bundle;      // מאחסן מידע על מצב האקטיביטי
+import android.view.Menu;      // מייצג את תפריט האפשרויות
+import android.view.MenuInflater; // הופך תפריט XML לאובייקטי Java
+import android.view.MenuItem;  // מייצג פריט בודד בתפריט
+import android.view.View;      // מחלקת בסיס לרכיבי ממשק משתמש
+import android.view.ViewGroup; // מיכל עבור מספר תצוגות (Views)
+import android.widget.RadioButton; // רכיב ממשק משתמש של כפתור בחירה (Radio Button)
+import android.widget.TextView; // רכיב ממשק משתמש להצגת טקסט
+import android.graphics.Color;  // משמש עבור ערכי צבע
+import android.content.SharedPreferences; // מאחסן נתוני מפתח-ערך פשוטים
+import android.widget.FrameLayout; // מכולת פריסה (Layout container)
 
-import androidx.activity.OnBackPressedCallback; // Handles back button behavior
-import androidx.annotation.Nullable; // Allows null-safe annotations
-import androidx.appcompat.app.AppCompatActivity; // Base activity with ActionBar support
+import androidx.activity.OnBackPressedCallback; // מטפל בהתנהגות כפתור החזור
+import androidx.annotation.Nullable; // מאפשר הערות לבדיקת null
+import androidx.appcompat.app.AppCompatActivity; // אקטיביטי בסיס עם תמיכה ב-ActionBar
 
-import java.util.concurrent.TimeUnit; // Used for time-based operations
+import java.util.concurrent.TimeUnit; // משמש לפעולות מבוססות זמן
 
-import nl.dionsegijn.konfetti.core.Party;
-import nl.dionsegijn.konfetti.core.PartyFactory;
-import nl.dionsegijn.konfetti.core.emitter.Emitter;
-import nl.dionsegijn.konfetti.core.emitter.EmitterConfig;
-import nl.dionsegijn.konfetti.core.models.Shape;
-import nl.dionsegijn.konfetti.core.models.Size;
-import nl.dionsegijn.konfetti.xml.KonfettiView;
+import nl.dionsegijn.konfetti.core.Party; // מחלקת מסיבה עבור קונפטי
+import nl.dionsegijn.konfetti.core.PartyFactory; // מפעל ליצירת מסיבות קונפטי
+import nl.dionsegijn.konfetti.core.emitter.Emitter; // מגדיר פולט קונפטי
+import nl.dionsegijn.konfetti.core.emitter.EmitterConfig; // הגדרות עבור פולט הקונפטי
+import nl.dionsegijn.konfetti.core.models.Shape; // צורות של קונפטי
+import nl.dionsegijn.konfetti.core.models.Size; // גדלים של קונפטי
+import nl.dionsegijn.konfetti.xml.KonfettiView; // תצוגת קונפטי ב-XML
 
-// Abstract base class shared by all menu-based activities
+// מחלקה מופשטת המשמשת כבסיס לכל האקטיביטיז מבוססות התפריט
 public abstract class BaseMenuActivity extends AppCompatActivity {
 
-    // Called when activity is first created
+    // נקרא כאשר האקטיביטי נוצרת לראשונה
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState); // Calls parent setup logic
+        super.onCreate(savedInstanceState); // קריאה ללוגיקת הגדרת ההורה
 
-        // Hide the default title bar text
+        // הסתרת טקסט ברירת המחדל של שורת הכותרת
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Override back button behavior
+        // דריסת התנהגות כפתור החזור
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                showExitConfirmationDialog(); // Show confirmation instead of exiting immediately
+                showExitConfirmationDialog(); // הצגת דיאלוג אישור במקום יציאה מיידית
             }
         });
     }
 
     /**
-     * Shows confirmation dialog before exiting screen
+     * מציג דיאלוג אישור לפני יציאה מהמסך
      */
     private void showExitConfirmationDialog() {
         String message;
 
-        // Customize message depending on current activity
+        // התאמת ההודעה בהתאם לאקטיביטי הנוכחית
         if (this instanceof MainActivity) {
             message = "Are you sure you want to exit the app?";
         } else if (this instanceof Second) {
@@ -66,56 +66,56 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             message = "Are you sure you want to quit this level? Your current progress will be lost.";
         }
 
-        // Build and show alert dialog
+        // בנייה והצגה של דיאלוג התראה
         new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle("Exit Confirmation")
                 .setMessage(message)
 
-                // YES button behavior
+                // התנהגות כפתור "כן"
                 .setPositiveButton("Yes", (dialog, which) -> {
                     if (this instanceof MainActivity) {
-                        finishAffinity(); // Close entire app
+                        finishAffinity(); // סגירת כל האפליקציה
                     } else if (this instanceof Second) {
-                        startActivity(new Intent(this, MainActivity.class)); // Go to main screen
+                        startActivity(new Intent(this, MainActivity.class)); // חזרה למסך הראשי
                         finish();
                     } else if (this instanceof GameSettings || this instanceof AppearanceSettings) {
-                        finish(); // Just go back
+                        finish(); // פשוט חזור אחורה
                     } else {
-                        startActivity(new Intent(this, Second.class)); // Return to hub
+                        startActivity(new Intent(this, Second.class)); // חזרה למסך הבית של המשחק
                         finish();
                     }
                 })
 
-                // NO button does nothing (dialog closes)
+                // כפתור "לא" לא עושה כלום (הדיאלוג נסגר)
                 .setNegativeButton("No", null)
                 .show();
     }
 
-    // Creates top-right options menu
+    // יוצר את תפריט האפשרויות בפינה הימנית העליונה
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater(); // Get menu inflater
-        inflater.inflate(R.menu.level_select, menu); // Load XML menu layout
-        return true; // Show menu
+        MenuInflater inflater = getMenuInflater(); // קבלת מנפח תפריטים
+        inflater.inflate(R.menu.level_select, menu); // טעינת פריסת התפריט מה-XML
+        return true; // הצגת התפריט
     }
 
-    // Called every time menu is shown (refresh state)
+    // נקרא בכל פעם שהתפריט מוצג (רענון מצב)
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
-        // Get music toggle button
+        // קבלת כפתור הפעלה/השתקה של המוזיקה
         MenuItem musicItem = menu.findItem(R.id.music_toggle);
 
         if (musicItem != null) {
-            // Check saved mute state
+            // בדיקת מצב השתקה שמור
             boolean isMuted = ProgressStorage.getAppPrefs(this)
                     .getBoolean("music_muted", false);
 
-            // Update icon depending on state
+            // עדכון האייקון בהתאם למצב
             musicItem.setIcon(isMuted ? R.drawable.music_off : R.drawable.music_on);
         }
 
-        // Hide menu entirely on login screen
+        // הסתרת התפריט לחלוטין במסך הכניסה
         if (this instanceof MainActivity) {
             for (int i = 0; i < menu.size(); i++) {
                 menu.getItem(i).setVisible(false);
@@ -123,43 +123,43 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             return true;
         }
 
-        // Get highest unlocked level
+        // קבלת השלב הגבוה ביותר שנפתח
         int highest = ProgressStorage.getHighestUnlockedLevel(this);
 
         SharedPreferences prefs = ProgressStorage.getAppPrefs(this);
         String mode = prefs.getString("game_mode", "casual");
 
-        boolean isTimedMode = mode.equals("timed"); // Check if timed mode
-        boolean isSecondActivity = this instanceof Second; // Check hub screen
-        boolean showLevels = isSecondActivity && !isTimedMode; // Only show levels if allowed
+        boolean isTimedMode = mode.equals("timed"); // בדיקה אם מצב מתוזמן
+        boolean isSecondActivity = this instanceof Second; // בדיקה אם זהו מסך הבית
+        boolean showLevels = isSecondActivity && !isTimedMode; // הצגת שלבים רק אם מותר
 
-        // Loop through all levels
+        // לולאה על כל השלבים
         for (int level = 1; level <= 9; level++) {
 
-            // Convert level number into menu ID (level_1, level_2, etc.)
+            // המרת מספר השלב למזהה תפריט (level_1, level_2 וכו')
             int resId = getResources().getIdentifier(
                     "level_" + level,
                     "id",
                     getPackageName()
             );
 
-            MenuItem item = menu.findItem(resId); // Get menu item
+            MenuItem item = menu.findItem(resId); // קבלת פריט התפריט
 
             if (item != null) {
 
-                // Hide levels if not allowed
+                // הסתרת שלבים אם לא מותר
                 if (!showLevels) {
                     item.setVisible(false);
                     continue;
                 }
 
-                // Unlock logic
+                // לוגיקת פתיחה
                 if (level <= highest) {
-                    item.setEnabled(true); // clickable
-                    item.setIcon(R.drawable.ic_unlock); // unlocked icon
+                    item.setEnabled(true); // ניתן ללחיצה
+                    item.setIcon(R.drawable.ic_unlock); // אייקון פתוח
                 } else {
-                    item.setEnabled(false); // locked
-                    item.setIcon(R.drawable.ic_lock); // lock icon
+                    item.setEnabled(false); // נעול
+                    item.setIcon(R.drawable.ic_lock); // אייקון מנעול
                 }
             }
         }
@@ -167,48 +167,48 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         return super.onPrepareOptionsMenu(menu);
     }
 
-    // Start a level (placeholder function)
+    // הפעלת שלב (פונקציית דמה)
     public void startLevel(int level) {
-        Intent intent = new Intent(this, Third.class); // Example level screen
+        Intent intent = new Intent(this, Third.class); // דוגמה למסך שלב
         startActivity(intent);
     }
 
-    // Handle menu clicks
+    // טיפול בלחיצות על התפריט
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        int id = item.getItemId(); // Get clicked item ID
+        int id = item.getItemId(); // קבלת ה-ID של הפריט שנלחץ
 
-        // Main menu
+        // תפריט ראשי
         if (id == R.id.main_menu) {
             startActivity(new Intent(this, MainActivity.class));
             return true;
         }
 
-        // Music toggle
+        // החלפת מצב מוזיקה
         if (id == R.id.music_toggle) {
 
             SharedPreferences prefs = ProgressStorage.getAppPrefs(this);
             boolean isMuted = prefs.getBoolean("music_muted", false);
             boolean newMuted = !isMuted;
 
-            prefs.edit().putBoolean("music_muted", newMuted).apply(); // Save state
+            prefs.edit().putBoolean("music_muted", newMuted).apply(); // שמירת המצב
 
-            ProgressStorage.syncMusicToFirebase(this, newMuted); // Sync cloud
+            ProgressStorage.syncMusicToFirebase(this, newMuted); // סנכרון לענן
 
             Intent serviceIntent = new Intent(this, MusicService.class);
 
             if (newMuted) {
-                stopService(serviceIntent); // stop music
+                stopService(serviceIntent); // הפסקת מוזיקה
             } else {
-                startService(serviceIntent); // start music
+                startService(serviceIntent); // הפעלת מוזיקה
             }
 
-            invalidateOptionsMenu(); // refresh icon
+            invalidateOptionsMenu(); // רענון האייקון
             return true;
         }
 
-        // Level navigation
+        // ניווט לשלבים
         if (id == R.id.level_1) { startActivity(new Intent(this, Third.class)); return true; }
         if (id == R.id.level_2) { startActivity(new Intent(this, SecondQuestion.class)); return true; }
         if (id == R.id.level_3) { startActivity(new Intent(this, ThirdQuestion.class)); return true; }
@@ -222,15 +222,15 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // When activity returns to foreground
+    // כאשר האקטיביטי חוזרת לקדמה
     @Override
     protected void onResume() {
-        super.onResume(); // resume lifecycle
+        super.onResume(); // המשך מחזור החיים
 
-        invalidateOptionsMenu(); // refresh menu state
-        applyAppearance(); // apply theme/colors
+        invalidateOptionsMenu(); // רענון מצב התפריט
+        applyAppearance(); // החלת ערכת נושא/צבעים
 
-        // Auto confetti on success screens
+        // הפעלת קונפטי אוטומטית במסכי הצלחה
         if (this.getClass().getSimpleName().contains("Correct") ||
                 this.getClass().getSimpleName().contains("Finish") ||
                 this instanceof FinalScore) {
@@ -238,7 +238,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         }
     }
 
-    // Shows confetti animation
+    // מציג אנימציית קונפטי
     public void triggerConfetti() {
 
         View rootView = findViewById(android.R.id.content);
@@ -248,7 +248,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
 
         KonfettiView konfettiView = null;
 
-        // Find existing confetti view
+        // חיפוש תצוגת קונפטי קיימת
         for (int i = 0; i < rootGroup.getChildCount(); i++) {
             if (rootGroup.getChildAt(i) instanceof KonfettiView) {
                 konfettiView = (KonfettiView) rootGroup.getChildAt(i);
@@ -256,7 +256,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             }
         }
 
-        // Create if missing
+        // יצירה אם חסרה
         if (konfettiView == null) {
             konfettiView = new KonfettiView(this);
             konfettiView.setLayoutParams(new FrameLayout.LayoutParams(
@@ -265,7 +265,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             rootGroup.addView(konfettiView);
         }
 
-        // Confetti settings
+        // הגדרות קונפטי
         EmitterConfig emitterConfig = new Emitter(5L, TimeUnit.SECONDS).perSecond(30);
 
         Party party = new PartyFactory(emitterConfig)
@@ -281,7 +281,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         konfettiView.start(party);
     }
 
-    // Applies theme colors
+    // החלת צבעי ערכת הנושא
     private void applyAppearance() {
 
         SharedPreferences prefs = ProgressStorage.getAppPrefs(this);
@@ -299,7 +299,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         }
     }
 
-    // Recursively applies colors to all views
+    // החלת צבעים באופן רקורסיבי על כל התצוגות
     private void applyColorsRecursively(View view, int bgColor, int textColor, boolean isRoot) {
 
         if (isRoot) {

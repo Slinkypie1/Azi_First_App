@@ -1,6 +1,6 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // החבילה אליה שייכת המחלקה הזו
 
-// Imports for navigation, UI components, and Android lifecycle handling
+// ייבוא עבור ניווט, רכיבי ממשק משתמש וניהול מחזור החיים של אנדרואיד
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -20,50 +20,50 @@ import java.util.Map;
 /**
  * Ranking Activity
  * ----------------
- * Displays the game leaderboard by fetching data from Firebase via ProgressStorage.
- * Shows players ranked by total completion time.
+ * מציג את טבלת המובילים של המשחק על ידי הבאת נתונים מ-Firebase דרך ProgressStorage.
+ * מציג שחקנים מדורגים לפי זמן הסיום הכולל שלהם.
  */
 public class Ranking extends BaseMenuActivity {
 
-    // UI elements
-    private TextView leaderboardText;          // Displays leaderboard results
-    private Button btnBackFromRanking;        // Button to return to previous screen
+    // רכיבי ממשק משתמש
+    private TextView leaderboardText;          // מציג את תוצאות טבלת המובילים
+    private Button btnBackFromRanking;        // כפתור לחזרה למסך הקודם
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה לשיטת ההורה
 
-        // Enable edge-to-edge UI layout
+        // הפעלת פריסת ממשק משתמש מקצה לקצה
         EdgeToEdge.enable(this);
 
-        // Set layout for this activity
+        // הגדרת הפריסה עבור אקטיביטי זו
         setContentView(R.layout.activity_ranking);
 
-        // Start background music for ranking screen
+        // הפעלת מוזיקת רקע עבור מסך הדירוג
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.ranking_music);
         startService(serviceIntent);
 
-        // Handle system UI insets (status bar, navigation bar)
+        // טיפול בשולי ממשק המערכת (שורת מצב, שורת ניווט)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Link UI elements
+        // קישור רכיבי ממשק משתמש
         leaderboardText = findViewById(R.id.leaderboardText);
         btnBackFromRanking = findViewById(R.id.btnBackFromRanking);
 
-        // Back button closes activity
+        // כפתור חזור שסוגר את האקטיביטי
         btnBackFromRanking.setOnClickListener(v -> finish());
 
-        // Load leaderboard data from Firebase/local storage
+        // טעינת נתוני טבלת המובילים מ-Firebase או מאחסון מקומי
         loadLeaderboard();
     }
 
     /**
-     * Fetches leaderboard data from ProgressStorage and displays it.
+     * מביא נתוני טבלת מובילים מ-ProgressStorage ומציג אותם.
      */
     private void loadLeaderboard() {
 
@@ -72,32 +72,32 @@ public class Ranking extends BaseMenuActivity {
             @Override
             public void onLeaderboardLoaded(List<Map<String, Object>> entries) {
 
-                StringBuilder sb = new StringBuilder();
-                int rank = 1;
+                StringBuilder sb = new StringBuilder(); // בונה את מחרוזת הדירוג
+                int rank = 1; // מונה דירוג
 
-                // Build leaderboard display text
+                // בניית טקסט התצוגה של טבלת המובילים
                 for (Map<String, Object> entry : entries) {
 
-                    String name = (String) entry.get("userName");              // Player name
-                    Long timeMillis = (Long) entry.get("totalTimeMillis");     // Completion time
+                    String name = (String) entry.get("userName");              // שם השחקן
+                    Long timeMillis = (Long) entry.get("totalTimeMillis");     // זמן הסיום
 
                     if (name != null && timeMillis != null) {
 
-                        // Convert milliseconds into readable format
+                        // המרת מילישניות לפורמט קריא
                         String timeFormatted = formatTime(timeMillis);
 
-                        // Append formatted ranking line
+                        // הוספת שורת דירוג מעוצבת
                         sb.append(rank).append(". ")
                                 .append(name)
                                 .append(" - ")
                                 .append(timeFormatted)
                                 .append("\n\n");
 
-                        rank++;
+                        rank++; // העלאת הדירוג
                     }
                 }
 
-                // If no entries exist, show placeholder message
+                // אם לא קיימות רשומות, הצגת הודעה זמנית
                 if (sb.length() == 0) {
                     leaderboardText.setText("No rankings yet. Be the first to finish!");
                 } else {
@@ -107,17 +107,17 @@ public class Ranking extends BaseMenuActivity {
 
             @Override
             public void onError(Exception e) {
-                // Show error message if Firebase request fails
+                // הצגת הודעת שגיאה אם הבקשה ל-Firebase נכשלת
                 leaderboardText.setText("Error loading leaderboard. Please try again later.");
             }
         });
     }
 
     /**
-     * Converts milliseconds into a readable time format.
-     * Example:
-     * - 90,000 ms → 01:30
-     * - 3,660,000 ms → 01:01:00
+     * המרת מילישניות לפורמט זמן קריא.
+     * דוגמה:
+     * - 90,000 מילישניות ← 01:30
+     * - 3,660,000 מילישניות ← 01:01:00
      */
     private String formatTime(long durationMillis) {
 
@@ -126,8 +126,10 @@ public class Ranking extends BaseMenuActivity {
         long hours = (durationMillis / (1000 * 60 * 60));
 
         if (hours > 0) {
+            // פורמט שעות:דקות:שניות
             return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
         } else {
+            // פורמט דקות:שניות
             return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
         }
     }

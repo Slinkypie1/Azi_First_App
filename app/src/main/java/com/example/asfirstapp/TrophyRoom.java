@@ -1,87 +1,87 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // הגדרת החבילה אליה שייכת המחלקה הזו
 
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.os.Bundle; // מחזיק נתוני מצב של האקטיביטי
+import android.util.Log; // לרישום הודעות ביומן (Log)
+import android.view.View; // מחלקת הבסיס לרכיבי ממשק משתמש
+import android.widget.Button; // רכיב כפתור
+import android.widget.LinearLayout; // פריסה קווית
 
-import androidx.activity.EdgeToEdge;
-import androidx.core.view.ViewCompat;
+import androidx.activity.EdgeToEdge; // תמיכה בפריסה מקצה לקצה
+import androidx.core.view.ViewCompat; // כלי עזר לתאימות תצוגות
 
-import java.util.Set;
+import java.util.Set; // ממשק עבור קבוצת ערכים ייחודיים
 
 /**
- * TrophyRoom Activity
+ * אקטיביטי TrophyRoom
  * --------------------
- * Displays all player achievements (trophies).
- * Each trophy is shown unlocked (fully visible) or locked (faded)
- * depending on what is stored in ProgressStorage.
+ * מציג את כל ההישגים (הגביעים) של השחקן.
+ * כל גביע מוצג כפתוח (גלוי לחלוטין) או נעול (שקוף למחצה)
+ * בהתאם למה שמאוחסן ב-ProgressStorage.
  */
 public class TrophyRoom extends BaseMenuActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה לשיטת ההורה
 
-        // Enable edge-to-edge fullscreen layout
+        // הפעלת פריסת מסך מלא מקצה לקצה
         EdgeToEdge.enable(this);
 
-        // Set layout for this screen
+        // הגדרת הפריסה עבור מסך זה
         setContentView(R.layout.activity_trophy_room);
 
-        // Initialize UI elements and logic
+        // אתחול רכיבי ממשק המשתמש והלוגיקה
         initViews();
 
-        // Handle system window insets (status bar / navigation bar spacing)
+        // טיפול בשולי חלון המערכת (שורת מצב / שורת ניווט)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            return insets;
+            return insets; // החזרת השוליים ללא שינוי
         });
     }
 
     @Override
     protected void onResume() {
-        super.onResume();
+        super.onResume(); // המשך מחזור החיים
 
-        // BaseMenuActivity handles appearance updates (theme, colors, etc.)
-        // No additional logic needed here
+        // BaseMenuActivity מטפלת בעדכוני מראה (ערכת נושא, צבעים וכו')
+        // אין צורך בלוגיקה נוספת כאן
     }
 
     /**
-     * Initializes UI elements and updates trophy visibility
-     * based on unlocked achievements.
+     * מאתחל רכיבי ממשק משתמש ומעדכן את נראות הגביעים
+     * בהתאם להישגים שנפתחו.
      */
     private void initViews() {
 
-        // Back button returns to previous screen
+        // כפתור חזרה מחזיר למסך הקודם
         Button btnBack = findViewById(R.id.btnBackFromTrophy);
         btnBack.setOnClickListener(v -> finish());
 
-        // Get all earned achievements from storage
+        // קבלת כל ההישגים שהושגו מהאחסון
         Set<String> earned = ProgressStorage.getEarnedAchievements(this);
         Log.d("TrophyRoom", "Earned Achievements: " + earned.toString());
 
-        // Speed Demon trophy
+        // גביע Speed Demon (שד המהירות)
         if (earned.contains(ProgressStorage.ACHIEV_SPEED_DEMON)) {
             findViewById(R.id.layoutSpeedDemon).setAlpha(1.0f);
         }
 
-        // Perfectionist trophy
+        // גביע Perfectionist (פרפקציוניסט)
         if (earned.contains(ProgressStorage.ACHIEV_PERFECTIONIST)) {
             findViewById(R.id.layoutPerfectionist).setAlpha(1.0f);
         }
 
-        // World Traveler trophy
+        // גביע World Traveler (מטייל עולמי)
         if (earned.contains(ProgressStorage.ACHIEV_WORLD_TRAVELER)) {
             findViewById(R.id.layoutWorldTraveler).setAlpha(1.0f);
         }
 
-        // Ranked trophy
+        // גביע Ranked (מדורג)
         if (earned.contains(ProgressStorage.ACHIEV_RANKED)) {
             findViewById(R.id.layoutRanked).setAlpha(1.0f);
         }
 
-        // Top 10 leaderboard trophy
+        // גביע Top 10 (עשרת הגדולים)
         if (earned.contains(ProgressStorage.ACHIEV_TOP_10)) {
             findViewById(R.id.layoutTop10).setAlpha(1.0f);
         }

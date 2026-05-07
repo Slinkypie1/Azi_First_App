@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- פריסה עבור משחק "Unlock City" המבוסס על מפות גוגל -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <!-- Google Map -->
-
-    <!-- Fixed pin image in center -->
+    <!-- קטע (Fragment) המציג את מפת גוגל -->
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- תמונת נעץ קבועה במרכז המסך המשמשת לבחירת מיקום על המפה -->
     <ImageView
         android:id="@+id/fixed_pin"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="center"
-        android:src="@drawable/ic_map_pin" /> <!-- Replace with your pin drawable -->
+        android:src="@drawable/ic_map_pin" /> <!-- תמונת הנעץ -->
 
-    <!-- Clue TextView at the top -->
+    <!-- תצוגת טקסט המציגה את הרמז לעיר בראש המסך -->
     <TextView
         android:id="@+id/clueText"
         android:layout_width="match_parent"
@@ -32,7 +32,7 @@
         android:text="City clue will appear here"
         android:layout_gravity="top" />
 
-    <!-- Hearts TextView at the top right -->
+    <!-- תצוגת טקסט המציגה את מספר החיים (לבבות) הנותרים -->
     <TextView
         android:id="@+id/heartsText"
         android:layout_width="wrap_content"
@@ -46,7 +46,7 @@
         android:textColor="#FF0000"
         android:textSize="20sp" />
 
-    <!-- Submit Guess button at the bottom center -->
+    <!-- כפתור להגשת הניחוש הממוקם בתחתית המרכז -->
     <Button
         android:id="@+id/submitGuessBtn"
         android:layout_width="wrap_content"

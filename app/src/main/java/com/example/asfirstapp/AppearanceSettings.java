@@ -1,113 +1,113 @@
-package com.example.asfirstapp; // Defines the app’s package (namespace)
+package com.example.asfirstapp; // מגדיר את החבילה של האפליקציה
 
-import android.content.Intent; // Used to switch between screens (activities)
-import android.content.SharedPreferences; // Used to save small persistent data locally
-import android.graphics.Color; // Allows working with colors (not used in this file currently)
-import android.os.Bundle; // Used to pass data into onCreate()
-import android.view.View; // Base class for all UI elements
-import android.widget.Button; // Button UI element
-import android.widget.RadioButton; // Single selectable option button
-import android.widget.RadioGroup; // Group of radio buttons (only one selectable)
-import android.widget.TextView; // Text display element (not used here)
-import android.widget.Toast; // Small popup message
+import android.content.Intent; // משמש למעבר בין מסכים (אקטיביטיז)
+import android.content.SharedPreferences; // משמש לשמירת נתונים קבועים קטנים באופן מקומי
+import android.graphics.Color; // מאפשר עבודה עם צבעים (לא בשימוש ישיר בקובץ זה כרגע)
+import android.os.Bundle; // משמש להעברת נתונים לתוך onCreate()
+import android.view.View; // מחלקת הבסיס לכל רכיבי ממשק המשתמש
+import android.widget.Button; // רכיב כפתור בממשק המשתמש
+import android.widget.RadioButton; // כפתור בחירה בודד
+import android.widget.RadioGroup; // קבוצת כפתורי בחירה (רק אחד ניתן לבחירה)
+import android.widget.TextView; // רכיב להצגת טקסט (לא בשימוש כאן)
+import android.widget.Toast; // הודעה קופצת קטנה
 
-import androidx.activity.EdgeToEdge; // Enables edge-to-edge layout rendering
-import androidx.core.graphics.Insets; // Handles system window insets (status/navigation bars)
-import androidx.core.view.ViewCompat; // Helps apply compatibility features to views
-import androidx.core.view.WindowInsetsCompat; // Provides system bar inset information
+import androidx.activity.EdgeToEdge; // מאפשר רינדור פריסה מקצה לקצה (Edge-to-Edge)
+import androidx.core.graphics.Insets; // מטפל בשולי חלון המערכת (שורת מצב/ניווט)
+import androidx.core.view.ViewCompat; // עוזר להחיל תכונות תאימות על תצוגות
+import androidx.core.view.WindowInsetsCompat; // מספק מידע על שולי סרגלי המערכת
 
 public class AppearanceSettings extends BaseMenuActivity {
-    // This screen inherits from BaseMenuActivity (shared menu functionality)
+    // מסך זה יורש מ-BaseMenuActivity (פונקציונליות תפריט משותפת)
 
-    private RadioGroup rgBgColor; // Group for background color options
-    private RadioButton rbWhite, rbBlack; // Two selectable color options
-    private Button btnSaveAppearance; // Button to save selected appearance
+    private RadioGroup rgBgColor; // קבוצה עבור אפשרויות צבע הרקע
+    private RadioButton rbWhite, rbBlack; // שתי אפשרויות צבע לבחירה
+    private Button btnSaveAppearance; // כפתור לשמירת המראה הנבחר
     private SharedPreferences sharedPreferences;
-    // Storage for saving user preferences locally on device
+    // אחסון לשמירת העדפות משתמש באופן מקומי במכשיר
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Called when this screen is created
+        // נקרא כאשר מסך זה נוצר
 
-        super.onCreate(savedInstanceState); // Calls parent setup logic
-        EdgeToEdge.enable(this); // Enables full-screen edge-to-edge UI
+        super.onCreate(savedInstanceState); // קריאה ללוגיקת ההגדרה של ההורה
+        EdgeToEdge.enable(this); // הפעלת ממשק משתמש מלא מקצה לקצה
         setContentView(R.layout.activity_appearance_settings);
-        // Links this Java file to its XML layout
+        // קישור קובץ ה-Java הזה לפריסת ה-XML שלו
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            // Adjust layout when system bars (status/nav) overlap UI
+            // התאמת הפריסה כאשר סרגלי המערכת (מצב/ניווט) חופפים לממשק המשתמש
 
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            // Gets size of system bars
+            // קבלת גודל סרגלי המערכת
 
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            // Applies padding so UI doesn't overlap system bars
+            // החלת ריפוח (padding) כדי שממשק המשתמש לא יחפוף לסרגלי המערכת
 
-            return insets; // Returns modified insets
+            return insets; // החזרת השוליים המעודכנים
         });
 
         sharedPreferences = ProgressStorage.getAppPrefs(this);
-        // Creates/opens a private storage file for the current user
+        // יצירת/פתיחת קובץ אחסון פרטי עבור המשתמש הנוכחי
 
-        rgBgColor = findViewById(R.id.rgBgColor); // Connects radio group from XML
-        rbWhite = findViewById(R.id.rbWhite); // Connects "white" option
-        rbBlack = findViewById(R.id.rbBlack); // Connects "black" option
-        btnSaveAppearance = findViewById(R.id.btnSaveAppearance); // Save button
+        rgBgColor = findViewById(R.id.rgBgColor); // קישור קבוצת הרדיו מה-XML
+        rbWhite = findViewById(R.id.rbWhite); // קישור אפשרות "לבן"
+        rbBlack = findViewById(R.id.rbBlack); // קישור אפשרות "שחור"
+        btnSaveAppearance = findViewById(R.id.btnSaveAppearance); // כפתור שמירה
         Button btnBackToSecond = findViewById(R.id.btnBackToSecond);
-        // Button to go back to previous screen
+        // כפתור לחזרה למסך הקודם
 
-        // Load existing setting
+        // טעינת הגדרה קיימת
         String bgColor = sharedPreferences.getString("bg_color", "white");
-        // Reads saved background color (default = white)
+        // קריאת צבע הרקע השמור (ברירת מחדל = לבן)
 
         if (bgColor.equals("black")) {
-            // If saved value is black
-            rbBlack.setChecked(true); // Select black option
+            // אם הערך השמור הוא שחור
+            rbBlack.setChecked(true); // בחירת אפשרות שחור
         } else {
-            rbWhite.setChecked(true); // Otherwise select white option
+            rbWhite.setChecked(true); // אחרת בחירת אפשרות לבן
         }
 
         btnSaveAppearance.setOnClickListener(v -> {
-            // Runs when user clicks save button
+            // רץ כאשר המשתמש לוחץ על כפתור השמירה
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            // Opens editor to modify stored preferences
+            // פתיחת עורך לשינוי ההעדפות המאוחסנות
 
             String chosenColor;
-            // Variable to store selected color
+            // משתנה לאחסון הצבע הנבחר
 
             if (rbBlack.isChecked()) {
-                chosenColor = "black"; // User selected black
+                chosenColor = "black"; // המשתמש בחר שחור
             } else {
-                chosenColor = "white"; // Otherwise white
+                chosenColor = "white"; // אחרת לבן
             }
 
             editor.putString("bg_color", chosenColor);
-            // Saves selected color under key "bg_color"
+            // שמירת הצבע הנבחר תחת המפתח "bg_color"
 
             editor.apply();
-            // Commits changes asynchronously
+            // ביצוע השינויים בצורה אסינכרונית
 
-            // Sync to Firebase
+            // סנכרון ל-Firebase
             ProgressStorage.syncAppearanceToFirebase(this, chosenColor);
-            // Sends selected appearance to Firebase database (cloud sync)
+            // שליחת המראה הנבחר למסד הנתונים Firebase (סנכרון ענן)
 
             Toast.makeText(this, "Appearance Saved", Toast.LENGTH_SHORT).show();
-            // Shows confirmation popup
+            // הצגת הודעת אישור קופצת
 
             recreate();
-            // Restarts activity to apply changes immediately
+            // הפעלה מחדש של האקטיביטי כדי להחיל את השינויים מיד
         });
 
         btnBackToSecond.setOnClickListener(v -> {
-            // Runs when back button is clicked
+            // רץ כאשר כפתור החזור נלחץ
 
             Intent intent = new Intent(AppearanceSettings.this, Second.class);
-            // Creates intent to move to Second screen
+            // יצירת אינטנט למעבר למסך השני (Second)
 
-            startActivity(intent); // Opens Second activity
+            startActivity(intent); // פתיחת האקטיביטי השנייה
 
-            finish(); // Closes current screen so user can’t go back to it
+            finish(); // סגירת המסך הנוכחי כדי שהמשתמש לא יוכל לחזור אליו
         });
     }
 }

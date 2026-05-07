@@ -1,63 +1,63 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // הגדרת החבילה אליה שייכת המחלקה הזו
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
+import android.content.Intent; // משמש למעבר בין מסכים
+import android.os.Bundle; // מחזיק נתוני מצב של האקטיביטי
+import android.os.Handler; // לניהול פעולות מושהות
+import android.os.Looper; // לניהול לולאת ההודעות של השרשור הראשי
+import android.util.Log; // לרישום הודעות ביומן (Log)
 
-import androidx.activity.EdgeToEdge;
+import androidx.activity.EdgeToEdge; // תמיכה בפריסה מקצה לקצה
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.FirebaseAuth; // אימות Firebase
+import com.google.firebase.firestore.FirebaseFirestore; // מסד הנתונים Firestore
 
 /**
- * SplashScreen Activity
+ * אקטיביטי SplashScreen
  * ----------------------
- * This is the first screen shown when the app launches.
- * It initializes Firebase, optionally performs a silent login,
- * and then navigates to the MainActivity after a short delay.
+ * זהו המסך הראשון שמוצג כשהאפליקציה עולה.
+ * הוא מאתחל את Firebase, מבצע התחברות שקטה (אם המשתמש כבר מחובר),
+ * ועובר ל-MainActivity או ללובי אחרי השהיה קצרה.
  */
 public class SplashScreen extends BaseMenuActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // קריאה לשיטת ההורה
 
-        // Enable modern fullscreen edge-to-edge layout
+        // הפעלת פריסת מסך מלא מודרנית
         EdgeToEdge.enable(this);
 
-        // Set splash screen layout (logo / loading screen)
+        // הגדרת פריסת מסך הפתיחה (לוגו / מסך טעינה)
         setContentView(R.layout.activity_splash_screen);
 
-        // Initialize Firestore instance early so Firebase is ready for use
+        // אתחול מופע Firestore מוקדם כדי ש-Firebase יהיה מוכן לשימוש
         FirebaseFirestore.getInstance();
 
-        // Get Firebase authentication instance
+        // קבלת מופע אימות Firebase
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-        // Check if user is already logged in
+        // בדיקה האם המשתמש כבר מחובר
         final Intent intent;
         if (mAuth.getCurrentUser() != null) {
             // Already logged in, skip login screen
             intent = new Intent(SplashScreen.this, Second.class);
             Log.d("SPLASH", "User already logged in: " + mAuth.getCurrentUser().getEmail());
         } else {
-            // Not logged in, go to login screen
+            // לא מחובר, מעבר למסך הכניסה
             intent = new Intent(SplashScreen.this, MainActivity.class);
         }
 
-        // Wait 2 seconds before moving to the next screen
+        // המתנה של 2 שניות לפני מעבר למסך הבא
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            startActivity(intent);
-            finish();
+            startActivity(intent); // הפעלת האקטיביטי הבאה
+            finish(); // סגירת מסך הפתיחה
         }, 2000);
     }
 
     @Override
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
 
-        // Disable menu for splash screen (no settings or actions here)
+        // ביטול התפריט עבור מסך הפתיחה (אין כאן הגדרות או פעולות)
         return false;
     }
 }

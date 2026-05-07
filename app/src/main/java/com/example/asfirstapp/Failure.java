@@ -1,61 +1,61 @@
-package com.example.asfirstapp; // Package namespace for the app
+package com.example.asfirstapp; // מרחב השמות של האפליקציה
 
-import android.content.Intent; // Used to navigate between activities
-import android.os.Bundle; // Stores activity state information
-import android.view.View; // Base class for UI components
-import android.widget.Button; // Button UI element
+import android.content.Intent; // משמש לניווט בין אקטיביטיז
+import android.os.Bundle; // מאחסן מידע על מצב האקטיביטי
+import android.view.View; // מחלקת הבסיס לרכיבי ממשק משתמש
+import android.widget.Button; // רכיב כפתור בממשק המשתמש
 
-import androidx.activity.EdgeToEdge; // Enables edge-to-edge fullscreen layout
-import androidx.appcompat.app.AppCompatActivity; // Base activity class (not directly used here since BaseMenuActivity extends it)
-import androidx.core.graphics.Insets; // Represents system bar insets
-import androidx.core.view.ViewCompat; // Handles compatibility for view changes
-import androidx.core.view.WindowInsetsCompat; // Provides window inset data
+import androidx.activity.EdgeToEdge; // מאפשר פריסת מסך מלא מקצה לקצה
+import androidx.appcompat.app.AppCompatActivity; // מחלקת בסיס לאקטיביטי (לא בשימוש ישיר כאן כי BaseMenuActivity מרחיבה אותה)
+import androidx.core.graphics.Insets; // מייצג את שולי סרגלי המערכת
+import androidx.core.view.ViewCompat; // מטפל בתאימות עבור שינויי תצוגה
+import androidx.core.view.WindowInsetsCompat; // מספק נתוני שולי חלון
 
-// Activity shown when the player fails a level
+// אקטיביטי המוצגת כאשר השחקן נכשל בשלב
 public class Failure extends BaseMenuActivity implements View.OnClickListener {
 
-    Button BtClickLose; // Button that returns player to main menu
+    Button BtClickLose; // כפתור שמחזיר את השחקן לתפריט הראשי
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate(savedInstanceState); // Call parent setup logic
+        super.onCreate(savedInstanceState); // קריאה ללוגיקת ההגדרה של ההורה
 
-        EdgeToEdge.enable(this); // Enable full-screen edge-to-edge layout
+        EdgeToEdge.enable(this); // הפעלת פריסה מלאה מקצה לקצה
 
-        setContentView(R.layout.activity_failure_screen); // Load failure screen layout
+        setContentView(R.layout.activity_failure_screen); // טעינת פריסת מסך הכישלון
 
-        // Record that the player failed (used for achievements like "Perfectionist")
+        // תיעוד שהשחקן נכשל (משמש להישגים כמו "פרפקציוניסט")
         ProgressStorage.recordWallHit();
 
-        // Start failure background music
+        // הפעלת מוזיקת רקע של כישלון
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.failure_music);
         startService(serviceIntent);
 
-        // Handle system UI insets (status bar, navigation bar)
+        // טיפול בשולי ממשק המערכת (שורת מצב, שורת ניווט)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main3), (v, insets) -> {
 
-            initViews(); // Initialize UI components
+            initViews(); // אתחול רכיבי ממשק המשתמש
 
-            return insets; // Keep system insets unchanged
+            return insets; // שמירה על שולי המערכת ללא שינוי
         });
     }
 
-    // Initializes UI components and sets click listeners
+    // מאתחל רכיבי ממשק משתמש ומגדיר מאזינים ללחיצה
     private void initViews() {
 
-        BtClickLose = findViewById(R.id.BtClickLose); // Find button in layout
-        BtClickLose.setOnClickListener(this); // Set click handler
+        BtClickLose = findViewById(R.id.BtClickLose); // מציאת הכפתור בפריסה
+        BtClickLose.setOnClickListener(this); // הגדרת מטפל בלחיצה
     }
 
-    // Handles button click events
+    // מטפל באירועי לחיצה על כפתורים
     @Override
     public void onClick(View view) {
 
         Intent intent = new Intent(this, Second.class);
-        // Create intent to return to main hub/menu screen
+        // יצירת אינטנט לחזרה למסך הבית הראשי של המשחק
 
-        startActivity(intent); // Launch main screen
+        startActivity(intent); // הפעלת המסך הראשי
     }
 }

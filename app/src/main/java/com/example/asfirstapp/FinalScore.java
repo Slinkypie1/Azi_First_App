@@ -1,40 +1,40 @@
-package com.example.asfirstapp; // Package name for this class
+package com.example.asfirstapp; // שם החבילה עבור מחלקה זו
 
-import android.content.Intent; // Used to navigate between activities
-import android.os.Bundle; // Holds activity state data
-import android.view.View; // Base class for UI elements
-import android.widget.Button; // Button UI component
-import android.widget.TextView; // Displays text on screen
+import android.content.Intent; // משמש לניווט בין אקטיביטיז
+import android.os.Bundle; // מחזיק נתוני מצב של האקטיביטי
+import android.view.View; // מחלקת הבסיס לרכיבי ממשק משתמש
+import android.widget.Button; // רכיב כפתור בממשק המשתמש
+import android.widget.TextView; // רכיב להצגת טקסט
 
-import androidx.activity.EdgeToEdge; // Enables edge-to-edge fullscreen layout
-import androidx.appcompat.app.AppCompatActivity; // Base activity class (not strictly needed here since BaseMenuActivity extends it)
-import androidx.core.graphics.Insets; // Represents system bar insets
-import androidx.core.view.ViewCompat; // Handles backward-compatible view adjustments
-import androidx.core.view.WindowInsetsCompat; // Provides window inset information
+import androidx.activity.EdgeToEdge; // מאפשר פריסת מסך מלא מקצה לקצה
+import androidx.appcompat.app.AppCompatActivity; // מחלקת בסיס לאקטיביטי (לא הכרחי כאן כי BaseMenuActivity מרחיבה אותה)
+import androidx.core.graphics.Insets; // מייצג את שולי סרגלי המערכת
+import androidx.core.view.ViewCompat; // מטפל בהתאמות תצוגה עם תאימות לאחור
+import androidx.core.view.WindowInsetsCompat; // מספק מידע על שולי החלון
 
-import java.util.Locale; // Used for formatting time strings
+import java.util.Locale; // משמש לעיצוב מחרוזות זמן
 
-// Screen that shows final total time after completing the game
+// מסך המציג את הזמן הסופי הכולל לאחר סיום המשחק
 public class FinalScore extends BaseMenuActivity {
 
-    private TextView tvTotalTime; // Displays total game time
-    private Button btnBackToMenu; // Button to return to main menu
-    private Button btnViewRanking; // Button to view leaderboard/ranking
+    private TextView tvTotalTime; // מציג את זמן המשחק הכולל
+    private Button btnBackToMenu; // כפתור לחזרה לתפריט הראשי
+    private Button btnViewRanking; // כפתור לצפייה בדירוג/טבלת מובילים
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate(savedInstanceState); // Call parent setup
-        EdgeToEdge.enable(this); // Enable fullscreen edge-to-edge layout
+        super.onCreate(savedInstanceState); // קריאה להגדרת ההורה
+        EdgeToEdge.enable(this); // הפעלת פריסה מלאה מקצה לקצה
 
-        setContentView(R.layout.activity_final_score); // Load UI layout
+        setContentView(R.layout.activity_final_score); // טעינת פריסת ממשק המשתמש
 
-        // Start background music for final score screen
+        // הפעלת מוזיקת רקע עבור מסך התוצאה הסופית
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.final_score_music);
         startService(serviceIntent);
 
-        // Apply system bar padding (status/navigation bars)
+        // החלת ריפוח עבור סרגלי מערכת (שורת מצב/ניווט)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
 
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -43,23 +43,23 @@ public class FinalScore extends BaseMenuActivity {
             return insets;
         });
 
-        // Connect UI elements
+        // קישור רכיבי ממשק המשתמש
         tvTotalTime = findViewById(R.id.tvTotalTime);
         btnBackToMenu = findViewById(R.id.btnBackToMenu);
         btnViewRanking = findViewById(R.id.btnViewRanking);
 
-        displayAndSaveFinalTime(); // Calculate and show final time
+        displayAndSaveFinalTime(); // חישוב והצגת הזמן הסופי
 
-        // Back to menu button logic
+        // לוגיקה של כפתור חזרה לתפריט
         btnBackToMenu.setOnClickListener(v -> {
 
-            // Reset progress (locks all levels again)
+            // איפוס התקדמות (נועל את כל השלבים מחדש)
             ProgressStorage.setHighestUnlockedLevel(FinalScore.this, 1);
 
-            // Go back to main menu
+            // חזרה לתפריט הראשי
             Intent intent = new Intent(FinalScore.this, Second.class);
 
-            // Clear back stack so user cannot return here
+            // ניקוי מחסנית האקטיביטיז כדי שהמשתמש לא יוכל לחזור לכאן
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                     Intent.FLAG_ACTIVITY_NEW_TASK |
                     Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -68,7 +68,7 @@ public class FinalScore extends BaseMenuActivity {
             finish();
         });
 
-        // Ranking button (only if exists in layout)
+        // כפתור דירוג (רק אם הוא קיים בפריסה)
         if (btnViewRanking != null) {
             btnViewRanking.setOnClickListener(v -> {
 
@@ -78,46 +78,46 @@ public class FinalScore extends BaseMenuActivity {
         }
     }
 
-    // Calculates total play time, formats it, saves it, and displays it
+    // מחשב את זמן המשחק הכולל, מעצב אותו, שומר אותו ומציג אותו
     private void displayAndSaveFinalTime() {
 
-        long startTime = ProgressStorage.getGameStartTime(this); // game start timestamp
-        long pausedTime = ProgressStorage.getTotalPausedTime(this); // time spent paused
+        long startTime = ProgressStorage.getGameStartTime(this); // חותמת זמן תחילת המשחק
+        long pausedTime = ProgressStorage.getTotalPausedTime(this); // זמן שהועבר בהשהיה
 
-        // If no start time exists, show fallback
+        // אם לא קיימת שעת התחלה, הצגת הודעת חסר
         if (startTime == 0) {
             tvTotalTime.setText("Total Time: N/A");
             return;
         }
 
-        long endTime = System.currentTimeMillis(); // current time
-        long rawDurationMillis = endTime - startTime; // total elapsed time
+        long endTime = System.currentTimeMillis(); // הזמן הנוכחי
+        long rawDurationMillis = endTime - startTime; // הזמן הכולל שחלף
 
-        // Remove paused/instruction time from total
+        // הסרת זמן השהיה/הוראות מהזמן הכולל
         long finalDurationMillis = rawDurationMillis - pausedTime;
 
-        // Prevent negative time values
+        // מניעת ערכי זמן שליליים
         if (finalDurationMillis < 0) finalDurationMillis = 0;
 
-        // Save final completion time (Firebase or storage)
+        // שמירת זמן הסיום הסופי (ב-Firebase או באחסון)
         ProgressStorage.saveGameCompletion(this, finalDurationMillis);
 
-        // Award "Ranked" achievement (timed completion)
+        // הענקת הישג "Ranked" (סיום מתוזמן)
         ProgressStorage.awardAchievement(this, ProgressStorage.ACHIEV_RANKED);
 
-        // Award "Perfectionist" achievement if no mistakes were made
+        // הענקת הישג "פרפקציוניסט" אם לא נעשו טעויות
         if (!ProgressStorage.wasWallHit()) {
             ProgressStorage.awardAchievement(this, ProgressStorage.ACHIEV_PERFECTIONIST);
         }
 
-        // Convert milliseconds into hours, minutes, seconds
+        // המרת מילישניות לשעות, דקות, שניות
         long seconds = (finalDurationMillis / 1000) % 60;
         long minutes = (finalDurationMillis / (1000 * 60)) % 60;
         long hours = (finalDurationMillis / (1000 * 60 * 60));
 
         String timeFormatted;
 
-        // Format time depending on whether hours exist
+        // עיצוב הזמן בהתאם לשאלה אם קיימות שעות
         if (hours > 0) {
             timeFormatted = String.format(Locale.getDefault(),
                     "%02d:%02d:%02d", hours, minutes, seconds);
@@ -126,7 +126,7 @@ public class FinalScore extends BaseMenuActivity {
                     "%02d:%02d", minutes, seconds);
         }
 
-        // Display final formatted time
+        // הצגת הזמן המעוצב הסופי
         tvTotalTime.setText("Total Time: " + timeFormatted);
     }
 }

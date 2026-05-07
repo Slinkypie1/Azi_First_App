@@ -1,131 +1,91 @@
-package com.example.asfirstapp;
-// Defines the package this class belongs to
+package com.example.asfirstapp; // הגדרת החבילה אליה שייכת המחלקה הזו
 
-import android.content.SharedPreferences;
-// Used to store simple key-value data locally on the device
+import android.content.SharedPreferences; // משמש לאחסון נתוני מפתח-ערך פשוטים באופן מקומי במכשיר
+import android.os.Bundle; // מחזיק מידע על מצב שמור עבור מחזור החיים של האקטיביטי
+import android.widget.Button; // רכיב ממשק משתמש עבור כפתורים לחיצים
+import android.widget.RadioButton; // רכיב ממשק משתמש לבחירת אפשרות אחת מתוך קבוצה
+import android.widget.RadioGroup; // מיכל המקבץ כפתורי בחירה (Radio Buttons) יחד
+import android.widget.Toast; // משמש להצגת הודעות קופצות קצרות
 
-import android.os.Bundle;
-// Contains saved state information for activity lifecycle
-
-import android.widget.Button;
-// UI element for clickable buttons
-
-import android.widget.RadioButton;
-// UI element for selecting one option in a group
-
-import android.widget.RadioGroup;
-// Container that groups radio buttons together
-
-import android.widget.Toast;
-// Used to show short popup messages
-
-import androidx.activity.EdgeToEdge;
-// Enables edge-to-edge fullscreen layout support
-
-import androidx.appcompat.app.AppCompatActivity;
-// Base class for modern Android activities
-
-import androidx.core.graphics.Insets;
-// Represents system bar insets (status/nav bar spacing)
-
-import androidx.core.view.ViewCompat;
-// Provides compatibility utilities for views
-
-import androidx.core.view.WindowInsetsCompat;
-// Handles system window insets for modern UI layouts
+import androidx.activity.EdgeToEdge; // מאפשר תמיכה בפריסת מסך מלא מקצה לקצה
+import androidx.appcompat.app.AppCompatActivity; // מחלקת בסיס עבור אקטיביטיז מודרניות באנדרואיד
+import androidx.core.graphics.Insets; // מייצג את שולי סרגלי המערכת (מרווח עבור שורת מצב/ניווט)
+import androidx.core.view.ViewCompat; // מספק כלי עזר לתאימות עבור תצוגות (Views)
+import androidx.core.view.WindowInsetsCompat; // מטפל בשולי חלון המערכת עבור פריסות UI מודרניות
 
 public class GameSettings extends BaseMenuActivity {
 
-    private RadioGroup rgGameMode;
-    // Group that holds game mode radio buttons
-
-    private RadioButton rbCasual, rbTimed;
-    // Radio buttons for selecting casual or timed mode
-
-    private Button btnSaveSettings;
-    // Button used to save selected settings
-
-    private SharedPreferences sharedPreferences;
-    // Stores persistent user settings locally
+    private RadioGroup rgGameMode; // קבוצה המחזיקה את כפתורי הבחירה של מצב המשחק
+    private RadioButton rbCasual, rbTimed; // כפתורי בחירה לבחירת מצב רגיל או מתוזמן
+    private Button btnSaveSettings; // כפתור המשמש לשמירת ההגדרות שנבחרו
+    private SharedPreferences sharedPreferences; // מאחסן הגדרות משתמש קבועות באופן מקומי
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Calls parent activity setup
-
-        EdgeToEdge.enable(this);
-        // Enables fullscreen edge-to-edge layout
-
-        setContentView(R.layout.activity_game_settings);
-        // Loads the UI layout for this screen
+        super.onCreate(savedInstanceState); // קריאה להגדרת אקטיביטי ההורה
+        EdgeToEdge.enable(this); // הפעלת פריסת מסך מלא מקצה לקצה
+        setContentView(R.layout.activity_game_settings); // טעינת פריסת ממשק המשתמש עבור מסך זה
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            // Gets system bar spacing (status + navigation bar)
+            // קבלת המרווח של סרגלי המערכת (שורת מצב + שורת ניווט)
 
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            // Applies padding so UI does not overlap system bars
+            // החלת ריפוח (padding) כך שממשק המשתמש לא יחפוף לסרגלי המערכת
 
             return insets;
         });
 
         sharedPreferences = ProgressStorage.getAppPrefs(this);
-        // Opens local storage for current user preferences
+        // פתיחת האחסון המקומי עבור העדפות המשתמש הנוכחי
 
-        rgGameMode = findViewById(R.id.rgGameMode);
-        // Connects radio group from XML
+        rgGameMode = findViewById(R.id.rgGameMode); // קישור קבוצת הרדיו מקובץ ה-XML
+        rbCasual = findViewById(R.id.rbCasual); // קישור כפתור הבחירה למצב רגיל
+        rbTimed = findViewById(R.id.rbTimed); // קישור כפתור הבחירה למצב מתוזמן
+        btnSaveSettings = findViewById(R.id.btnSaveSettings); // קישור כפתור השמירה
 
-        rbCasual = findViewById(R.id.rbCasual);
-        // Connects casual mode radio button
-
-        rbTimed = findViewById(R.id.rbTimed);
-        // Connects timed mode radio button
-
-        btnSaveSettings = findViewById(R.id.btnSaveSettings);
-        // Connects save button
-
-        // Load existing setting
+        // טעינת הגדרה קיימת
         String mode = sharedPreferences.getString("game_mode", "casual");
-        // Reads saved game mode (defaults to casual)
+        // קריאת מצב המשחק השמור (ברירת מחדל היא "casual")
 
         if (mode.equals("timed")) {
             rbTimed.setChecked(true);
-            // Select timed mode if previously saved
+            // בחירת מצב מתוזמן אם נשמר בעבר
         } else {
             rbCasual.setChecked(true);
-            // Otherwise default to casual mode
+            // אחרת, ברירת המחדל היא מצב רגיל
         }
 
         btnSaveSettings.setOnClickListener(v -> {
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            // Creates editor to modify stored preferences
+            // יצירת עורך לשינוי ההעדפות המאוחסנות
 
             String chosenMode;
-            // Stores selected mode
+            // משתנה לאחסון המצב שנבחר
 
             if (rbTimed.isChecked()) {
                 chosenMode = "timed";
-                // User selected timed mode
+                // המשתמש בחר במצב מתוזמן
             } else {
                 chosenMode = "casual";
-                // Default to casual mode
+                // המשתמש בחר במצב רגיל
             }
 
             editor.putString("game_mode", chosenMode);
-            // Saves selected mode locally
+            // שמירת המצב הנבחר באופן מקומי
 
             editor.apply();
-            // Applies changes asynchronously
+            // החלת השינויים בצורה אסינכרונית
 
-            // Sync to Firebase
+            // סנכרון ל-Firebase
             ProgressStorage.syncGameModeToFirebase(this, chosenMode);
-            // Sends selected mode to cloud storage
+            // שליחת המצב הנבחר לאחסון בענן
 
-            Toast.makeText(this, "Settings Saved", Toast.LENGTH_SHORT).show();
-            // Shows confirmation message
+            Toast.makeText(this, "ההגדרות נשמרו", Toast.LENGTH_SHORT).show();
+            // הצגת הודעת אישור
 
             finish();
-            // Closes settings screen and returns to previous screen
+            // סגירת מסך ההגדרות וחזרה למסך הקודם
         });
     }
 }

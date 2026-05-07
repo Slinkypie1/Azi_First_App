@@ -1,6 +1,6 @@
-package com.example.asfirstapp;
+package com.example.asfirstapp; // החבילה אליה שייכת המחלקה הזו
 
-// Imports for sensors, UI, threading, and activity management
+// ייבוא עבור חיישנים, ממשק משתמש, שרשורים וניהול אקטיביטי
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
@@ -16,54 +16,54 @@ import android.widget.TextView;
 /**
  * Puzzle1 Activity
  * ----------------
- * Light sensor-based puzzle:
- * The player must reduce ambient light below a threshold to succeed.
+ * פאזל מבוסס חיישן אור:
+ * השחקן חייב להפחית את האור בסביבה מתחת לסף מסוים כדי להצליח.
  */
 public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
 
-    // Sensor-related objects
-    private SensorManager sensorManager;       // Handles access to device sensors
-    private Sensor lightSensor;                // The device light sensor
-    private TextView lightTextView;            // Displays current light value
+    // אובייקטים הקשורים לחיישנים
+    private SensorManager sensorManager;       // מנהל את הגישה לחיישני המכשיר
+    private Sensor lightSensor;                // חיישן האור של המכשיר
+    private TextView lightTextView;            // מציג את ערך האור הנוכחי
 
-    // State control variables
-    private static boolean hasNavigated = false; // Prevents multiple screen transitions
-    private boolean isFirstReading = true;      // Skips first sensor reading (often unstable)
-    private Handler handler = new Handler(Looper.getMainLooper()); // Main-thread handler
-    private Runnable navigateRunnable;          // Handles success navigation delay
-    private Runnable failureRunnable;           // Handles timeout failure navigation
-    private long startTime;                     // Stores puzzle start timestamp
+    // משתני בקרת מצב
+    private static boolean hasNavigated = false; // מונע מעברי מסך מרובים
+    private boolean isFirstReading = true;      // מדלג על קריאת חיישן ראשונה (לעתים לא יציבה)
+    private Handler handler = new Handler(Looper.getMainLooper()); // מטפל (Handler) לשרשור הראשי
+    private Runnable navigateRunnable;          // מטפל בהשהיית ניווט להצלחה
+    private Runnable failureRunnable;           // מטפל בניווט לכישלון עקב פסק זמן
+    private long startTime;                     // שומר את חותמת זמן תחילת הפאזל
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_puzzle1); // Load UI layout
+        setContentView(R.layout.activity_puzzle1); // טעינת פריסת ממשק המשתמש
 
-        Log.d("Puzzle1", "Puzzle1 started!");
+        Log.d("Puzzle1", "Puzzle1 started!"); // רישום שהפאזל התחיל
 
-        // Start background music specific to this puzzle
+        // הפעלת מוזיקת רקע ספציפית לפאזל זה
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("MUSIC_RES_ID", R.raw.puzzle1_music);
         startService(serviceIntent);
 
-        startTime = System.currentTimeMillis(); // Record start time
+        startTime = System.currentTimeMillis(); // תיעוד זמן ההתחלה
 
-        // Connect UI elements
+        // קישור רכיבי ממשק משתמש
         lightTextView = findViewById(R.id.lightTextView);
 
-        // Initialize sensor system
+        // אתחול מערכת החיישנים
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
         if (lightSensor == null) {
-            // Device does not support light sensor
+            // המכשיר אינו תומך בחיישן אור
             lightTextView.setText("No Light Sensor Found!");
         }
 
-        // Reset navigation lock
+        // איפוס נעילת הניווט
         hasNavigated = false;
 
-        // FAILURE logic: triggers after timeout
+        // לוגיקת כישלון: מופעלת לאחר פסק זמן
         failureRunnable = new Runnable() {
             @Override
             public void run() {
@@ -71,10 +71,10 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
                     hasNavigated = true;
                     Log.d("Puzzle1", "Time up → Failure screen");
 
-                    // Stop sensor listening
+                    // הפסקת האזנה לחיישן
                     sensorManager.unregisterListener(Puzzle1.this);
 
-                    // Go to failure screen
+                    // מעבר למסך כישלון
                     Intent intent = new Intent(Puzzle1.this, Failure.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -83,7 +83,7 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
             }
         };
 
-        // SUCCESS logic: triggers after low light condition
+        // לוגיקת הצלחה: מופעלת לאחר תנאי אור נמוך
         navigateRunnable = new Runnable() {
             @Override
             public void run() {
@@ -91,15 +91,15 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
                     hasNavigated = true;
                     Log.d("Puzzle1", "Success → CorrectScreen4");
 
-                    // Stop sensor updates
+                    // הפסקת עדכוני חיישן
                     sensorManager.unregisterListener(Puzzle1.this);
 
-                    // Cancel failure timer
+                    // ביטול טיימר הכישלון
                     handler.removeCallbacks(failureRunnable);
 
                     long timeTaken = System.currentTimeMillis() - startTime;
 
-                    // Navigate to success screen
+                    // ניווט למסך הצלחה
                     Intent intent = new Intent(Puzzle1.this, CorrectScreen4.class);
                     intent.putExtra("TIME_TAKEN", timeTaken);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -113,23 +113,23 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float lightValue = event.values[0]; // Current light level
+        float lightValue = event.values[0]; // רמת האור הנוכחית
         Log.d("Puzzle1", "Light Sensor Value: " + lightValue);
 
-        // Ignore first unstable reading
+        // התעלמות מקריאה ראשונה לא יציבה
         if (isFirstReading) {
             isFirstReading = false;
             return;
         }
 
-        // Update UI with light value
+        // עדכון ממשק המשתמש עם ערך האור
         lightTextView.setText("Light Intensity: " + lightValue + " lx");
 
-        // If environment is dark enough → schedule success
+        // אם הסביבה חשוכה מספיק ← תזמון הצלחה
         if (lightValue <= 5 && !hasNavigated) {
             handler.postDelayed(navigateRunnable, 3000);
         } else {
-            // Cancel success if light increases again
+            // ביטול הצלחה אם האור עולה שוב
             handler.removeCallbacks(navigateRunnable);
         }
     }
@@ -138,16 +138,16 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
     protected void onResume() {
         super.onResume();
 
-        // Start listening to light sensor updates
+        // התחלת האזנה לעדכוני חיישן האור
         if (lightSensor != null) {
             sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
 
-        // Check game mode (casual or timed)
+        // בדיקת מצב משחק (רגיל או מתוזמן)
         String mode = ProgressStorage.getAppPrefs(this)
                 .getString("game_mode", "casual");
 
-        // Only start failure timer in timed mode
+        // הפעלת טיימר כישלון רק במצב מתוזמן
         if (mode.equals("timed") && !hasNavigated) {
             handler.postDelayed(failureRunnable, 20000);
         }
@@ -157,16 +157,16 @@ public class Puzzle1 extends BaseMenuActivity implements SensorEventListener {
     protected void onPause() {
         super.onPause();
 
-        // Stop sensor updates when activity is not visible
+        // הפסקת עדכוני חיישן כאשר האקטיביטי אינה נראית
         sensorManager.unregisterListener(this);
 
-        // Prevent memory leaks by removing callbacks
+        // מניעת דליפות זיכרון על ידי הסרת הקולבקים
         handler.removeCallbacks(navigateRunnable);
         handler.removeCallbacks(failureRunnable);
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Not needed for this puzzle
+        // לא נדרש עבור פאזל זה
     }
 }

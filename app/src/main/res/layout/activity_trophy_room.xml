@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- פריסה עבור "חדר הגביעים" (Trophy Room) - מציג את ההישגים של המשתמש -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -9,6 +10,7 @@
     android:gravity="center_horizontal"
     tools:context=".TrophyRoom">
 
+    <!-- כותרת המסך -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,6 +20,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="32dp"/>
 
+    <!-- תצוגת גלילה המכילה את רשימת ההישגים -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -29,7 +32,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Achievement Item: Speed Demon -->
+            <!-- פריט הישג: Speed Demon (שד המהירות) -->
             <LinearLayout
                 android:id="@+id/layoutSpeedDemon"
                 android:layout_width="match_parent"
@@ -62,7 +65,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Achievement Item: Perfectionist -->
+            <!-- פריט הישג: Perfectionist (פרפקציוניסט) -->
             <LinearLayout
                 android:id="@+id/layoutPerfectionist"
                 android:layout_width="match_parent"
@@ -95,7 +98,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Achievement Item: World Traveler -->
+            <!-- פריט הישג: World Traveler (מטייל עולמי) -->
             <LinearLayout
                 android:id="@+id/layoutWorldTraveler"
                 android:layout_width="match_parent"
@@ -128,7 +131,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Achievement Item: Ranked -->
+            <!-- פריט הישג: Ranked (מדורג) -->
             <LinearLayout
                 android:id="@+id/layoutRanked"
                 android:layout_width="match_parent"
@@ -161,7 +164,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Achievement Item: Top 10 -->
+            <!-- פריט הישג: Top 10 (עשרת הגדולים) -->
             <LinearLayout
                 android:id="@+id/layoutTop10"
                 android:layout_width="match_parent"
@@ -197,6 +200,7 @@
         </LinearLayout>
     </ScrollView>
 
+    <!-- כפתור חזרה -->
     <Button
         android:id="@+id/btnBackFromTrophy"
         android:layout_width="wrap_content"

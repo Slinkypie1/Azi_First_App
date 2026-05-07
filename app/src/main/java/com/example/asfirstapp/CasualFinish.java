@@ -1,72 +1,72 @@
-package com.example.asfirstapp; // Package name for this activity
+package com.example.asfirstapp; // שם החבילה עבור אקטיביטי זו
 
-import android.content.Intent; // Used to navigate between activities
-import android.os.Bundle; // Holds saved instance state
-import android.view.View; // Base class for UI elements
-import android.widget.Button; // Button UI element
+import android.content.Intent; // משמש לניווט בין אקטיביטיז
+import android.os.Bundle; // מחזיק את מצב המופע השמור
+import android.view.View; // מחלקת הבסיס לרכיבי ממשק משתמש
+import android.widget.Button; // רכיב כפתור בממשק המשתמש
 
-import androidx.activity.EdgeToEdge; // Enables edge-to-edge UI layout
-import androidx.core.view.ViewCompat; // Used for window inset handling
+import androidx.activity.EdgeToEdge; // מאפשר פריסת ממשק משתמש מקצה לקצה
+import androidx.core.view.ViewCompat; // משמש לטיפול בשולי החלון (Window Insets)
 
-// This screen is shown when the user finishes Casual mode
+// מסך זה מוצג כאשר המשתמש מסיים את המצב הרגיל (Casual mode)
 public class CasualFinish extends BaseMenuActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState); // Call parent setup logic
+        super.onCreate(savedInstanceState); // קריאה ללוגיקת ההגדרה של ההורה
 
-        EdgeToEdge.enable(this); // Enable edge-to-edge fullscreen layout
+        EdgeToEdge.enable(this); // הפעלת פריסת מסך מלא מקצה לקצה
 
-        setContentView(R.layout.activity_casual_finish); // Load layout XML
+        setContentView(R.layout.activity_casual_finish); // טעינת קובץ ה-XML של הפריסה
 
-        // Check achievement: if player never hit a wall
+        // בדיקת הישג: אם השחקן מעולם לא פגע בקיר
         if (!ProgressStorage.wasWallHit()) {
             ProgressStorage.awardAchievement(this, ProgressStorage.ACHIEV_PERFECTIONIST);
         }
 
-        // Apply window inset handling (safe layout padding for system bars)
+        // החלת טיפול בשולי חלון (ריפוח פריסה בטוח עבור סרגלי מערכת)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
 
-            initViews(); // Initialize buttons and UI interactions
+            initViews(); // אתחול כפתורים ואינטראקציות ממשק משתמש
 
-            return insets; // Return unchanged insets
+            return insets; // החזרת השוליים ללא שינוי
         });
     }
 
-    // Initializes all buttons and click behavior
+    // מאתחל את כל הכפתורים והתנהגות הלחיצה
     private void initViews() {
 
-        // Find UI buttons from layout
+        // מציאת כפתורי ממשק המשתמש מהפריסה
         Button btnBackToMenu = findViewById(R.id.btnBackToMenu);
         Button btnTryTimedMode = findViewById(R.id.btnTryTimedMode);
 
-        // Back to menu button click handler
+        // מטפל בלחיצה על כפתור חזרה לתפריט
         btnBackToMenu.setOnClickListener(v -> {
 
-            // Create intent to go back to hub screen
+            // יצירת אינטנט לחזרה למסך הבית (הלובי)
             Intent intent = new Intent(CasualFinish.this, Second.class);
 
-            startActivity(intent); // Launch activity
-            finish(); // Close current screen
+            startActivity(intent); // הפעלת האקטיביטי
+            finish(); // סגירת המסך הנוכחי
         });
 
-        // Try timed mode button click handler
+        // מטפל בלחיצה על כפתור ניסיון מצב מתוזמן
         btnTryTimedMode.setOnClickListener(v -> {
 
-            // Save game mode as "timed" in local storage
+            // שמירת מצב המשחק כ-"timed" באחסון המקומי
             ProgressStorage.getAppPrefs(this)
                     .edit()
                     .putString("game_mode", "timed")
                     .apply();
 
-            // Sync updated mode to Firebase cloud storage
+            // סנכרון המצב המעודכן לאחסון הענן של Firebase
             ProgressStorage.syncGameModeToFirebase(this, "timed");
 
-            // Return to main hub screen
+            // חזרה למסך הבית הראשי
             Intent intent = new Intent(CasualFinish.this, Second.class);
 
-            startActivity(intent); // Open hub
-            finish(); // Close finish screen
+            startActivity(intent); // פתיחת הלובי
+            finish(); // סגירת מסך הסיום
         });
     }
 }

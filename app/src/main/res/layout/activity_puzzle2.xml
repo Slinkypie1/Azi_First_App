@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- פריסה עבור פאזל 2 המבוסס על מצפן -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -11,19 +12,23 @@
     tools:context=".Puzzle2"
     android:gravity="center"
     android:padding="16dp">
+
+    <!-- תצוגת טקסט להצגת הרמז/חידה הנוכחיים -->
     <TextView
         android:id="@+id/hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:textColor="@color/black"/>
+
+    <!-- תצוגת טקסט המראה את הכיוון הנוכחי אליו פונה המכשיר -->
     <TextView
-    android:id="@+id/directionText"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:text="Current Direction: "
-    android:textSize="24sp"
-    android:textColor="@color/black"
+        android:id="@+id/directionText"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Current Direction: "
+        android:textSize="24sp"
+        android:textColor="@color/black"
     />
 
 </LinearLayout>
