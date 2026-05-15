@@ -81,7 +81,7 @@ public class GameSettings extends BaseMenuActivity {
             ProgressStorage.syncGameModeToFirebase(this, chosenMode);
             // שליחת המצב הנבחר לאחסון בענן
 
-            Toast.makeText(this, "ההגדרות נשמרו", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Setting Saved", Toast.LENGTH_SHORT).show();
             // הצגת הודעת אישור
 
             finish();
